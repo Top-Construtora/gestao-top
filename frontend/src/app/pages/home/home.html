@@ -1,0 +1,65 @@
+<app-header 
+  [userName]="userName"
+  [userRole]="userRole"
+  [userInitials]="userInitials"
+  [userId]="userId"
+  [hasProfilePicture]="userHasProfilePicture"
+  [notifications]="notifications"
+  [unreadNotificationsCount]="unreadNotificationsCount"
+  [isNotificationOpen]="isNotificationOpen"
+  (toggleMobileSidebar)="toggleMobileSidebar()"
+  (toggleNotifications)="toggleNotifications()"
+  (clearNotifications)="clearNotifications()"
+  (logout)="logout()">
+</app-header>
+
+<!-- Notification Dropdown Overlay -->
+<div class="notification-dropdown-overlay" 
+     *ngIf="isNotificationOpen" 
+     (click)="isNotificationOpen = false">
+  <div class="notification-dropdown-wrapper">
+    <app-notification-dropdown
+      [isOpen]="isNotificationOpen"
+      (close)="isNotificationOpen = false"
+      (viewAllClick)="openNotificationCenter()">
+    </app-notification-dropdown>
+  </div>
+</div>
+
+<!-- Notification Center -->
+<app-notification-center
+  *ngIf="isNotificationCenterOpen"
+  [isOpen]="isNotificationCenterOpen"
+  (close)="closeNotificationCenter()">
+</app-notification-center>
+
+<!-- Mobile Sidebar Overlay -->
+<div class="sidebar-overlay" 
+     [class.visible]="isMobileSidebarOpen" 
+     (click)="closeMobileSidebar()">
+</div>
+
+<app-sidebar
+  [isCollapsed]="isSidebarCollapsed" 
+  [isMobileSidebarOpen]="isMobileSidebarOpen"
+  (sidebarToggled)="toggleSidebar()">
+</app-sidebar>
+
+<main class="main-content" [class.sidebar-collapsed]="isSidebarCollapsed">
+  <router-outlet></router-outlet>
+</main>
+
+<app-contract-modal
+  [isOpen]="isContractModalOpen"
+  [servicesList]="servicesList"
+  [selectedServices]="selectedServices"
+  (close)="closeContractModal()"
+  (save)="saveContract()">
+</app-contract-modal>
+
+<app-user-modal
+  [isOpen]="isUserModalOpen"
+  [editingUser]="editingUser"
+  (close)="closeUserModal()"
+  (save)="saveUser()">
+</app-user-modal>

@@ -1,0 +1,824 @@
+<div class="contract-page-content">
+  <div class="page-header">
+    <h1 class="page-title">
+      {{ isViewMode ? 'Visualizar Contrato' : (isEditMode ? 'Editar Contrato' : 'Novo Contrato') }}
+    </h1>
+    <app-breadcrumb></app-breadcrumb>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <i class="fas fa-spinner fa-spin"></i>Carregando...
+  </div>
+
+  <div class="table-container" *ngIf="!isLoading">
+    <form (ngSubmit)="save()" class="contract-form" *ngIf="!isViewMode">
+      <div class="form-layout">
+        <div class="left-column">
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-info-circle"></i>
+              Informações Básicas
+            </h3>
+        
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Número <span class="required">*</span></label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="formData.contract_number"
+                  name="contract_number"
+                  [readonly]="isEditMode"
+                  [disabled]="isLoading"
+                  [class.error]="errors.contract_number"
+                  placeholder="TOP-YYYY-XXXX"
+                />
+                <span class="error-message" *ngIf="errors.contract_number">{{ errors.contract_number }}</span>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Tipo <span class="required">*</span></label>
+                <select class="form-control select-input" [(ngModel)]="formData.type" name="type" [disabled]="isLoading">
+                  <option value="">Selecione o tipo</option>
+                  <option *ngFor="let type of contractTypes" [value]="type">
+                    {{ type }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-grid" *ngIf="isEditMode">
+              <div class="form-group">
+                <label class="form-label">Status <span class="required">*</span></label>
+                <select class="form-control status-select" [(ngModel)]="formData.status" name="status" [disabled]="isLoading">
+                  <option value="">Selecione o status</option>
+                  <option *ngFor="let status of contractStatuses" [value]="status.value">
+                    {{ status.label }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Cliente <span class="required">*</span></label>
+              <select
+                class="form-control select-input client-select"
+                [(ngModel)]="formData.client_id"
+                name="client_id"
+                [disabled]="isLoading"
+                [class.error]="errors.client_id"
+              >
+                <option [value]="null" disabled>Selecione um cliente</option>
+                <option *ngFor="let client of clients" [value]="client.id">
+                  {{ client.name }}
+                </option>
+              </select>
+              <span class="error-message" *ngIf="errors.client_id">{{ errors.client_id }}</span>
+            </div>
+            
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Data de Início <span class="required">*</span></label>
+                <input
+                  type="date"
+                  class="form-control date-input"
+                  [(ngModel)]="formData.start_date"
+                  name="start_date"
+                  [disabled]="isLoading"
+                  [class.error]="errors.start_date"
+                />
+                <span class="error-message" *ngIf="errors.start_date">{{ errors.start_date }}</span>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Data de Término</label>
+                <input
+                  type="date"
+                  class="form-control date-input"
+                  [(ngModel)]="formData.end_date"
+                  name="end_date"
+                  [disabled]="isLoading"
+                  [min]="formData.start_date"
+                />
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Observações</label>
+              <textarea
+                class="form-control"
+                [(ngModel)]="formData.notes"
+                name="notes"
+                rows="3"
+                [disabled]="isLoading"
+                placeholder="Adicione observações sobre este contrato..."
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-credit-card"></i>
+              Informações de Pagamento
+            </h3>
+            
+            
+            <!-- Lista compacta de formas de pagamento -->
+            <div class="payment-methods-list">
+              <div class="payment-methods-header">
+                <h4 class="subsection-title">Formas de Pagamento</h4>
+                <button 
+                  type="button" 
+                  class="btn btn-secondary btn-sm" 
+                  (click)="addNewPaymentMethod()"
+                  [disabled]="isLoading">
+                  <i class="fas fa-plus"></i> 
+                  Adicionar
+                </button>
+              </div>
+              
+              <div *ngIf="dynamicPaymentMethods.length === 0" class="no-payments-message" style="text-align: center; padding: 1rem; color: #6c757d;">
+                Nenhuma forma de pagamento configurada.
+              </div>
+
+              <div *ngFor="let method of dynamicPaymentMethods; let i = index" class="payment-method-item">
+                <div class="payment-item-header">
+                  <div class="payment-item-title">
+                    <span class="payment-badge">{{ i + 1 }}</span>
+                    <span class="payment-name">Forma de Pagamento {{ i + 1 }}</span>
+                  </div>
+                  <button 
+                    *ngIf="dynamicPaymentMethods.length > 1"
+                    type="button" 
+                    class="btn-remove" 
+                    (click)="removePaymentMethod(i)" 
+                    title="Remover">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+                
+                <div class="payment-item-content">
+                  <!-- Linha 1: Método e Valor -->
+                  <div class="payment-row-1">
+                    <div class="field-group method-field">
+                      <label class="field-label">Método</label>
+                      <select
+                        class="form-control"
+                        [(ngModel)]="method.payment_method"
+                        [name]="'payment_method_' + i"
+                        [disabled]="isLoading">
+                        <option value="">Selecione...</option>
+                        <option *ngFor="let paymentOpt of paymentMethods" [value]="paymentOpt.value">
+                          {{ paymentOpt.label }}
+                        </option>
+                      </select>
+                    </div>
+                    
+                    <div class="field-group value-field" *ngIf="method.payment_method">
+                      <label class="field-label">Valor</label>
+                      <div class="value-controls-vertical">
+                        <div class="value-type-buttons">
+                          <button 
+                            type="button"
+                            class="value-type-btn"
+                            [class.active]="method.value_type === 'percentage'"
+                            (click)="setPaymentValueType(i, 'percentage')"
+                            [disabled]="isLoading">
+                            %
+                          </button>
+                          <button 
+                            type="button"
+                            class="value-type-btn"
+                            [class.active]="method.value_type === 'fixed_value'"
+                            (click)="setPaymentValueType(i, 'fixed_value')"
+                            [disabled]="isLoading">
+                            R$
+                          </button>
+                        </div>
+                        
+                        <input 
+                          *ngIf="method.value_type === 'percentage'"
+                          type="number" 
+                          class="form-control value-input"
+                          [(ngModel)]="method.percentage"
+                          [name]="'percentage_' + i"
+                          [disabled]="isLoading || dynamicPaymentMethods.length === 1"
+                          [class.locked]="dynamicPaymentMethods.length === 1"
+                          min="0" max="100" step="0.01"
+                          placeholder="100">
+                        
+                        <input 
+                          *ngIf="method.value_type === 'fixed_value'"
+                          type="text" 
+                          class="form-control value-input"
+                          [(ngModel)]="method.fixed_value"
+                          [name]="'fixed_value_' + i"
+                          [disabled]="isLoading || dynamicPaymentMethods.length === 1"
+                          [class.locked]="dynamicPaymentMethods.length === 1"
+                          placeholder="Valor total"
+                          appCurrencyMask>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Linha 2: Parcelas e Data (se aplicável) -->
+                  <div class="payment-row-2" *ngIf="method.payment_method && isPaymentMethodInstallable(method.payment_method)">
+                    <div class="field-group installment-field">
+                      <label class="field-label">Parcelas</label>
+                      <select
+                        class="form-control"
+                        [(ngModel)]="method.installment_count"
+                        (ngModelChange)="onPaymentInstallmentCountChange(i, $event)"
+                        [name]="'installment_count_' + i"
+                        [disabled]="isLoading">
+                        <option [value]="1">À vista</option>
+                        <option *ngFor="let count of [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]" [value]="count">
+                          {{ count }}x de {{ getInstallmentPreview(method, count) }}
+                        </option>
+                      </select>
+                    </div>
+                    
+                    <div class="field-group date-field" *ngIf="method.installment_count && method.installment_count > 1">
+                      <label class="field-label">Data da 1ª Parcela</label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        [(ngModel)]="method.first_installment_date"
+                        (ngModelChange)="onPaymentFirstInstallmentDateChange(i, $event)"
+                        [name]="'first_installment_date_' + i"
+                        [disabled]="isLoading">
+                    </div>
+
+                  </div>
+
+                  <!-- Botão para gerenciar parcelas -->
+                  <div class="payment-row-3" *ngIf="!isViewMode && i === 0 && method.payment_method && isPaymentMethodInstallable(method.payment_method) && method.installment_count && method.installment_count > 1" style="margin-top: 1rem; padding-left: 0.5rem;">
+                    <button type="button" class="btn btn-primary" (click)="openInstallmentsModal()">
+                      <i class="fas fa-calendar-alt"></i>
+                      Visualizar e Gerenciar Parcelas
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Resumo compacto -->
+              <div class="payment-summary" *ngIf="dynamicPaymentMethods.length > 0">
+                <div class="summary-item">
+                  <span>Total configurado:</span>
+                  <strong>{{ formatCurrency(getTotalPaymentMethodsValue()) }}</strong>
+                </div>
+                <div class="summary-item contract-total">
+                  <span>Valor do contrato:</span>
+                  <strong>{{ formatCurrency(getTotalValue()) }}</strong>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Data Prevista para Pagamento</label>
+                <input
+                  type="date"
+                  class="form-control date-input"
+                  [(ngModel)]="formData.expected_payment_date"
+                  name="expected_payment_date"
+                  [disabled]="isLoading || (formData.installment_count > 1 && isPaymentMethodInstallable(formData.payment_method))"
+                />
+                <span class="help-text" *ngIf="formData.installment_count > 1 && isPaymentMethodInstallable(formData.payment_method)">
+                  <i class="fas fa-info-circle"></i>
+                  Data automaticamente definida como vencimento da última parcela
+                </span>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Status do Pagamento</label>
+                <select
+                  class="form-control select-input"
+                  [(ngModel)]="formData.payment_status"
+                  name="payment_status"
+                  [disabled]="isLoading"
+                >
+                  <option value="pendente">Pendente</option>
+                  <option value="pago">Pago</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- Campos de Permuta -->
+            <div *ngIf="showBarterOptions" class="barter-section">
+              <div class="form-group">
+                <label class="form-label">Tipo de Permuta</label>
+                <div class="radio-group">
+                  <label class="radio-label">
+                    <input 
+                      type="radio" 
+                      name="barterType" 
+                      value="percentage"
+                      [(ngModel)]="formData.barter_type"
+                      (ngModelChange)="onBarterTypeChange()"
+                      [disabled]="isLoading">
+                    <span>Porcentagem</span>
+                  </label>
+                  <label class="radio-label">
+                    <input 
+                      type="radio" 
+                      name="barterType" 
+                      value="value"
+                      [(ngModel)]="formData.barter_type"
+                      (ngModelChange)="onBarterTypeChange()"
+                      [disabled]="isLoading">
+                    <span>Valor em R$</span>
+                  </label>
+                </div>
+              </div>
+              
+              <div class="form-group" *ngIf="formData.barter_type === 'percentage'">
+                <label class="form-label">Porcentagem de Permuta (%)</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  [(ngModel)]="formData.barter_percentage"
+                  (ngModelChange)="onBarterValueChange()"
+                  name="barterPercentage"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  placeholder="0"
+                  [disabled]="isLoading">
+                <span class="help-text">
+                  <i class="fas fa-info-circle"></i>
+                  Valor da permuta: {{ formatCurrency((getTotalValue() * (formData.barter_percentage || 0)) / 100) }}
+                </span>
+              </div>
+              
+              <div class="form-group" *ngIf="formData.barter_type === 'value'">
+                <label class="form-label">Valor da Permuta (R$)</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="formData.barter_value"
+                  (ngModelChange)="onBarterValueChange()"
+                  name="barterValue"
+                  placeholder="0,00"
+                  appCurrencyMask
+                  [disabled]="isLoading">
+                <span class="help-text">
+                  <i class="fas fa-info-circle"></i>
+                  Máximo permitido: {{ formatCurrency(getTotalValue()) }}
+                </span>
+              </div>
+              
+              <div class="form-group" *ngIf="remainingValue > 0">
+                <label class="form-label">Forma de Pagamento do Valor Restante <span class="required">*</span></label>
+                <select 
+                  class="form-control select-input" 
+                  [(ngModel)]="formData.secondary_payment_method"
+                  (ngModelChange)="onSecondaryPaymentMethodChange()"
+                  name="secondaryPaymentMethod"
+                  [disabled]="isLoading"
+                  required>
+                  <option value="">Selecione...</option>
+                  <option *ngFor="let method of paymentMethods" [value]="method.value" 
+                    [disabled]="method.value === 'Permuta'">
+                    {{ method.label }}
+                  </option>
+                </select>
+                <span class="help-text">
+                  <i class="fas fa-info-circle"></i>
+                  Escolha como será pago o valor restante de {{ formatCurrency(remainingValue) }}
+                </span>
+              </div>
+              
+              <!-- Parcelamento do valor restante -->
+              <div *ngIf="remainingValue > 0 && isPaymentMethodInstallable(formData.secondary_payment_method)" class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Número de Parcelas do Valor Restante</label>
+                  <select 
+                    class="form-control select-input" 
+                    [(ngModel)]="secondaryInstallmentCount" 
+                    (ngModelChange)="onSecondaryInstallmentCountChange($event)"
+                    name="secondaryInstallmentCount"
+                    [disabled]="isLoading">
+                    <option value="1">À vista</option>
+                    <option *ngFor="let i of [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]" [value]="i">
+                      {{ i }}x de {{ formatCurrency(remainingValue / i) }}
+                    </option>
+                  </select>
+                </div>
+                
+                <div class="form-group" *ngIf="secondaryInstallmentCount > 1">
+                  <label class="form-label">Primeira Parcela</label>
+                  <input 
+                    type="date" 
+                    class="form-control" 
+                    [(ngModel)]="secondaryFirstInstallmentDate"
+                    (ngModelChange)="onSecondaryFirstInstallmentDateChange($event)"
+                    name="secondaryFirstInstallmentDate"
+                    [disabled]="isLoading">
+                </div>
+              </div>
+              
+              <!-- Info cards no final da seção de permuta -->
+              <div class="remaining-value-info" *ngIf="formData.barter_type">
+                <div class="info-card">
+                  <div class="info-label">Valor Total do Contrato</div>
+                  <div class="info-value">{{ formatCurrency(getTotalValue()) }}</div>
+                </div>
+                <div class="info-card">
+                  <div class="info-label">Valor da Permuta</div>
+                  <div class="info-value">
+                    {{ formatCurrency(formData.barter_type === 'percentage' ? 
+                      (getTotalValue() * (formData.barter_percentage || 0)) / 100 : 
+                      (formData.barter_value || 0)) }}
+                  </div>
+                </div>
+                <div class="info-card highlight">
+                  <div class="info-label">Valor Restante a Pagar</div>
+                  <div class="info-value">{{ formatCurrency(remainingValue) }}</div>
+                </div>
+              </div>
+            </div>
+
+
+            <!-- Componente de Gerenciamento de Parcelas (apenas para visualização detalhada) -->
+            <app-installments-manager
+              *ngIf="isViewMode"
+              [totalValue]="getTotalValue()"
+              [paymentMethod]="formData.payment_method"
+              [installments]="contractInstallments"
+              [isViewMode]="isViewMode"
+              [contractId]="contractId"
+              [apiInstallments]="apiInstallments"
+              (installmentsChange)="onInstallmentsChange($event)"
+              (installmentCountChange)="onInstallmentCountChange($event)">
+            </app-installments-manager>
+          </div>
+        </div>
+
+        <div class="right-column">
+          <div class="form-section">
+            <div class="section-header">
+              <h3 class="section-title">
+                <i class="fas fa-briefcase"></i>
+                Serviços do Contrato
+              </h3>
+              <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                (click)="openServiceModal()"
+                [disabled]="isLoading"
+              >
+                <i class="fas fa-plus"></i>
+                Adicionar Serviço
+              </button>
+            </div>
+
+            <!-- Estado vazio -->
+            <div class="empty-services" *ngIf="getVisibleServicesCount() === 0">
+              <div class="empty-icon">
+                <i class="fas fa-briefcase"></i>
+              </div>
+              <h4 class="empty-title">Nenhum serviço adicionado</h4>
+              <p class="empty-description">Adicione serviços para começar a montar seu contrato</p>
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="openServiceModal()"
+                [disabled]="isLoading"
+              >
+                <i class="fas fa-plus"></i>
+                Adicionar Primeiro Serviço
+              </button>
+            </div>
+
+            <!-- Lista de serviços -->
+            <div class="services-list" *ngIf="getVisibleServicesCount() > 0">
+              <div class="selected-services" [class.enable-scroll]="getVisibleServicesCount() > 3">
+                <div
+                  class="service-card"
+                  *ngFor="let service of selectedServices; let i = index"
+                  [hidden]="service.category === 'Interno'"
+                >
+                  <div class="service-header">
+                    <div class="service-info">
+                      <h4 class="service-name">{{ service.name }}</h4>
+                      <div class="service-meta">
+                        <span class="service-category">
+                          <i class="fas fa-tag"></i>
+                          {{ service.category }}
+                        </span>
+                        <span class="service-duration" *ngIf="service.duration && service.duration_unit">
+                          <i class="fas fa-clock"></i>
+                          {{ service.duration }} {{ service.duration_unit }}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      class="remove-service-btn"
+                      (click)="removeService(i)"
+                      title="Remover serviço"
+                    >
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+
+                  <div class="service-pricing">
+                    <!-- Campos normais de valor para outros serviços -->
+                    <div class="price-input-group">
+                      <label class="price-label">Valor do Serviço</label>
+                      <div class="price-input-wrapper">
+                        <input
+                          type="text"
+                          class="price-input"
+                          [(ngModel)]="service.unit_value"
+                          (ngModelChange)="onPriceChange(i, $event)"
+                          [name]="'price_' + i"
+                          placeholder="0,00"
+                          appCurrencyMask
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Resumo do contrato -->
+              <div class="contract-total-summary">
+                <div class="summary-row total">
+                  <span class="summary-label">Valor Total do Contrato</span>
+                  <span class="summary-value">{{ getFormattedTotalValue() }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="section-title">
+                <i class="fas fa-users-cog"></i>
+                Usuários e Permissões
+            </h3>
+            <div class="services-header">
+                <button 
+                    type="button" 
+                    class="btn btn-secondary" 
+                    (click)="openUserModal()"
+                    [disabled]="isLoading">
+                    <i class="fas fa-plus"></i> 
+                    Adicionar Usuário
+                </button>
+            </div>
+            <div class="assigned-users-management">
+                <div *ngIf="assignedUsers.length === 0" class="no-users-message" style="text-align: center; padding: 1rem; color: #6c757d;">
+                    Nenhum usuário atribuído.
+                </div>
+
+                <div *ngFor="let assignedUser of assignedUsers" class="user-management-row">
+                    <div class="user-details">
+                        <span class="user-name">{{ assignedUser.user.name }}</span>
+                        <span class="user-email">{{ assignedUser.user.email }}</span>
+                    </div>
+                    <div class="user-controls">
+                        <div class="role-selector">
+                            <select 
+                                class="form-control" 
+                                [ngModel]="assignedUser.role"
+                                (ngModelChange)="onRoleChangeLocal(assignedUser, $event)"
+                                [name]="'role_' + assignedUser.user.id"
+                                title="Alterar permissão do usuário">
+                                <option *ngFor="let role of availableRoles" [value]="role.value">
+                                    {{ role.label }}
+                                </option>
+                            </select>
+                        </div>
+                        <button type="button" class="remove-btn" (click)="removeUser(assignedUser)" title="Remover usuário">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aviso quando não há serviços selecionados -->
+      <div class="alert alert-warning" *ngIf="!hasSelectedServices() && !isEditMode">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>Selecione pelo menos um serviço para criar o contrato.</span>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="isSaving">
+          <i class="fas fa-arrow-left"></i>
+          Voltar
+        </button>
+        
+        <button type="submit" class="btn btn-primary" [disabled]="isSaving || !hasSelectedServices()">
+          <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+          <i class="fas fa-save" *ngIf="!isSaving"></i>
+          {{ isEditMode ? 'Atualizar' : 'Criar' }} Contrato
+        </button>
+      </div>
+    </form>
+
+    <div class="view-mode" *ngIf="isViewMode">
+      <div class="view-grid">
+        <div class="view-section">
+          <h2 class="section-title">
+            <i class="fas fa-file-contract"></i>Detalhes da Rotina
+          </h2>
+          <div class="detail-item">
+            <span class="detail-label">Número:</span>
+            <span class="detail-value">{{ formData.contract_number }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Tipo:</span>
+            <span class="type-badge" [attr.data-type]="formData.type">{{ formData.type }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Cliente:</span>
+            <span class="detail-value">{{ getClientName(formData.client_id) }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Início:</span>
+            <span class="detail-value">{{ formatDate(formData.start_date) }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Término:</span>
+            <span class="detail-value">{{ formatDate(formData.end_date) }}</span>
+          </div>
+          <div class="detail-item" *ngIf="formData.notes">
+            <span class="detail-label">Obs:</span>
+            <p class="detail-value notes">{{ formData.notes }}</p>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Status:</span>
+            <span class="detail-value">
+              <span class="status-badge" [ngClass]="'status-' + formData.status">
+                {{ getStatusText(formData.status) }}
+              </span>
+            </span>
+          </div>
+        </div>
+        
+        <div class="view-section">
+          <h2 class="section-title">
+            <i class="fas fa-credit-card"></i>Informações de Pagamento
+          </h2>
+          <div class="detail-item">
+            <span class="detail-label">Forma de Pagamento:</span>
+            <span class="detail-value">{{ formData.payment_method || 'Não informado' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Data Prevista:</span>
+            <span class="detail-value">{{ formatDate(formData.expected_payment_date) }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Status do Pagamento:</span>
+            <span class="detail-value">
+              <span class="payment-status-badge" [ngClass]="'payment-' + formData.payment_status">
+                {{ getPaymentStatusText(formData.payment_status) }}
+              </span>
+            </span>
+          </div>
+        </div>
+        
+        <div class="view-section">
+          <h2 class="section-title">
+            <i class="fas fa-briefcase"></i>Serviços Contratados
+          </h2>
+          <div class="services-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Serviço</th>
+                  <th>Valor Unit.</th>
+                  <th>Valor Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let service of selectedServices">
+                  <td>{{ service.name }}</td>
+                  <td>{{ formatCurrency(service.unit_value) }}</td>
+                  <td class="value-highlight">
+                    {{ formatCurrency(service.total_value) }}
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td class="text-right">
+                    <strong>Total:</strong>
+                  </td>
+                  <td class="total-value">
+                    <strong>{{ getFormattedTotalValue() }}</strong>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+        
+        <div class="view-section" *ngIf="isViewMode && assignedUsers.length > 0">
+          <h2 class="section-title">
+            <i class="fas fa-users"></i>Usuários Atribuídos
+          </h2>
+          <div class="assigned-users-list">
+            <div *ngFor="let assignedUser of assignedUsers" class="user-item">
+              <span class="user-name">{{ assignedUser.user.name }}</span>
+              <span class="user-role-badge">{{ getRoleLabel(assignedUser.role) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">
+          <i class="fas fa-arrow-left"></i>Voltar
+        </button>
+        <button type="button" class="btn btn-primary" (click)="enableEdit()">
+          <i class="fas fa-edit"></i>Editar
+        </button>
+      </div>
+    </div>
+  </div>
+
+<div
+  class="modal"
+  [class.active]="showServiceModal"
+  (click)="closeServiceModal()"
+>
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-title">Adicionar Serviço</h3>
+      <button class="close-btn" (click)="closeServiceModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-filters">
+        <div class="modal-search">
+          <i class="fas fa-search"></i>
+          <input
+            type="text"
+            class="modal-search-input"
+            placeholder="Buscar serviço..."
+            [(ngModel)]="serviceSearchTerm"
+            name="serviceSearch"
+          />
+        </div>
+        <select 
+          class="modal-category-filter"
+          [(ngModel)]="serviceCategoryFilter"
+          name="categoryFilter">
+          <option value="">Todas as categorias</option>
+          <option *ngFor="let category of availableCategories" [value]="category">
+            {{ category }}
+          </option>
+        </select>
+      </div>
+      <div class="services-list">
+        <div
+          class="service-option"
+          *ngFor="let service of filteredServices"
+          (click)="addService(service)"
+        >
+          <div class="service-option-info">
+            <h4>{{ service.name }}</h4>
+            <div class="service-option-details">
+              <span><i class="fas fa-tag"></i> {{ service.category }}</span>
+              <span>
+                <i class="fas fa-clock"></i> {{ formatServiceDuration(service) }}
+              </span>
+            </div>
+          </div>
+          <div class="service-option-action">
+            <i class="fas fa-plus-circle"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Gerenciamento de Parcelas -->
+<app-installments-modal
+  [isOpen]="isInstallmentsModalOpen"
+  [contractId]="contractId"
+  [contractNumber]="formData.contract_number"
+  [totalValue]="getTotalValue()"
+  [installmentCount]="(dynamicPaymentMethods[0] && dynamicPaymentMethods[0].installment_count) || 1"
+  [firstInstallmentDate]="(dynamicPaymentMethods[0] && dynamicPaymentMethods[0].first_installment_date) || ''"
+  (close)="closeInstallmentsModal()"
+  (save)="handleInstallmentsSave($event)">
+</app-installments-modal>
+
+<app-user-selection-modal
+  [isOpen]="isUserModalOpen"
+  [allUsers]="allUsers"
+  [initialSelectedIds]="getAssignedUserIds()"
+  (close)="closeUserModal()"
+  (selectionConfirmed)="updateAssignedUsers($event)"
+>
+</app-user-selection-modal>

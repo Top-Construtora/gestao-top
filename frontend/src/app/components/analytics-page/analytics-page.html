@@ -1,0 +1,287 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Analytics</h1>
+    <app-breadcrumb></app-breadcrumb>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-page">
+    <!-- Header Skeleton -->
+    <div class="loading-header">
+      <div class="skeleton skeleton-title"></div>
+      <div class="skeleton skeleton-subtitle"></div>
+    </div>
+
+    <!-- KPI Cards Skeleton -->
+    <div class="loading-kpi-grid">
+      <div class="skeleton-card" *ngFor="let item of [1,2,3]">
+        <div class="skeleton skeleton-kpi-title"></div>
+        <div class="skeleton skeleton-kpi-value"></div>
+        <div class="skeleton skeleton-kpi-chart"></div>
+      </div>
+    </div>
+
+    <!-- Charts Skeleton -->
+    <div class="loading-charts">
+      <div class="skeleton-chart-container">
+        <div class="skeleton skeleton-chart-title"></div>
+        <div class="skeleton skeleton-chart"></div>
+      </div>
+      <div class="loading-chart-grid">
+        <div class="skeleton-chart-small" *ngFor="let item of [1,2,3]">
+          <div class="skeleton skeleton-chart-title"></div>
+          <div class="skeleton skeleton-chart"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div class="loading-indicator">
+      <div class="loading-spinner">
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <span class="loading-text">Carregando analytics...</span>
+      <div class="loading-progress">
+        <div class="progress-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!isLoading && !analyticsData" class="error-container">
+    <div class="error-message">
+      <i class="fas fa-exclamation-triangle"></i>
+      <h3>Erro ao carregar dados</h3>
+      <p>Não foi possível carregar os dados de analytics. Tente novamente.</p>
+      <button class="retry-btn" (click)="refreshData()">
+        <i class="fas fa-redo"></i>
+        Tentar novamente
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && analyticsData">
+    <!-- Seletor de Período -->
+    <div class="period-selector">
+      <label class="period-label">
+        <i class="fas fa-calendar-alt"></i>
+        Período de análise
+      </label>
+      <div class="period-buttons">
+        <button
+          class="period-btn"
+          [class.active]="selectedPeriod === 'week'"
+          (click)="setPeriod('week')">
+          Semana
+        </button>
+        <button
+          class="period-btn"
+          [class.active]="selectedPeriod === 'month'"
+          (click)="setPeriod('month')">
+          Mês
+        </button>
+        <button
+          class="period-btn"
+          [class.active]="selectedPeriod === 'quarter'"
+          (click)="setPeriod('quarter')">
+          Trimestre
+        </button>
+        <button
+          class="period-btn"
+          [class.active]="selectedPeriod === 'year'"
+          (click)="setPeriod('year')">
+          Ano
+        </button>
+      </div>
+      <div class="period-info">
+        <span class="last-updated">
+          <i class="fas fa-clock"></i>
+          Atualizado: {{ lastUpdated | date:'dd/MM/yyyy HH:mm' }}
+        </span>
+        <button class="refresh-btn" (click)="refreshData()" [disabled]="isRefreshing">
+          <i class="fas fa-sync" [class.fa-spin]="isRefreshing"></i>
+        </button>
+      </div>
+    </div>
+
+
+    <!-- KPIs Principais -->
+    <div class="kpi-section">
+      <h3 class="section-title">
+        <i class="fas fa-tachometer-alt"></i>
+        Indicadores-Chave de Performance
+      </h3>
+      <div class="kpi-grid">
+        <!-- Taxa de Conversão -->
+        <div class="kpi-card primary-kpi">
+          <div class="kpi-header">
+            <h4 class="kpi-title">Taxa de Conversão</h4>
+            <div class="kpi-icon">
+              <i class="fas fa-percentage"></i>
+            </div>
+          </div>
+          <div class="kpi-value">{{ analyticsData.general.conversionRate || 0 }}%</div>
+          <div class="kpi-description">
+            <span class="kpi-subtitle">Sucesso Comercial</span>
+          </div>
+          <div class="kpi-gauge">
+            <canvas id="conversionGauge" width="120" height="60"></canvas>
+          </div>
+        </div>
+
+        <!-- Receita Total -->
+        <div class="kpi-card revenue-kpi">
+          <div class="kpi-header">
+            <h4 class="kpi-title">Receita Total</h4>
+            <div class="kpi-icon">
+              <i class="fas fa-dollar-sign"></i>
+            </div>
+          </div>
+          <div class="kpi-value revenue-value">{{ formatCurrency(analyticsData.general.totalRevenue || 0) }}</div>
+          <div class="kpi-description">
+            <div class="revenue-breakdown">
+              <span>Coletado: {{ formatCurrency(analyticsData.revenue.totalCollected || 0) }}</span>
+              <span>Pendente: {{ formatCurrency(analyticsData.revenue.totalPending || 0) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contratos Ativos -->
+        <div class="kpi-card contracts-kpi">
+          <div class="kpi-header">
+            <h4 class="kpi-title">Contratos por Status</h4>
+            <div class="kpi-icon">
+              <i class="fas fa-file-contract"></i>
+            </div>
+          </div>
+          <div class="kpi-value">{{ analyticsData.general.totalContracts || 0 }}</div>
+          <div class="kpi-description">
+            <div class="contract-stats">
+              <div class="status-item" *ngIf="analyticsData?.contracts?.byStatus && analyticsData.contracts.byStatus['active'] > 0">
+                <span class="status-dot" style="background-color: #0A8060;"></span>
+                <span>Ativos: {{ analyticsData.contracts.byStatus['active'] }}</span>
+              </div>
+              <div class="status-item" *ngIf="analyticsData?.contracts?.byStatus && analyticsData.contracts.byStatus['completed'] > 0">
+                <span class="status-dot" style="background-color: #6366f1;"></span>
+                <span>Concluídos: {{ analyticsData.contracts.byStatus['completed'] }}</span>
+              </div>
+              <div class="status-item" *ngIf="analyticsData?.contracts?.byStatus && analyticsData.contracts.byStatus['cancelled'] > 0">
+                <span class="status-dot" style="background-color: #ef4444;"></span>
+                <span>Cancelados: {{ analyticsData.contracts.byStatus['cancelled'] }}</span>
+              </div>
+              <div class="status-item" *ngIf="analyticsData?.contracts?.byStatus && analyticsData.contracts.byStatus['suspended'] > 0">
+                <span class="status-dot" style="background-color: #f59e0b;"></span>
+                <span>Suspensos: {{ analyticsData.contracts.byStatus['suspended'] }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="contract-chart">
+            <canvas id="contractsDonut" width="80" height="80"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+
+    <!-- Novos Gráficos Analytics -->
+    <div class="analytics-charts-section">
+      <h3 class="section-title">
+        <i class="fas fa-chart-bar"></i>
+        Analytics Detalhados
+      </h3>
+      
+      <!-- Gráfico de Conclusão por Contrato - Largura Total -->
+      <div class="chart-card full-width">
+        <div class="chart-header">
+          <h4 class="chart-title">
+            <i class="fas fa-file-contract"></i>
+            Taxa de Conclusão por Contrato
+          </h4>
+
+          <!-- Filtros -->
+          <div class="chart-filters">
+            <!-- Filtro de Tipo de Contrato -->
+            <div class="chart-filter">
+              <select
+                id="contractTypeFilter"
+                class="filter-select"
+                [value]="selectedContractType || ''"
+                (change)="onContractTypeFilterChangeEvent($event)">
+                <option value="">Todos os tipos</option>
+                <option
+                  *ngFor="let type of availableContractTypes"
+                  [value]="type.value">
+                  {{ type.label }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Filtro de Cliente -->
+            <div class="chart-filter" *ngIf="availableClients.length > 0">
+              <select
+                id="clientFilter"
+                class="filter-select"
+                [value]="selectedClientId || ''"
+                (change)="onClientFilterChangeEvent($event)">
+                <option value="">Todos os clientes</option>
+                <option
+                  *ngFor="let client of availableClients"
+                  [value]="client.id">
+                  {{ client.name }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="chart-wrapper contract-completion-wrapper">
+          <canvas id="contractCompletionChart" *ngIf="analyticsData.contractCompletionData && analyticsData.contractCompletionData.length > 0"></canvas>
+          <div *ngIf="!analyticsData.contractCompletionData || analyticsData.contractCompletionData.length === 0" class="no-data-message">
+            <i class="fas fa-info-circle"></i>
+            <p>Nenhum dado de conclusão por contrato disponível ainda</p>
+            <small>Os dados aparecerão quando houver contratos ativos com serviços em andamento</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <!-- Contratos por Tipo -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h4 class="chart-title">
+              <i class="fas fa-layer-group"></i>
+              Contratos por Tipo
+            </h4>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="contractsByTypeChart" *ngIf="analyticsData.contracts?.byType"></canvas>
+            <div *ngIf="!analyticsData.contracts?.byType" class="no-data-message">
+              <i class="fas fa-info-circle"></i>
+              <p>Nenhum dado de contratos por tipo disponível ainda</p>
+              <small>Os dados aparecerão quando houver contratos cadastrados</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Serviços Mais Contratados -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h4 class="chart-title">
+              <i class="fas fa-trophy"></i>
+              Serviços Mais Contratados
+            </h4>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="topServicesChart" *ngIf="analyticsData.topServices && analyticsData.topServices.length > 0"></canvas>
+            <div *ngIf="!analyticsData.topServices || analyticsData.topServices.length === 0" class="no-data-message">
+              <i class="fas fa-info-circle"></i>
+              <p>Nenhum dados de serviços disponível ainda</p>
+              <small>Os dados aparecerão quando houver contratos com serviços vinculados</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

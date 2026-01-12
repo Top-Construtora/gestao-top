@@ -1,0 +1,123 @@
+<div class="modal" [class.active]="isOpen" (click)="onBackdropClick($event)">
+  <div class="modal-content installments-modal">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <i class="fas fa-calendar-alt"></i>
+        Gerenciar Parcelas
+        <span class="contract-number" *ngIf="contractNumber">{{ contractNumber }}</span>
+      </h2>
+      <button class="close-btn" (click)="close.emit()" [disabled]="loading">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Resumo Geral -->
+      <div class="summary-section">
+        <div class="summary-cards">
+          <div class="summary-card">
+            <div class="summary-label">Total do Contrato</div>
+            <div class="summary-value">{{ formatCurrency(totalValue) }}</div>
+          </div>
+          <div class="summary-card paid">
+            <div class="summary-label">Total Pago</div>
+            <div class="summary-value">{{ formatCurrency(getTotalPaid()) }}</div>
+          </div>
+          <div class="summary-card pending">
+            <div class="summary-label">Total Pendente</div>
+            <div class="summary-value">{{ formatCurrency(getTotalPending()) }}</div>
+          </div>
+          <div class="summary-card overdue" *ngIf="getTotalOverdue() > 0">
+            <div class="summary-label">Total em Atraso</div>
+            <div class="summary-value">{{ formatCurrency(getTotalOverdue()) }}</div>
+          </div>
+        </div>
+
+        <!-- Barra de Progresso -->
+        <div class="progress-section">
+          <div class="progress-header">
+            <span>Progresso de Pagamento</span>
+            <span class="progress-percentage">{{ getProgress().toFixed(1) }}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="getProgress()"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela de Parcelas -->
+      <div class="installments-table-container">
+        <table class="installments-table">
+          <thead>
+            <tr>
+              <th>Parcela</th>
+              <th>Vencimento</th>
+              <th>Valor</th>
+              <th>Status</th>
+              <th>Data Pgto</th>
+              <th>Observações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let installment of installments" [class.paid]="installment.payment_status === 'pago'">
+              <td class="installment-number">
+                {{ installment.installment_number }}/{{ installmentCount }}
+              </td>
+              <td>
+                <span class="fixed-value">{{ formatDate(installment.due_date) }}</span>
+              </td>
+              <td>
+                <span class="fixed-value amount">{{ formatCurrency(installment.amount) }}</span>
+              </td>
+              <td>
+                <select
+                  [(ngModel)]="installment.payment_status"
+                  (change)="updateStatus(installment)"
+                  class="status-select"
+                  [style.color]="getStatusColor(installment.payment_status)"
+                  [disabled]="loading">
+                  <option *ngFor="let status of statusOptions"
+                          [value]="status.value"
+                          [style.color]="status.color">
+                    {{ status.label }}
+                  </option>
+                </select>
+              </td>
+              <td>
+                <input
+                  type="date"
+                  [(ngModel)]="installment.paid_date"
+                  class="date-input"
+                  [disabled]="installment.payment_status !== 'pago' || loading">
+              </td>
+              <td>
+                <input
+                  type="text"
+                  [(ngModel)]="installment.notes"
+                  class="notes-input"
+                  [disabled]="loading"
+                  placeholder="Observações...">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="loading-overlay" *ngIf="loading">
+        <i class="fas fa-spinner fa-spin"></i>
+        <span>Processando...</span>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-primary" (click)="saveInstallments()" [disabled]="loading">
+        <i class="fas fa-save"></i>
+        Salvar Alterações
+      </button>
+      <button class="btn btn-secondary" (click)="close.emit()" [disabled]="loading">
+        <i class="fas fa-times"></i>
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>

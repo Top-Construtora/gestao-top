@@ -1,0 +1,387 @@
+<div class="page-header">
+  <h1 class="page-title">Detalhes do Contrato</h1>
+  <app-breadcrumb></app-breadcrumb>
+</div>
+
+<!-- Error State -->
+<div class="error-container" *ngIf="!isLoading && !contract && error">
+  <div class="error-icon">
+    <i class="fas fa-exclamation-triangle"></i>
+  </div>
+  <h3>Contrato não encontrado</h3>
+  <p>Não foi possível carregar os dados do contrato.</p>
+  <button class="btn btn-primary" (click)="backToContracts()">
+    <i class="fas fa-arrow-left"></i> Voltar para Contratos
+  </button>
+</div>
+
+<!-- Main Content -->
+<div class="content" *ngIf="!isLoading && contract && !error">
+  
+  <!-- Unified Contract Details Section -->
+  <div class="contract-details-unified">
+    <!-- Contract Overview Header -->
+    <div class="contract-overview-header">
+      <!-- Action Buttons -->
+      <div class="contract-actions">
+        <button class="btn-action-header" (click)="editContract()" *ngIf="canEditContract()" title="Editar Contrato">
+          <i class="fas fa-edit"></i>
+          Editar
+        </button>
+        <button class="btn-action-header" (click)="openExportModal()" title="Exportar Contrato">
+          <i class="fas fa-download"></i>
+          Exportar
+        </button>
+        <button class="btn-action-header delete" *ngIf="canDeleteContract()" (click)="deleteContract()" title="Excluir Contrato">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+      
+      <!-- Primary Info -->
+      <div class="primary-info">
+        <div class="contract-header">
+          <div class="contract-logo-section">
+            <div class="company-logo-wrapper">
+              <img src="logoTOP.png" alt="TOP Construtora" class="company-logo">
+            </div>
+          </div>
+          <div class="contract-info">
+            <h2 class="contract-number">{{ contract.contract_number }}</h2>
+            <div class="contract-badges">
+              <span class="type-badge">{{ contract.type }}</span>
+              <span class="status-badge" [attr.data-status]="contract.status">
+                {{ getStatusText(contract.status) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Meta Information -->
+      <div class="meta-info">
+        <div class="info-group">
+          <span class="info-label">Cliente</span>
+          <span class="info-value">{{ getClientName() || 'Não informado' }}</span>
+        </div>
+        <div class="info-group">
+          <span class="info-label">E-mail</span>
+          <span class="info-value">{{ getClientEmail() || 'Não informado' }}</span>
+        </div>
+        <div class="info-group">
+          <span class="info-label">Telefone</span>
+          <span class="info-value">{{ getClientPhone() || 'Não informado' }}</span>
+        </div>
+        <div class="info-group">
+          <span class="info-label">Data de Início</span>
+          <span class="info-value">{{ formatDate(contract.start_date) }}</span>
+        </div>
+        <div class="info-group" *ngIf="contract.end_date">
+          <span class="info-label">Válido Até</span>
+          <span class="info-value">{{ contract.end_date ? formatDate(contract.end_date) : 'Não definido' }}</span>
+        </div>
+        <div class="info-group">
+          <span class="info-label">Total de Serviços</span>
+          <span class="info-value">{{ getNonInternalServices().length || 0 }} item(s)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="contract-content">
+      
+      
+      <!-- Services Section -->
+      <section class="content-section">
+        <h3 class="section-title">
+          <i class="fas fa-cogs"></i>
+          Serviços do Contrato
+        </h3>
+        
+        <!-- Services Grid -->
+        <div class="services-grid" *ngIf="getNonInternalServices().length > 0">
+          <div *ngFor="let service of getNonInternalServices(); let i = index" class="service-card">
+            <div class="service-card-header">
+              <div class="service-header-left">
+                <div class="service-number">{{ i + 1 }}</div>
+                <div class="service-name">{{ service.service.name || 'Serviço ' + service.service.id }}</div>
+              </div>
+
+              <div class="service-header-right">
+                <!-- Data (quando não é aditivo) -->
+                <span class="additive-date" *ngIf="!isAdditiveService(service)">
+                  {{ getServiceAddedDate(service) }}
+                </span>
+
+                <!-- Badge de Aditivo -->
+                <div *ngIf="isAdditiveService(service)" class="additive-container">
+                  <span class="additive-badge">
+                    Aditivo
+                  </span>
+                  <span class="additive-date-in-badge">
+                    {{ getServiceAddedDate(service) }}
+                  </span>
+                </div>
+
+                <!-- Botão de Toggle -->
+                <button
+                  *ngIf="hasServiceDetails(service)"
+                  class="btn-toggle-details"
+                  (click)="toggleServiceDetails(service.id)"
+                  [title]="isServiceExpanded(service.id) ? 'Recolher detalhes' : 'Ver detalhes'"
+                >
+                  <i class="fas" [class.fa-chevron-down]="!isServiceExpanded(service.id)" [class.fa-chevron-up]="isServiceExpanded(service.id)"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="service-card-body">
+              <!-- Detalhes expandíveis -->
+              <div class="service-details-content" *ngIf="isServiceExpanded(service.id)">
+                <!-- Subtítulo do serviço -->
+                <div class="service-subtitle" *ngIf="service.service.subtitle">
+                  <i class="fas fa-bookmark"></i> <span [innerHTML]="service.service.subtitle"></span>
+                </div>
+
+                <!-- Resumo do serviço -->
+                <div class="service-summary" *ngIf="service.service.summary" [innerHTML]="service.service.summary">
+                </div>
+
+                <!-- Descrição do serviço -->
+                <div class="service-description" *ngIf="service.service.description" [innerHTML]="service.service.description">
+                </div>
+              </div>
+
+              <div class="service-category" *ngIf="service.service.category">
+                <i class="fas fa-tag"></i> Categoria: {{ service.service.category }}
+              </div>
+
+              <!-- Valores financeiros - APENAS para Admin -->
+              <div class="service-pricing" *ngIf="canViewFinancialInfo">
+                <div class="service-detail">
+                  <span class="detail-label">Valor Unitário:</span>
+                  <span class="detail-value">{{ formatCurrency(service.unit_value) }}</span>
+                </div>
+
+                <div class="service-detail highlight">
+                  <span class="detail-label">Total:</span>
+                  <span class="detail-value" [class.cancelled-service]="getServiceStatus(service) === 'cancelled'">
+                    {{ formatCurrency(service.total_value) }}
+                    <span *ngIf="getServiceStatus(service) === 'cancelled'" class="cancelled-label">(Cancelado)</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Empty State -->
+        <div *ngIf="getNonInternalServices().length === 0" class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-cogs"></i>
+          </div>
+          <h4>Nenhum serviço encontrado</h4>
+          <p>Este contrato ainda não possui serviços cadastrados.</p>
+        </div>
+        
+        <!-- Services Summary - APENAS para Admin -->
+        <div class="services-summary" *ngIf="getNonInternalServices().length > 0 && canViewFinancialInfo">
+          <div class="summary-card">
+            <div class="summary-icon">
+              <i class="fas fa-calculator"></i>
+            </div>
+            <div class="summary-content">
+              <div class="summary-label">Valor Total do Contrato</div>
+
+              <!-- Mostrar valor original quando há cancelamentos -->
+              <div *ngIf="hasCancelledServices()" class="summary-breakdown">
+                <div class="original-value">
+                  <span class="original-label">Valor Original:</span>
+                  <span class="original-amount">{{ formatCurrency(contract.total_value) }}</span>
+                </div>
+                <div class="cancelled-value">
+                  <span class="cancelled-label">Serviços Cancelados:</span>
+                  <span class="cancelled-amount">- {{ formatCurrency(getCancelledServicesValue()) }}</span>
+                </div>
+                <div class="adjusted-value">
+                  <span class="adjusted-label">Valor Atual:</span>
+                  <span class="adjusted-amount">{{ formatCurrency(getAdjustedTotalValue()) }}</span>
+                </div>
+              </div>
+              
+              <!-- Mostrar apenas valor normal quando não há cancelamentos -->
+              <div *ngIf="!hasCancelledServices()" class="summary-value">
+                {{ formatCurrency(contract.total_value) }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Payment Information Section - APENAS para Admin (não Admin Gerencial) -->
+      <section class="content-section" *ngIf="canViewFinancialInfo">
+        <h3 class="section-title">
+          <i class="fas fa-credit-card"></i>
+          Informações de Pagamento
+        </h3>
+
+        <div class="payment-info-grid">
+          
+          <!-- Card Principal: Valor Total e Status -->
+          <div class="payment-card main-payment">
+            <div class="payment-card-header">
+              <div class="payment-label">Valor Total</div>
+              <div class="payment-value total">{{ formatCurrency(contract.total_value) }}</div>
+            </div>
+            <div class="payment-details">
+              <div class="detail-item">
+                <span class="detail-label">Forma de Pagamento:</span>
+                <span class="detail-value">{{ contract.payment_method || 'Não informado' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Status:</span>
+                <span class="detail-value" [class.paid]="contract.payment_status === 'pago'" 
+                     [class.pending]="contract.payment_status === 'pendente'">
+                  {{ contract.payment_status === 'pago' ? 'Pago' : 'Pendente' }}
+                </span>
+              </div>
+              <div class="detail-item" *ngIf="contract && contract.expected_payment_date">
+                <span class="detail-label">Data Prevista:</span>
+                <span class="detail-value">{{ formatDate(contract.expected_payment_date) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Específico: Informações de Permuta -->
+          <div class="payment-card barter-payment" *ngIf="contract && contract.payment_method === 'Permuta' && contract.barter_type">
+            <div class="payment-card-header">
+              <div class="payment-label">Detalhes da Permuta</div>
+              <div class="payment-value barter">
+                {{ contract.barter_type === 'percentage' ? contract.barter_percentage + '%' : 'Valor Fixo' }}
+              </div>
+            </div>
+            <div class="payment-details">
+              <div class="detail-item" *ngIf="contract.barter_type === 'percentage'">
+                <span class="detail-label">Porcentagem aplicada:</span>
+                <span class="detail-value">{{ contract.barter_percentage }}% do total</span>
+              </div>
+              <div class="detail-item" *ngIf="contract.barter_type === 'value'">
+                <span class="detail-label">Valor da permuta:</span>
+                <span class="detail-value">{{ formatCurrency(contract.barter_value) }}</span>
+              </div>
+              <div class="detail-item highlight-row">
+                <span class="detail-label">Valor abatido:</span>
+                <span class="detail-value highlight">{{ formatCurrency(getBarterAmount()) }}</span>
+              </div>
+              <div class="detail-item highlight-row" *ngIf="getRemainingValue() > 0">
+                <span class="detail-label">Valor restante a pagar:</span>
+                <span class="detail-value highlight">{{ formatCurrency(getRemainingValue()) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Complementar: Pagamento do Valor Restante -->
+          <div class="payment-card secondary-payment" *ngIf="contract && contract.secondary_payment_method">
+            <div class="payment-card-header">
+              <div class="payment-label">Pagamento do Restante</div>
+              <div class="payment-value">{{ contract.secondary_payment_method }}</div>
+            </div>
+            <div class="payment-details">
+              <div class="detail-item">
+                <span class="detail-label">Valor a pagar:</span>
+                <span class="detail-value">{{ formatCurrency(getRemainingValue()) }}</span>
+              </div>
+              <div class="detail-item" *ngIf="contract && contract.installment_count && contract.installment_count > 1">
+                <span class="detail-label">Parcelamento:</span>
+                <span class="detail-value">{{ contract.installment_count }}x de {{ formatCurrency(getInstallmentValue()) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Adicional: Parcelamento (quando não há permuta) -->
+          <div class="payment-card installment-payment" *ngIf="contract && contract.installment_count && contract.installment_count > 1 && contract.payment_method && contract.payment_method !== 'Permuta'">
+            <div class="payment-card-header">
+              <div class="payment-label">Parcelamento</div>
+              <div class="payment-value">{{ contract.installment_count }}x</div>
+            </div>
+            <div class="payment-details">
+              <div class="detail-item">
+                <span class="detail-label">Valor de cada parcela:</span>
+                <span class="detail-value">{{ formatCurrency(getInstallmentValue()) }}</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        
+      </section>
+
+      <!-- Assigned Users Section -->
+      <section class="content-section" *ngIf="contract.assigned_users && contract.assigned_users.length > 0">
+        <h3 class="section-title">
+          <i class="fas fa-users"></i>
+          Usuários Atribuídos
+        </h3>
+        
+        <div class="users-grid">
+          <div *ngFor="let assignment of contract.assigned_users" class="user-card">
+            <div class="user-card-header">
+              <div class="user-avatar">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="user-name">{{ assignment.user.name }}</div>
+            </div>
+            
+            <div class="user-card-body">
+              <div class="user-detail">
+                <span class="detail-label">E-mail:</span>
+                <span class="detail-value">{{ assignment.user.email }}</span>
+              </div>
+              
+              <div class="user-role-badge">
+                <span class="role-text">{{ getRoleText(assignment.role) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Notes Section -->
+      <section class="content-section" *ngIf="contract.notes">
+        <h3 class="section-title">
+          <i class="fas fa-sticky-note"></i>
+          Observações
+        </h3>
+        
+        <div class="notes-display">
+          <p class="notes-text">{{ contract.notes }}</p>
+        </div>
+      </section>
+      
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-container" *ngIf="isLoading">
+  <div class="loading-spinner"></div>
+  <p>Carregando contrato...</p>
+</div>
+
+<!-- Export Modal -->
+<app-contract-export-modal
+  [isVisible]="showExportModal"
+  [contract]="contract"
+  (onClose)="closeExportModal()">
+</app-contract-export-modal>
+
+<!-- Delete Confirmation Modal -->
+<app-delete-confirmation-modal
+  [isVisible]="showDeleteModal"
+  title="Confirmar Exclusão de Contrato"
+  message="Tem certeza que deseja excluir este contrato permanentemente? Esta ação não pode ser desfeita."
+  [itemName]="contract ? (contract.contract_number + ' (' + getClientName() + ')') : ''"
+  [isDeleting]="isDeleting"
+  deleteButtonText="Excluir Contrato"
+  (onConfirm)="confirmDeleteContract()"
+  (onCancel)="cancelDeleteContract()">
+</app-delete-confirmation-modal>

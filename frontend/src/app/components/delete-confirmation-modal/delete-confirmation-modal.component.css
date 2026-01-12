@@ -1,0 +1,105 @@
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-dialog {
+  width: 100%;
+  max-width: 450px;
+  margin: 20px;
+  z-index: 10000;
+}
+
+.modal-content {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 25px 30px;
+  width: 100%;
+}
+
+.modal-content p {
+  margin: 0 0 20px 0;
+  color: #333333;
+  font-size: 16px;
+  line-height: 1.4;
+  text-align: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  padding-top: 5px;
+}
+
+.btn-cancel,
+.btn-danger {
+  padding: 10px 25px;
+  border: 1px solid;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  min-width: 100px;
+}
+
+.btn-cancel {
+  background: #ffffff;
+  color: #6c757d;
+  border-color: #dee2e6;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #6c757d;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: #ffffff;
+  border-color: #dc3545;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #c82333;
+  border-color: #bd2130;
+}
+
+.btn-cancel:disabled,
+.btn-danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 15px;
+    max-width: none;
+  }
+  
+  .modal-content {
+    padding: 20px;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .btn-cancel,
+  .btn-danger {
+    width: 100%;
+  }
+}

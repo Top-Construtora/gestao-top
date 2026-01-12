@@ -1,0 +1,142 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "gestao-contratos": {
+      "projectType": "application",
+      "schematics": {},
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "src/main.ts",
+            "polyfills": [
+              "src/polyfills.ts"
+            ],
+            "tsConfig": "tsconfig.app.json",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
+            "styles": [
+              "src/styles.css",
+              "src/app/pages/home/home.css"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "7MB",
+                  "maximumError": "10MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "100kB",
+                  "maximumError": "150kB"
+                }
+              ],
+              "allowedCommonJsDependencies": [
+                "buffer",
+                "file-saver",
+                "docx",
+                "jspdf",
+                "html2canvas",
+                "xlsx-js-style",
+                "canvg",
+                "rgbcolor",
+                "raf",
+                "core-js",
+                "core-js/modules/es.promise.js",
+                "core-js/modules/es.string.match.js",
+                "core-js/modules/es.string.replace.js",
+                "core-js/modules/es.string.starts-with.js",
+                "core-js/modules/es.array.iterator.js",
+                "core-js/modules/web.dom-collections.iterator.js",
+                "core-js/modules/es.array.reduce.js",
+                "core-js/modules/es.string.ends-with.js",
+                "core-js/modules/es.string.split.js",
+                "core-js/modules/es.string.trim.js",
+                "core-js/modules/es.array.index-of.js",
+                "core-js/modules/es.string.includes.js",
+                "core-js/modules/es.array.reverse.js",
+                "core-js/modules/es.regexp.to-string.js"
+              ],
+              "optimization": {
+                "scripts": true,
+                "styles": true,
+                "fonts": true
+              },
+              "define": {
+                "global": "globalThis"
+              },
+              "outputHashing": "all",
+              "sourceMap": false,
+              "namedChunks": false,
+              "extractLicenses": true
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "buildTarget": "gestao-contratos:build:development"
+          },
+          "configurations": {
+            "production": {
+              "buildTarget": "gestao-contratos:build:production"
+            },
+            "development": {
+              "buildTarget": "gestao-contratos:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular/build:extract-i18n"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "tsconfig.spec.json",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
+            "styles": [
+              "src/styles.css"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "analytics": false
+  }
+}

@@ -1,0 +1,49 @@
+<nav class="sidebar" [class.collapsed]="isCollapsed" [class.mobile-open]="isMobileSidebarOpen">
+  <button class="sidebar-toggle-compact" (click)="toggleSidebar()" title="Recolher/Expandir menu">
+    <i class="fas fa-chevron-left" *ngIf="!isCollapsed"></i>
+    <i class="fas fa-chevron-right" *ngIf="isCollapsed"></i>
+  </button>
+
+  <ul class="nav-menu">
+    <div *ngFor="let section of filteredNavSections" class="nav-section">
+      <div class="nav-section-title">{{ section.title }}</div>
+      <ng-container *ngFor="let item of section.items">
+        <!-- Nav item with dropdown -->
+        <div *ngIf="item.children && item.children.length > 0" class="nav-item-wrapper">
+          <a
+            class="nav-item nav-item-dropdown"
+            [class.active]="isChildRouteActive(item.children)"
+            [class.expanded]="item.isExpanded"
+            (click)="toggleDropdown(item)"
+            [title]="isCollapsed ? item.text : ''">
+            <i [class]="item.icon + ' nav-icon'"></i>
+            <span class="nav-text">{{ item.text }}</span>
+            <i class="fas fa-chevron-down dropdown-icon" *ngIf="!isCollapsed"></i>
+          </a>
+          <div class="nav-dropdown" [class.expanded]="item.isExpanded" *ngIf="!isCollapsed">
+            <a
+              *ngFor="let child of item.children"
+              [routerLink]="child.route"
+              class="nav-item nav-item-child"
+              [class.active]="isRouteActive(child.route || '')"
+              [title]="child.text">
+              <i [class]="child.icon + ' nav-icon'"></i>
+              <span class="nav-text">{{ child.text }}</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Regular nav item -->
+        <a
+          *ngIf="!item.children || item.children.length === 0"
+          [routerLink]="item.route"
+          class="nav-item"
+          [class.active]="isRouteActive(item.route || '')"
+          [title]="isCollapsed ? item.text : ''">
+          <i [class]="item.icon + ' nav-icon'"></i>
+          <span class="nav-text">{{ item.text }}</span>
+        </a>
+      </ng-container>
+    </div>
+  </ul>
+</nav>

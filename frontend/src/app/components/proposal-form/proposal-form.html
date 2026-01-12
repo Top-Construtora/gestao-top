@@ -1,0 +1,564 @@
+<div class="proposal-page-content">
+  <div class="page-header">
+    <h1 class="page-title">{{ isEditMode ? 'Editar Proposta' : 'Nova Proposta' }}</h1>
+    <app-breadcrumb></app-breadcrumb>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <i class="fas fa-spinner fa-spin"></i>
+    Carregando...
+  </div>
+
+  <div class="form-container" *ngIf="!isLoading">
+    <form [formGroup]="proposalForm" (ngSubmit)="onSubmit()" class="proposal-form">
+      <div class="form-layout">
+        
+        <!-- COLUNA ESQUERDA - Informações Básicas -->
+        <div class="left-column">
+          
+          <!-- Seção Cliente -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-users"></i>
+              Cliente
+            </h3>
+            
+            <div class="form-group">
+              <label for="client_id" class="form-label">Cliente <span class="required">*</span></label>
+              <div class="client-selection-row">
+                <select id="client_id" formControlName="client_id" class="form-control client-select" [class.error]="isFieldInvalid('client_id')">
+                  <option value="" disabled>Selecione um cliente</option>
+                  <option *ngFor="let client of clients" [value]="client.id">
+                    {{ client.name }} <span *ngIf="client.headquarters" class="client-details">- {{ client.headquarters }}</span>
+                  </option>
+                </select>
+                <button type="button" class="btn btn-secondary btn-sm new-client-btn" (click)="toggleNewClientForm()">
+                  <i class="fas fa-plus"></i> 
+                  {{ showNewClientForm ? 'Cancelar' : 'Novo Cliente' }}
+                </button>
+              </div>
+              <div *ngIf="isFieldInvalid('client_id')" class="error-message">A seleção do cliente é obrigatória.</div>
+            </div>
+
+            <!-- Novo Cliente Form (collapsed by default) -->
+            <div *ngIf="showNewClientForm" class="sub-form" @slideInOut>
+              <h3 class="sub-form-title">
+                <i class="fas fa-user-plus"></i>
+                Cadastrar Novo Cliente
+              </h3>
+              <div [formGroup]="newClientForm" class="new-client-content">
+                
+                <!-- Tipo de Cliente -->
+                <div class="form-group">
+                  <label for="new_client_type" class="form-label">Tipo de Cliente <span class="required">*</span></label>
+                  <select id="new_client_type" formControlName="client_type" class="form-control" [class.error]="isNewClientFieldInvalid('client_type')">
+                    <option value="" disabled>Selecione o tipo</option>
+                    <option value="pf">Pessoa Física</option>
+                    <option value="pj">Pessoa Jurídica</option>
+                  </select>
+                  <div *ngIf="isNewClientFieldInvalid('client_type')" class="error-message">Tipo de cliente é obrigatório.</div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                  <label for="new_client_email" class="form-label">Email <span class="required">*</span></label>
+                  <input id="new_client_email" type="email" formControlName="email" class="form-control" 
+                         placeholder="cliente@exemplo.com" 
+                         [class.error]="isNewClientFieldInvalid('email')">
+                  <div *ngIf="isNewClientFieldInvalid('email')" class="error-message">Email válido é obrigatório.</div>
+                </div>
+
+                <!-- CPF (apenas para PF) -->
+                <div class="form-group" *ngIf="newClientForm.get('client_type')?.value === 'pf'">
+                  <label for="new_client_cpf" class="form-label">CPF <span class="required">*</span></label>
+                  <input id="new_client_cpf" type="text" formControlName="cpf" class="form-control" 
+                         placeholder="000.000.000-00" 
+                         appDocumentMask="cpf"
+                         [class.error]="isNewClientFieldInvalid('cpf')">
+                  <div *ngIf="isNewClientFieldInvalid('cpf')" class="error-message">CPF é obrigatório.</div>
+                </div>
+
+                <!-- CNPJ (apenas para PJ) -->
+                <div class="form-group" *ngIf="newClientForm.get('client_type')?.value === 'pj'">
+                  <label for="new_client_cnpj" class="form-label">CNPJ <span class="required">*</span></label>
+                  <input id="new_client_cnpj" type="text" formControlName="cnpj" class="form-control" 
+                         placeholder="00.000.000/0000-00" 
+                         appDocumentMask="cnpj"
+                         [class.error]="isNewClientFieldInvalid('cnpj')">
+                  <div *ngIf="isNewClientFieldInvalid('cnpj')" class="error-message">CNPJ é obrigatório.</div>
+                </div>
+
+                <!-- Nome/Razão Social baseado no tipo -->
+                <div class="form-group">
+                  <label for="new_client_name" class="form-label">
+                    <span *ngIf="newClientForm.get('client_type')?.value === 'pf'">Nome Completo</span>
+                    <span *ngIf="newClientForm.get('client_type')?.value === 'pj'">Razão Social</span>
+                    <span *ngIf="!newClientForm.get('client_type')?.value">Nome / Razão Social</span>
+                    <span class="required">*</span>
+                  </label>
+                  <input id="new_client_name" type="text" formControlName="name" class="form-control" 
+                         [placeholder]="getNewClientNamePlaceholder()" 
+                         [class.error]="isNewClientFieldInvalid('name')">
+                  <div *ngIf="isNewClientFieldInvalid('name')" class="error-message">{{ getNewClientNameLabel() }} é obrigatório.</div>
+                </div>
+
+                <!-- Nome Fantasia (apenas para PJ) -->
+                <div class="form-group" *ngIf="newClientForm.get('client_type')?.value === 'pj'">
+                  <label for="new_client_trade_name" class="form-label">Nome Fantasia</label>
+                  <input id="new_client_trade_name" type="text" formControlName="trade_name" class="form-control" 
+                         placeholder="Nome como é conhecido no mercado">
+                  <div class="help-text">Opcional - Como a empresa é conhecida no mercado</div>
+                </div>
+
+                <!-- Botões de ação -->
+                <div class="new-client-actions">
+                  <button type="button" class="btn btn-secondary btn-sm" (click)="cancelNewClient()">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                  </button>
+                  <button type="button" class="btn btn-primary btn-sm" (click)="createNewClient()" 
+                          [disabled]="newClientForm.invalid || isCreatingClient">
+                    <i *ngIf="!isCreatingClient" class="fas fa-save"></i>
+                    <i *ngIf="isCreatingClient" class="fas fa-spinner fa-spin"></i>
+                    {{ isCreatingClient ? 'Criando...' : 'Salvar Cliente' }}
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção Informações Básicas da Proposta -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-info-circle"></i>
+              Informações da Proposta
+            </h3>
+            
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="type" class="form-label">Tipo de Proposta <span class="required">*</span></label>
+                <select id="type" formControlName="type" class="form-control" [class.error]="isFieldInvalid('type')">
+                  <option value="Full">Full</option>
+                  <option value="Pontual">Pontual</option>
+                  <option value="Individual">Individual</option>
+                  <option value="Recrutamento & Seleção">Recrutamento & Seleção</option>
+                </select>
+                <div *ngIf="isFieldInvalid('type')" class="error-message">Tipo de proposta é obrigatório.</div>
+              </div>
+              <div class="form-group">
+                <label for="end_date" class="form-label">Válida Até</label>
+                <input id="end_date" type="date" formControlName="end_date" class="form-control">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="source" class="form-label">
+                <i class="fas fa-bullseye"></i>
+                Fonte
+              </label>
+              <select id="source" formControlName="source" class="form-control">
+                <option value="">Selecione a fonte</option>
+                <option value="Indicação">Indicação</option>
+                <option value="Site">Site</option>
+                <option value="Já era cliente">Já era cliente</option>
+                <option value="Redes Sociais">Redes Sociais</option>
+                <option value="Instagram">Instagram</option>
+                <option value="LinkedIn">LinkedIn</option>
+                <option value="Facebook">Facebook</option>
+                <option value="Google">Google</option>
+                <option value="WhatsApp">WhatsApp</option>
+                <option value="E-mail Marketing">E-mail Marketing</option>
+                <option value="Evento">Evento</option>
+                <option value="Parceiro">Parceiro</option>
+                <option value="Outro">Outro</option>
+              </select>
+              <div class="help-text">Como o cliente conheceu a empresa</div>
+            </div>
+
+            <!-- Status field - only visible in edit mode -->
+            <div class="form-group" *ngIf="isEditMode">
+              <label for="status" class="form-label">Status da Proposta</label>
+              <select id="status" formControlName="status" class="form-control">
+                <option value="draft">Rascunho</option>
+                <option value="sent">Enviada</option>
+                <option value="signed">Fechada</option>
+                <option value="rejected">Rejeitada</option>
+                <option value="expired">Expirada</option>
+                <option value="converted">Assinada</option>
+                <option value="contraproposta">Assinada Parcialmente</option>
+              </select>
+              <div class="help-text">Alterar o status da proposta pode afetar as ações disponíveis</div>
+            </div>
+            
+            <!-- Valor Global da Proposta -->
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="usar_valor_global" />
+                <span style="margin-left: 8px;">Usar valor global fixo para a proposta</span>
+              </label>
+              <div class="help-text">
+                Quando marcado, o valor total da proposta será o valor global definido, ignorando a soma dos serviços
+              </div>
+            </div>
+
+            <div class="form-group" *ngIf="proposalForm.get('usar_valor_global')?.value">
+              <label for="valor_global" class="form-label">Valor Global <span class="required">*</span></label>
+              <input
+                id="valor_global"
+                type="text"
+                formControlName="valor_global"
+                class="form-control"
+                appCurrencyMask
+                [class.error]="isFieldInvalid('valor_global')"
+                placeholder="R$ 0,00">
+              <div *ngIf="isFieldInvalid('valor_global')" class="error-message">
+                Valor global é obrigatório quando a opção está marcada
+              </div>
+              <div class="help-text">Este valor substituirá a soma dos serviços como valor total da proposta</div>
+            </div>
+
+            <div class="form-group" *ngIf="proposalForm.get('type')?.value !== 'Recrutamento & Seleção'">
+              <label for="max_installments" class="form-label">Máximo de Parcelas <span class="required">*</span></label>
+              <select id="max_installments" formControlName="max_installments" class="form-control" [class.error]="isFieldInvalid('max_installments')">
+                <option value="1">1x (somente à vista)</option>
+                <option *ngFor="let count of [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]" [value]="count">
+                  Até {{ count }}x
+                </option>
+              </select>
+              <div *ngIf="isFieldInvalid('max_installments')" class="error-message">Quantidade máxima de parcelas é obrigatória.</div>
+              <div class="help-text">Define o número máximo de parcelas que o cliente poderá escolher no pagamento a prazo</div>
+            </div>
+
+            <!-- Descontos para pagamento à vista -->
+            <div class="discount-section" *ngIf="proposalForm.get('type')?.value !== 'Recrutamento & Seleção'">
+              <h4 class="discount-title">
+                <i class="fas fa-tag"></i>
+                Desconto para Pagamento à Vista
+              </h4>
+              <div class="discount-inputs">
+                <!-- Desconto à vista em porcentagem -->
+                <div class="form-group">
+                  <label for="vista_discount" class="form-label">
+                    <i class="fas fa-percentage"></i>
+                    Porcentagem (%)
+                    <span class="required">*</span>
+                  </label>
+                  <input
+                    id="vista_discount"
+                    type="number"
+                    formControlName="vista_discount_percentage"
+                    class="form-control"
+                    min="0"
+                    max="100"
+                    step="0.5"
+                    [class.error]="isFieldInvalid('vista_discount_percentage')"
+                    placeholder="Ex: 6">
+                  <div *ngIf="isFieldInvalid('vista_discount_percentage')" class="error-message">Desconto deve ser entre 0% e 100%.</div>
+                </div>
+
+                <div class="discount-separator">ou</div>
+
+                <!-- Desconto à vista em valor absoluto -->
+                <div class="form-group">
+                  <label for="vista_discount_value" class="form-label">
+                    <i class="fas fa-dollar-sign"></i>
+                    Valor (R$)
+                    <span class="required">*</span>
+                  </label>
+                  <input
+                    id="vista_discount_value"
+                    type="number"
+                    formControlName="vista_discount_value"
+                    class="form-control"
+                    min="0"
+                    step="0.01"
+                    [class.error]="isFieldInvalid('vista_discount_value')"
+                    placeholder="Ex: 500.00">
+                  <div *ngIf="isFieldInvalid('vista_discount_value')" class="error-message">Valor deve ser maior ou igual a zero.</div>
+                </div>
+              </div>
+              <div class="help-text">Digite a porcentagem ou o valor. O outro campo será calculado automaticamente.</div>
+            </div>
+
+            <!-- Descontos para pagamento à prazo -->
+            <div class="discount-section" *ngIf="proposalForm.get('type')?.value !== 'Recrutamento & Seleção'">
+              <h4 class="discount-title">
+                <i class="fas fa-calendar-alt"></i>
+                Desconto para Pagamento à Prazo
+              </h4>
+              <div class="discount-inputs">
+                <!-- Desconto à prazo em porcentagem -->
+                <div class="form-group">
+                  <label for="prazo_discount" class="form-label">
+                    <i class="fas fa-percentage"></i>
+                    Porcentagem (%)
+                    <span class="required">*</span>
+                  </label>
+                  <input
+                    id="prazo_discount"
+                    type="number"
+                    formControlName="prazo_discount_percentage"
+                    class="form-control"
+                    min="0"
+                    max="100"
+                    step="0.5"
+                    [class.error]="isFieldInvalid('prazo_discount_percentage')"
+                    placeholder="Ex: 0">
+                  <div *ngIf="isFieldInvalid('prazo_discount_percentage')" class="error-message">Desconto deve ser entre 0% e 100%.</div>
+                </div>
+
+                <div class="discount-separator">ou</div>
+
+                <!-- Desconto à prazo em valor absoluto -->
+                <div class="form-group">
+                  <label for="prazo_discount_value" class="form-label">
+                    <i class="fas fa-dollar-sign"></i>
+                    Valor (R$)
+                    <span class="required">*</span>
+                  </label>
+                  <input
+                    id="prazo_discount_value"
+                    type="number"
+                    formControlName="prazo_discount_value"
+                    class="form-control"
+                    min="0"
+                    step="0.01"
+                    [class.error]="isFieldInvalid('prazo_discount_value')"
+                    placeholder="Ex: 0.00">
+                  <div *ngIf="isFieldInvalid('prazo_discount_value')" class="error-message">Valor deve ser maior ou igual a zero.</div>
+                </div>
+              </div>
+              <div class="help-text">Digite a porcentagem ou o valor. O outro campo será calculado automaticamente.</div>
+            </div>
+
+          </div>
+
+          <!-- Seção Solicitante -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-user-tie"></i>
+              Solicitante
+            </h3>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="solicitante_name" class="form-label">Nome do Solicitante</label>
+                <input id="solicitante_name" type="text" formControlName="solicitante_name" class="form-control"
+                       placeholder="Nome completo do solicitante">
+                <div class="help-text">Pessoa que solicitou a proposta</div>
+              </div>
+              <div class="form-group">
+                <label for="solicitante_email" class="form-label">Email do Solicitante</label>
+                <input id="solicitante_email" type="email" formControlName="solicitante_email" class="form-control"
+                       placeholder="email@exemplo.com"
+                       [class.error]="proposalForm.get('solicitante_email')?.invalid && proposalForm.get('solicitante_email')?.touched">
+                <div *ngIf="proposalForm.get('solicitante_email')?.invalid && proposalForm.get('solicitante_email')?.touched"
+                     class="error-message">Email inválido</div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="solicitante_phone" class="form-label">Telefone do Solicitante</label>
+              <input id="solicitante_phone" type="text" formControlName="solicitante_phone" class="form-control"
+                     placeholder="(00) 00000-0000">
+              <div class="help-text">Todos os campos do solicitante são opcionais</div>
+            </div>
+          </div>
+
+          <!-- Seção Observações -->
+          <div class="form-section">
+
+            <div class="form-group">
+              <label for="observations" class="form-label">Observações</label>
+              <textarea id="observations" formControlName="observations" class="form-control" rows="3"
+                        placeholder="Adicione observações sobre esta proposta..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUNA DIREITA - Serviços -->
+        <div class="right-column">
+          <div class="form-section">
+            <div class="section-header">
+              <h3 class="section-title">
+                <i class="fas fa-briefcase"></i>
+                Serviços da Proposta
+              </h3>
+              <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                (click)="openServiceModal()"
+                [disabled]="isSubmitting"
+              >
+                <i class="fas fa-plus"></i>
+                Adicionar Serviço
+              </button>
+            </div>
+
+            <!-- Estado vazio -->
+            <div class="empty-services" *ngIf="selectedServices.length === 0">
+              <div class="empty-icon">
+                <i class="fas fa-briefcase"></i>
+              </div>
+              <h4 class="empty-title">Nenhum serviço adicionado</h4>
+              <p class="empty-description">Adicione serviços para começar a montar sua proposta</p>
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="openServiceModal()"
+                [disabled]="isSubmitting"
+              >
+                <i class="fas fa-plus"></i>
+                Adicionar Primeiro Serviço
+              </button>
+            </div>
+            
+            <!-- Lista de serviços -->
+            <div class="services-list" *ngIf="selectedServices.length > 0">
+              <div class="selected-services">
+                <div
+                  class="service-card"
+                  *ngFor="let service of selectedServices; let i = index"
+                  draggable="true"
+                  (dragstart)="onServiceDragStart($event, i)"
+                  (dragover)="onServiceDragOver($event)"
+                  (drop)="onServiceDrop($event, i)"
+                >
+                  <div class="service-header">
+                    <div class="drag-handle" title="Arrastar para reordenar">
+                      <i class="fas fa-grip-vertical"></i>
+                    </div>
+                    <div class="service-info">
+                      <h4 class="service-name">{{ service.name }}</h4>
+                      <div class="service-meta">
+                        <span class="service-category">
+                          <i class="fas fa-tag"></i>
+                          {{ service.category }}
+                        </span>
+                        <span class="service-duration" *ngIf="service.duration_unit && (service.duration || service.duration_unit === 'Projeto')">
+                          <i class="fas fa-clock"></i>
+                          <span *ngIf="service.duration_unit === 'Projeto'">{{ service.duration_unit }}</span>
+                          <span *ngIf="service.duration_unit !== 'Projeto'">{{ service.duration }} {{ service.duration_unit }}</span>
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      class="remove-service-btn"
+                      (click)="removeService(i)"
+                      title="Remover serviço"
+                    >
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+
+                  <div class="service-pricing">
+                    <!-- Campos normais de valor para outros serviços -->
+                    <div class="price-input-group">
+                      <label class="price-label">Valor do Serviço</label>
+                      <div class="price-input-wrapper">
+                        <input
+                          type="text"
+                          class="price-input"
+                          [(ngModel)]="service.unit_value"
+                          [ngModelOptions]="{standalone: true}"
+                          (ngModelChange)="onPriceChange(i, $event)"
+                          [name]="'price_' + service._uniqueId"
+                          placeholder="0,00"
+                          appCurrencyMask
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Resumo total da proposta -->
+            <div class="proposal-total-summary" *ngIf="selectedServices.length > 0">
+              <div class="summary-row">
+                <span class="summary-label">Total da Proposta</span>
+                <span class="summary-value">{{ getTotalValueFormatted() }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="isSubmitting">
+          <i class="fas fa-times"></i>
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="proposalForm.invalid || isSubmitting">
+          <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin"></i>
+          <i *ngIf="!isSubmitting" class="fas fa-paper-plane"></i>
+          <span>{{ isEditMode ? 'Atualizar Proposta' : 'Criar Proposta' }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Modal de Seleção de Serviços (igual ao contrato) -->
+  <div class="modal-overlay" *ngIf="showServiceModal" (click)="closeServiceModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Selecionar Serviços</h2>
+        <button type="button" class="modal-close" (click)="closeServiceModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-filters">
+        <div class="filter-row">
+          <div class="search-filter">
+            <input
+              type="text"
+              [(ngModel)]="serviceSearchTerm"
+              [ngModelOptions]="{standalone: true}"
+              placeholder="Buscar serviços..."
+              class="search-input"
+            >
+          </div>
+          <div class="category-filter">
+            <select [(ngModel)]="serviceCategoryFilter" [ngModelOptions]="{standalone: true}" class="category-select">
+              <option value="">Todas as categorias</option>
+              <option *ngFor="let category of serviceCategories" [value]="category">
+                {{ category }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-body">
+        <div class="service-options">
+          <div
+            class="service-option"
+            *ngFor="let service of filteredServices"
+            (click)="addService(service)"
+          >
+            <div class="service-option-info">
+              <h4>{{ service.name }}</h4>
+              <div class="service-option-details">
+                <span><i class="fas fa-tag"></i> {{ service.category }}</span>
+                <span *ngIf="service.duration_unit && (service.duration_amount || service.duration_unit === 'Projeto')">
+                  <i class="fas fa-clock"></i>
+                  <span *ngIf="service.duration_unit === 'Projeto'">{{ service.duration_unit }}</span>
+                  <span *ngIf="service.duration_unit !== 'Projeto'">{{ service.duration_amount }} {{ service.duration_unit }}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <div *ngIf="filteredServices.length === 0" class="no-services">
+            <i class="fas fa-search"></i>
+            <p>Nenhum serviço encontrado</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

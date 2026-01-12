@@ -1,0 +1,61 @@
+<div *ngIf="isVisible" class="modal-backdrop" (click)="onBackdropClick($event)">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!-- Header Compacto -->
+      <div class="modal-header">
+        <h3>Exportar Contrato</h3>
+        <button class="close-btn" (click)="closeModal()" [disabled]="isExporting">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <!-- Body Enxuto -->
+      <div class="modal-body">
+        <div class="template-selector">
+          <div 
+            *ngFor="let template of templates" 
+            class="template-option"
+            [class.selected]="selectedTemplateId === template.id"
+            (click)="selectTemplate(template.id)">
+            <div class="template-radio">
+              <div class="radio-circle" [class.active]="selectedTemplateId === template.id"></div>
+            </div>
+            <div class="template-content">
+              <div class="template-info">
+                <div class="template-title">
+                  <i [class]="getTemplateIcon(template.id)"></i>
+                  <span>{{ template.name }}</span>
+                </div>
+                <div class="template-description">{{ template.description }}</div>
+              </div>
+              <span class="template-badge">{{ template.type }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="export-actions">
+          <button 
+            class="export-button docx" 
+            (click)="exportSelected('docx')"
+            [disabled]="!selectedTemplateId || isExporting">
+            <i class="fas fa-file-word"></i>
+            Exportar DOCX
+          </button>
+          
+          <button 
+            class="export-button pdf" 
+            (click)="exportSelected('pdf')"
+            [disabled]="!selectedTemplateId || isExporting">
+            <i class="fas fa-file-pdf"></i>
+            Exportar PDF
+          </button>
+        </div>
+
+        <div class="loading-indicator" *ngIf="isExporting">
+          <i class="fas fa-spinner fa-spin"></i>
+          <span>Gerando documento...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,49 @@
+<!-- src/app/components/notification-toast/notification-toast.html -->
+<div class="notification-toast-container">
+    <div 
+      *ngFor="let notification of notifications; trackBy: trackById"
+      [@slideIn]
+      class="notification-toast"
+      [class.success]="notification.type === 'success'"
+      [class.error]="notification.type === 'error'"
+      [class.warning]="notification.type === 'warning'"
+      [class.info]="notification.type === 'info'"
+      (click)="handleClick(notification)">
+      
+      <div class="notification-icon">
+        <i [class]="notification.icon"></i>
+      </div>
+      
+      <div class="notification-content">
+        <div class="notification-header">
+          <h4 class="notification-title">{{ notification.title }}</h4>
+          <button 
+            class="notification-close"
+            (click)="close(notification.id, $event)"
+            title="Fechar">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <p class="notification-message">{{ notification.message }}</p>
+        
+        <div class="notification-footer" *ngIf="notification.action || showProgress">
+          <button 
+            *ngIf="notification.action"
+            class="notification-action"
+            (click)="executeAction(notification, $event)">
+            {{ notification.action.label }}
+          </button>
+          
+          <div 
+            *ngIf="showProgress && notification.duration && notification.duration > 0"
+            class="notification-progress">
+            <div 
+              class="notification-progress-bar"
+              [style.animation-duration.ms]="notification.duration">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

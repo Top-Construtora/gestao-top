@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: gestao-contratos-api
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: FRONTEND_URL
+        sync: false # Você definirá manualmente com a URL da Vercel
+      - key: DATABASE_URL
+        fromDatabase:
+          name: gestao-contratos-db
+          property: connectionString
+      - key: SUPABASE_URL
+        sync: false # Se usar Supabase, defina manualmente
+      - key: SUPABASE_ANON_KEY
+        sync: false # Se usar Supabase, defina manualmente
+
+databases:
+  - name: gestao-contratos-db
+    databaseName: gestao_contratos
+    user: gestao_user
+    plan: free # Mude para 'starter' ou 'standard' se precisar de mais recursos

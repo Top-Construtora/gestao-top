@@ -1,0 +1,217 @@
+<div class="installments-manager">
+  <!-- Configuração de Parcelamento (Modo Edição) -->
+  <div *ngIf="!isViewMode && showInstallmentFields" class="installment-config">
+    <h4 class="config-title">
+      <i class="fas fa-calendar-alt"></i>
+      Configuração de Parcelamento
+    </h4>
+    
+    <div class="config-grid">
+      <div class="config-group">
+        <label class="config-label">Número de Parcelas</label>
+        <select 
+          class="config-select" 
+          [(ngModel)]="installmentCount" 
+          (ngModelChange)="onInstallmentCountChange()"
+          name="installmentCount">
+          <option value="1">À vista</option>
+          <option *ngFor="let i of [2,3,4,5,6,7,8,9,10,11,12,18,24,36]" [value]="i">
+            {{ i }}x
+          </option>
+        </select>
+      </div>
+      
+      <div class="config-group" *ngIf="installmentCount > 1">
+        <label class="config-label">Primeira Parcela</label>
+        <input 
+          type="date" 
+          class="config-input" 
+          [(ngModel)]="firstDueDate"
+          (ngModelChange)="onFirstDueDateChange()"
+          name="firstDueDate">
+      </div>
+      
+      <div class="config-group" *ngIf="installmentCount > 1">
+        <label class="config-label">Intervalo (dias)</label>
+        <select 
+          class="config-select" 
+          [(ngModel)]="intervalDays" 
+          (ngModelChange)="onIntervalDaysChange()"
+          name="intervalDays">
+          <option value="15">15 dias</option>
+          <option value="30">30 dias</option>
+          <option value="60">60 dias</option>
+          <option value="90">90 dias</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Validação do Valor Total -->
+    <div *ngIf="installmentCount > 1 && installments.length > 0" class="value-validation">
+      <div class="validation-row" [class.error]="!isInstallmentValueValid">
+        <span class="validation-label">Total das Parcelas:</span>
+        <span class="validation-value">{{ formatCurrency(totalInstallmentValue) }}</span>
+      </div>
+      <div class="validation-row">
+        <span class="validation-label">Valor do Contrato:</span>
+        <span class="validation-value">{{ formatCurrency(totalValue) }}</span>
+      </div>
+      <div *ngIf="!isInstallmentValueValid" class="validation-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        Total das parcelas não confere com o valor do contrato
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de Parcelas (Modo Edição) -->
+  <div *ngIf="!isViewMode && installmentCount > 1 && installments.length > 0" class="installments-list">
+    <div class="list-header">
+      <h4 class="list-title">
+        <i class="fas fa-list"></i>
+        Parcelas ({{ installments.length }})
+      </h4>
+      <button 
+        type="button" 
+        class="btn btn-sm btn-secondary" 
+        (click)="addInstallment()">
+        <i class="fas fa-plus"></i>
+        Adicionar Parcela
+      </button>
+    </div>
+
+    <div class="installments-table">
+      <div class="table-header">
+        <div class="col-number">#</div>
+        <div class="col-date">Vencimento</div>
+        <div class="col-amount">Valor</div>
+        <div class="col-status">Status</div>
+        <div class="col-notes">Observações</div>
+        <div class="col-actions">Ações</div>
+      </div>
+      
+      <div
+        *ngFor="let installment of installments; let i = index"
+        class="table-row"
+        [class.paid-row]="installment.payment_status === 'pago'">
+        <div class="col-number">{{ i + 1 }}</div>
+        <div class="col-date">
+          <input
+            type="date"
+            class="installment-input date-input"
+            [value]="installment.due_date"
+            (input)="onDateChange(i, $event)"
+            [name]="'due_date_' + i">
+        </div>
+        <div class="col-amount">
+          <input
+            type="number"
+            class="installment-input amount-input"
+            [value]="installment.amount"
+            (input)="onAmountChange(i, $event)"
+            [name]="'amount_' + i"
+            step="0.01"
+            min="0">
+        </div>
+        <div class="col-status">
+          <select
+            class="installment-input status-input"
+            [(ngModel)]="installment.payment_status"
+            (ngModelChange)="onStatusChange(i, $event)"
+            [name]="'status_' + i">
+            <option value="pendente">Pendente</option>
+            <option value="pago">Paga</option>
+          </select>
+        </div>
+        <div class="col-notes">
+          <input
+            type="text"
+            class="installment-input notes-input"
+            [value]="installment.notes || ''"
+            (input)="onNotesChange(i, $event)"
+            [name]="'notes_' + i"
+            placeholder="Observações">
+        </div>
+        <div class="col-actions">
+          <button
+            type="button"
+            class="btn-icon btn-danger"
+            (click)="removeInstallment(i)"
+            title="Remover parcela">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visualização de Parcelas (Modo View) -->
+  <div *ngIf="isViewMode && apiInstallments && apiInstallments.length > 0" class="installments-view">
+    <h4 class="view-title">
+      <i class="fas fa-credit-card"></i>
+      Parcelas do Contrato ({{ apiInstallments.length }})
+    </h4>
+    
+    <div class="installments-cards">
+      <div 
+        *ngFor="let installment of apiInstallments" 
+        class="installment-card" 
+        [class.paid]="installment.payment_status === 'pago'"
+        [class.overdue]="installment.payment_status === 'atrasado'">
+        
+        <div class="card-header">
+          <div class="installment-number">
+            Parcela {{ installment.installment_number }}
+          </div>
+          <div class="installment-status">
+            <span 
+              class="status-badge" 
+              [style.background-color]="getInstallmentStatusColor(installment.payment_status) + '20'"
+              [style.color]="getInstallmentStatusColor(installment.payment_status)">
+              <i [class]="getInstallmentStatusIcon(installment.payment_status)"></i>
+              {{ getInstallmentStatusText(installment.payment_status) }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="card-content">
+          <div class="installment-detail">
+            <span class="detail-label">Vencimento:</span>
+            <span class="detail-value">{{ formatDate(installment.due_date) }}</span>
+          </div>
+          <div class="installment-detail">
+            <span class="detail-label">Valor:</span>
+            <span class="detail-value amount">{{ formatCurrency(installment.amount) }}</span>
+          </div>
+          <div *ngIf="installment.paid_date" class="installment-detail">
+            <span class="detail-label">Data do Pagamento:</span>
+            <span class="detail-value">{{ formatDate(installment.paid_date) }}</span>
+          </div>
+          <div *ngIf="installment.paid_amount" class="installment-detail">
+            <span class="detail-label">Valor Pago:</span>
+            <span class="detail-value amount">{{ formatCurrency(installment.paid_amount) }}</span>
+          </div>
+          <div *ngIf="installment.notes" class="installment-detail">
+            <span class="detail-label">Observações:</span>
+            <span class="detail-value">{{ installment.notes }}</span>
+          </div>
+        </div>
+        
+        <div *ngIf="installment.payment_status !== 'pago'" class="card-actions">
+          <button 
+            class="btn btn-sm btn-success" 
+            (click)="markInstallmentAsPaid(installment)"
+            title="Marcar como paga">
+            <i class="fas fa-check"></i>
+            Marcar como Paga
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensagem quando não há parcelas -->
+  <div *ngIf="isViewMode && (!apiInstallments || apiInstallments.length === 0)" class="no-installments">
+    <i class="fas fa-info-circle"></i>
+    <span>Este contrato não possui parcelas configuradas</span>
+  </div>
+</div>

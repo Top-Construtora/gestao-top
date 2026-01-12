@@ -1,0 +1,1206 @@
+/* Contract View Page - Seguindo padrão da página de proposta - ATUALIZADO */
+:host {
+  display: block;
+  animation: fadeInUp 0.5s ease;
+}
+
+/* Page Header */
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+:host-context(body.dark-mode) .page-title {
+  color: var(--dark-text);
+}
+
+/* Error States */
+.error-container {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 2rem;
+}
+
+:host-context(body.dark-mode) .error-container {
+  background: var(--dark-card);
+}
+
+.error-icon {
+  font-size: 4rem;
+  color: var(--danger);
+  margin-bottom: 1rem;
+}
+
+.error-container h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+:host-context(body.dark-mode) .error-container h3 {
+  color: var(--dark-text);
+}
+
+.error-container p {
+  color: var(--text-gray);
+  margin-bottom: 1.5rem;
+}
+
+:host-context(body.dark-mode) .error-container p {
+  color: #aaa;
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--light-gray);
+  border-top: 3px solid var(--primary-green);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.loading-container p {
+  color: var(--text-gray);
+}
+
+:host-context(body.dark-mode) .loading-container p {
+  color: #aaa;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Contract Details */
+.contract-details-unified {
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+:host-context(body.dark-mode) .contract-details-unified {
+  background: var(--dark-card);
+}
+
+.contract-overview-header {
+  position: relative;
+  padding: 2rem;
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-light) 100%);
+  color: var(--white);
+}
+
+/* Action Buttons in Header */
+.contract-actions {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-action-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--white);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.btn-action-header:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-action-header.delete {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.btn-action-header.delete:hover {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: rgba(239, 68, 68, 0.7);
+}
+
+.btn-action-header i {
+  font-size: 0.875rem;
+  color: var(--white);
+}
+
+.contract-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.contract-logo-section {
+  flex-shrink: 0;
+}
+
+.company-logo-wrapper {
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.company-logo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.contract-number {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: var(--white);
+}
+
+.contract-badges {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.type-badge,
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--white);
+}
+
+.status-badge[data-status="active"] {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.status-badge[data-status="completed"] {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.status-badge[data-status="cancelled"] {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.status-badge[data-status="suspended"] {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.5);
+}
+
+/* Meta Info */
+.meta-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.info-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 0.25rem;
+  color: var(--white);
+}
+
+.info-value {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--white);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Main Content Area */
+.contract-content {
+  padding: 2rem;
+  background: var(--white);
+}
+
+:host-context(body.dark-mode) .contract-content {
+  background: var(--dark-card);
+}
+
+/* Content Sections */
+.content-section {
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border-gray);
+}
+
+:host-context(body.dark-mode) .content-section {
+  border-bottom-color: var(--dark-border);
+}
+
+.content-section:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 1.5rem;
+}
+
+:host-context(body.dark-mode) .section-title {
+  color: var(--dark-text);
+}
+
+.section-title i {
+  color: var(--primary-green);
+}
+
+/* Services Section */
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: var(--text-gray);
+}
+
+.empty-icon {
+  font-size: 3rem;
+  color: var(--border-gray);
+  margin-bottom: 1rem;
+}
+
+.empty-state h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+:host-context(body.dark-mode) .empty-state h4 {
+  color: var(--dark-text);
+}
+
+.services-grid {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.service-card {
+  background: var(--bg-light);
+  border: 1px solid var(--border-gray);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+:host-context(body.dark-mode) .service-card {
+  background: var(--dark-bg);
+  border-color: var(--dark-border);
+}
+
+.service-card:hover {
+  border-color: var(--primary-green);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.service-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.service-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0; /* Permite truncar texto se necessário */
+}
+
+.service-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.btn-toggle-details {
+  background: rgba(14, 155, 113, 0.1);
+  border: 1px solid rgba(14, 155, 113, 0.3);
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--primary-green);
+  font-size: 0.875rem;
+  padding: 0;
+}
+
+.btn-toggle-details:hover {
+  background: rgba(14, 155, 113, 0.2);
+  border-color: var(--primary-green);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(14, 155, 113, 0.2);
+}
+
+.btn-toggle-details:active {
+  transform: translateY(0);
+}
+
+.btn-toggle-details i {
+  transition: transform 0.3s ease;
+}
+
+:host-context(body.dark-mode) .btn-toggle-details {
+  background: rgba(14, 155, 113, 0.15);
+  border-color: rgba(14, 155, 113, 0.4);
+  color: var(--primary-green-light);
+}
+
+:host-context(body.dark-mode) .btn-toggle-details:hover {
+  background: rgba(14, 155, 113, 0.25);
+  border-color: var(--primary-green-light);
+}
+
+.additive-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.additive-badge {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.additive-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.additive-date-in-badge {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.additive-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+}
+
+:host-context(body.dark-mode) .additive-badge {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+}
+
+:host-context(body.dark-mode) .additive-date {
+  color: var(--dark-text-muted);
+}
+
+:host-context(body.dark-mode) .additive-date-in-badge {
+  color: var(--dark-text-muted);
+}
+
+.service-number {
+  width: 32px;
+  height: 32px;
+  background: var(--primary-green);
+  color: var(--white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.service-name {
+  flex: 1;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .service-name {
+  color: var(--dark-text);
+}
+
+.service-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.service-details-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(14, 155, 113, 0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(14, 155, 113, 0.1);
+  animation: slideDown 0.3s ease;
+}
+
+:host-context(body.dark-mode) .service-details-content {
+  background: rgba(14, 155, 113, 0.05);
+  border-color: rgba(14, 155, 113, 0.15);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+    transform: translateY(0);
+  }
+}
+
+.service-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--primary-green);
+  font-style: italic;
+}
+
+:host-context(body.dark-mode) .service-subtitle {
+  color: var(--primary-green-light);
+}
+
+.service-subtitle i {
+  font-size: 0.875rem;
+}
+
+.service-summary {
+  color: var(--text-dark);
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.6;
+  padding: 0.75rem;
+  background: rgba(14, 155, 113, 0.05);
+  border-left: 3px solid var(--primary-green);
+  border-radius: 4px;
+}
+
+:host-context(body.dark-mode) .service-summary {
+  color: var(--dark-text);
+  background: rgba(14, 155, 113, 0.1);
+}
+
+.service-description {
+  color: var(--text-gray);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+:host-context(body.dark-mode) .service-description {
+  color: #aaa;
+}
+
+/* Estilos para HTML dentro de summary e description */
+.service-summary ::ng-deep h1,
+.service-summary ::ng-deep h2,
+.service-summary ::ng-deep h3,
+.service-summary ::ng-deep h4,
+.service-summary ::ng-deep h5,
+.service-summary ::ng-deep h6,
+.service-description ::ng-deep h1,
+.service-description ::ng-deep h2,
+.service-description ::ng-deep h3,
+.service-description ::ng-deep h4,
+.service-description ::ng-deep h5,
+.service-description ::ng-deep h6 {
+  margin: 0.5rem 0 0.25rem 0;
+  font-weight: 600;
+  color: inherit;
+}
+
+.service-summary ::ng-deep h2,
+.service-description ::ng-deep h2 {
+  font-size: 1rem;
+}
+
+.service-summary ::ng-deep h3,
+.service-description ::ng-deep h3 {
+  font-size: 0.95rem;
+}
+
+.service-summary ::ng-deep p,
+.service-description ::ng-deep p {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.service-summary ::ng-deep ul,
+.service-summary ::ng-deep ol,
+.service-description ::ng-deep ul,
+.service-description ::ng-deep ol {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.service-summary ::ng-deep li,
+.service-description ::ng-deep li {
+  margin: 0.25rem 0;
+  line-height: 1.5;
+}
+
+.service-summary ::ng-deep strong,
+.service-summary ::ng-deep b,
+.service-description ::ng-deep strong,
+.service-description ::ng-deep b {
+  font-weight: 600;
+  color: inherit;
+}
+
+.service-summary ::ng-deep em,
+.service-summary ::ng-deep i,
+.service-description ::ng-deep em,
+.service-description ::ng-deep i {
+  font-style: italic;
+}
+
+.service-summary ::ng-deep a,
+.service-description ::ng-deep a {
+  color: var(--primary-green);
+  text-decoration: underline;
+}
+
+.service-summary ::ng-deep a:hover,
+.service-description ::ng-deep a:hover {
+  color: var(--primary-green-dark);
+}
+
+:host-context(body.dark-mode) .service-summary ::ng-deep a,
+:host-context(body.dark-mode) .service-description ::ng-deep a {
+  color: var(--primary-green-light);
+}
+
+.service-category {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-gray);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+:host-context(body.dark-mode) .service-category {
+  color: #999;
+}
+
+.service-category i {
+  font-size: 0.8rem;
+  color: var(--primary-green);
+}
+
+.service-pricing {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-gray);
+}
+
+:host-context(body.dark-mode) .service-pricing {
+  border-top-color: var(--dark-border);
+}
+
+.service-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.service-detail.highlight {
+  text-align: right;
+}
+
+.detail-label {
+  font-size: 0.875rem;
+  color: var(--text-gray);
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .detail-value {
+  color: var(--dark-text);
+}
+
+.service-detail.highlight .detail-value {
+  font-size: 1.25rem;
+  color: var(--primary-green);
+}
+
+/* Services Summary */
+.services-summary {
+  margin-top: 2rem;
+}
+
+/* Payment Information Section */
+.payment-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.payment-card {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+:host-context(body.dark-mode) .payment-card {
+  background: var(--dark-card-bg);
+  border-color: var(--dark-border);
+}
+
+/* Card Específico: Principal */
+.payment-card.main-payment {
+  border-left: 4px solid var(--primary-green);
+}
+
+.payment-card.main-payment .payment-value.total {
+  color: var(--primary-green);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* Card Específico: Permuta */
+.payment-card.barter-payment {
+  border-left: 4px solid var(--primary-green);
+}
+
+.payment-card.barter-payment .payment-value.barter {
+  color: var(--primary-green);
+  font-weight: 700;
+}
+
+/* Card Específico: Pagamento Secundário */
+.payment-card.secondary-payment {
+  border-left: 4px solid var(--primary-green-alt);
+}
+
+/* Card Específico: Parcelamento */
+.payment-card.installment-payment {
+  border-left: 4px solid #3b82f6;
+}
+
+.payment-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+:host-context(body.dark-mode) .payment-card-header {
+  border-bottom-color: var(--dark-border);
+}
+
+.payment-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+:host-context(body.dark-mode) .payment-label {
+  color: var(--dark-text-muted);
+}
+
+.payment-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .payment-value {
+  color: var(--dark-text);
+}
+
+.payment-details .detail-value.paid {
+  color: #10b981;
+}
+
+.payment-details .detail-value.pending {
+  color: var(--primary-green);
+}
+
+.payment-details {
+  margin-top: 0;
+}
+
+.payment-details .detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.payment-details .detail-item.highlight-row {
+  background: rgba(0, 59, 43, 0.05);
+  margin: 0 -1.25rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 4px;
+}
+
+:host-context(body.dark-mode) .payment-details .detail-item.highlight-row {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.payment-details .detail-item:not(:last-child) {
+  border-bottom: 1px solid #f8f9fa;
+}
+
+:host-context(body.dark-mode) .payment-details .detail-item:not(:last-child) {
+  border-bottom-color: var(--dark-border);
+}
+
+.payment-details .detail-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+:host-context(body.dark-mode) .payment-details .detail-label {
+  color: var(--dark-text-muted);
+}
+
+.payment-details .detail-value {
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 0.875rem;
+  text-align: right;
+}
+
+:host-context(body.dark-mode) .payment-details .detail-value {
+  color: var(--dark-text);
+}
+
+.payment-details .detail-value.highlight {
+  color: var(--primary-green);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+
+.summary-card {
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-light) 100%);
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  color: var(--white);
+}
+
+.summary-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.summary-content {
+  flex: 1;
+}
+
+.summary-label {
+  font-size: 0.875rem;
+  opacity: 0.9;
+  margin-bottom: 0.25rem;
+}
+
+.summary-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* Breakdown de valores para contratos com serviços cancelados */
+.summary-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.original-value,
+.cancelled-value,
+.adjusted-value {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.original-value {
+  opacity: 0.8;
+  text-decoration: line-through;
+}
+
+.cancelled-value {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.cancelled-amount {
+  font-weight: 700;
+}
+
+.adjusted-value {
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  padding-top: 0.5rem;
+  margin-top: 0.25rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.adjusted-amount {
+  font-size: 1.3rem;
+}
+
+/* Estilos para serviços cancelados */
+.cancelled-service {
+  text-decoration: line-through;
+  opacity: 0.7;
+  color: #ef4444 !important;
+}
+
+.cancelled-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #ef4444;
+  margin-left: 0.5rem;
+  text-decoration: none;
+}
+
+/* Users Grid */
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.user-card {
+  background: var(--bg-light);
+  border: 1px solid var(--border-gray);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+:host-context(body.dark-mode) .user-card {
+  background: var(--dark-bg);
+  border-color: var(--dark-border);
+}
+
+.user-card:hover {
+  border-color: var(--primary-green);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.user-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--primary-green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  font-size: 0.875rem;
+}
+
+.user-name {
+  flex: 1;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .user-name {
+  color: var(--dark-text);
+}
+
+.user-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.user-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.user-detail .detail-label {
+  font-size: 0.875rem;
+  color: var(--text-gray);
+  font-weight: 500;
+}
+
+.user-detail .detail-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .user-detail .detail-value {
+  color: var(--dark-text);
+}
+
+.user-role-badge {
+  align-self: flex-start;
+}
+
+.role-text {
+  padding: 0.25rem 0.75rem;
+  background: rgba(14, 155, 113, 0.1);
+  color: var(--primary-green);
+  border: 1px solid rgba(14, 155, 113, 0.2);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Notes Display */
+.notes-display {
+  padding: 1.5rem;
+  background: rgba(59, 130, 246, 0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+:host-context(body.dark-mode) .notes-display {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: var(--dark-border);
+}
+
+.notes-text {
+  font-size: 0.875rem;
+  color: var(--text-dark);
+  line-height: 1.6;
+  margin: 0;
+}
+
+:host-context(body.dark-mode) .notes-text {
+  color: var(--dark-text);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+
+.btn-primary {
+  background: var(--primary-green);
+  color: var(--white);
+  border-color: var(--primary-green);
+}
+
+.btn-primary:hover {
+  background: var(--primary-green-dark);
+  border-color: var(--primary-green-dark);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .meta-info {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .contract-actions {
+    position: static;
+    margin-bottom: 1rem;
+    justify-content: flex-start;
+  }
+  
+  .btn-action-header {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+  
+  .btn-action-header span {
+    display: none;
+  }
+  
+  .contract-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .meta-info {
+    grid-template-columns: 1fr;
+  }
+  
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .service-pricing {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .service-detail.highlight {
+    text-align: left;
+  }
+  
+  .users-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .contract-number {
+    font-size: 1.5rem;
+  }
+  
+  .company-logo-wrapper {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .contract-content {
+    padding: 1rem;
+  }
+  
+  .service-card {
+    padding: 1rem;
+  }
+}

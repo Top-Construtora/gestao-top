@@ -1,0 +1,609 @@
+/* Loading and Error States */
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.loading-container i {
+  font-size: 1.25rem;
+  color: var(--primary);
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--error-bg, #fef2f2);
+  color: var(--error-text, #dc2626);
+  border: 1px solid var(--error-border, #fca5a5);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.error-message i {
+  font-size: 1.25rem;
+}
+
+/* Stats Grid - Sistema Ultra Responsivo (exatamente como dashboard) */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-shrink: 0;
+  width: 100%;
+  container-type: inline-size;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Breakpoints específicos para diferentes layouts de grid */
+@media (min-width: 1600px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1599px) {
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.75rem;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 575px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+/* OTIMIZAÇÃO ESPECÍFICA PARA 1280x800 - com container queries */
+@media (min-width: 1260px) and (max-width: 1300px) and (max-height: 820px), 
+       (width: 1280px) and (max-height: 820px) {
+  
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .stat-card {
+    padding: 1.25rem;
+    border-radius: 14px;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .stat-card-header {
+    margin-bottom: 0.75rem;
+  }
+  
+  .stat-footer {
+    margin-top: 0.5rem;
+    gap: 0.5rem;
+  }
+  
+  .stat-change {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+  }
+  
+  /* Container queries específicas para 1280x800 */
+  @container (min-width: 280px) and (max-width: 320px) {
+    .stat-value {
+      font-size: 2.5rem !important;
+      line-height: 1.1;
+      margin-bottom: 0.375rem;
+      font-weight: 800;
+    }
+    
+    .stat-label {
+      font-size: 0.8rem !important;
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+    }
+    
+    .stat-icon-wrapper {
+      width: 42px !important;
+      height: 42px !important;
+      border-radius: 10px;
+    }
+    
+    .stat-icon-wrapper i {
+      font-size: 1.25rem !important;
+    }
+  }
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+  border-radius: 20px;
+  padding: 2rem 1.75rem;
+  box-shadow: 0 4px 12px rgba(0, 59, 43, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 59, 43, 0.08);
+  position: relative;
+  overflow: hidden;
+  container-type: inline-size; /* Habilita container queries */
+}
+
+.stat-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 16px 32px rgba(0, 59, 43, 0.12), 
+              0 8px 16px rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 59, 43, 0.15);
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(0, 59, 43, 0.05) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(30px, -30px);
+}
+
+.stat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.75rem;
+}
+
+.stat-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  box-shadow: 0 4px 12px rgba(0, 59, 43, 0.15);
+  position: relative;
+  z-index: 2;
+  border: 2px solid rgba(0, 59, 43, 0.1);
+}
+
+.stat-icon-wrapper i {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: #003b2b;
+  margin-bottom: 0.5rem;
+  line-height: 1.1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  letter-spacing: -0.025em;
+  position: relative;
+  z-index: 2;
+  animation: numberSlideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes numberSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ==========================================
+   CONTAINER QUERIES - RESPONSIVIDADE DO CARD
+   ========================================== */
+
+/* Cards muito pequenos (< 200px) */
+@container (max-width: 199px) {
+  .stat-value {
+    font-size: 1.75rem !important;
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+    font-weight: 800;
+  }
+  
+  .stat-label {
+    font-size: 0.7rem !important;
+    margin-bottom: 0.375rem;
+  }
+  
+  .stat-icon-wrapper {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  
+  .stat-icon-wrapper i {
+    font-size: 1rem !important;
+  }
+}
+
+/* Cards pequenos (200px - 249px) */
+@container (min-width: 200px) and (max-width: 249px) {
+  .stat-value {
+    font-size: 2rem !important;
+    line-height: 1.2;
+    margin-bottom: 0.375rem;
+    font-weight: 800;
+  }
+  
+  .stat-label {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.5rem;
+  }
+  
+  .stat-icon-wrapper {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  
+  .stat-icon-wrapper i {
+    font-size: 1.125rem !important;
+  }
+}
+
+/* Cards médios (250px - 299px) */
+@container (min-width: 250px) and (max-width: 299px) {
+  .stat-value {
+    font-size: 2.375rem !important;
+    line-height: 1.15;
+    margin-bottom: 0.5rem;
+    font-weight: 800;
+  }
+  
+  .stat-label {
+    font-size: 0.8rem !important;
+    margin-bottom: 0.625rem;
+  }
+  
+  .stat-icon-wrapper {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  .stat-icon-wrapper i {
+    font-size: 1.25rem !important;
+  }
+}
+
+/* Cards normais (300px - 349px) */
+@container (min-width: 300px) and (max-width: 349px) {
+  .stat-value {
+    font-size: 2.75rem !important;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+    font-weight: 800;
+  }
+  
+  .stat-label {
+    font-size: 0.85rem !important;
+    margin-bottom: 0.75rem;
+  }
+  
+  .stat-icon-wrapper {
+    width: 44px !important;
+    height: 44px !important;
+  }
+  
+  .stat-icon-wrapper i {
+    font-size: 1.375rem !important;
+  }
+}
+
+/* Cards grandes (350px - 399px) */
+@container (min-width: 350px) and (max-width: 399px) {
+  .stat-value {
+    font-size: 3.25rem !important;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+    font-weight: 800;
+  }
+  
+  .stat-label {
+    font-size: 0.9rem !important;
+    margin-bottom: 0.75rem;
+  }
+  
+  .stat-icon-wrapper {
+    width: 48px !important;
+    height: 48px !important;
+  }
+  
+  .stat-icon-wrapper i {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* Cards muito grandes (400px+) */
+@container (min-width: 400px) {
+  .stat-value {
+    font-size: 3.75rem !important;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+    font-weight: 800;
+  }
+  
+  .stat-label {
+    font-size: 0.95rem !important;
+    margin-bottom: 0.75rem;
+  }
+  
+  .stat-icon-wrapper {
+    width: 56px !important;
+    height: 56px !important;
+  }
+  
+  .stat-icon-wrapper i {
+    font-size: 1.75rem !important;
+  }
+}
+
+.stat-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-change {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.stat-change.trend-positive {
+  color: #0a8560;
+  background: rgba(10, 133, 96, 0.1);
+  border: 1px solid rgba(10, 133, 96, 0.2);
+}
+
+.stat-change.trend-negative {
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+
+/* Dark mode support */
+[data-theme="dark"] .stat-card {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .stat-card::before {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+}
+
+[data-theme="dark"] .stat-label {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .stat-value {
+  color: #f9fafb;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .stat-icon-wrapper {
+  background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+
+[data-theme="dark"] .error-message {
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* ==========================================
+   BREAKPOINTS RESPONSIVOS COMPLETOS (igual dashboard)
+   ========================================== */
+
+/* Desktop Ultra Wide - 1600px+ */
+@media (min-width: 1600px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .stat-card {
+    padding: 2.5rem;
+    border-radius: 20px;
+    min-height: 180px;
+  }
+  
+  .stat-value {
+    font-size: 3rem;
+  }
+  
+  .stat-icon-wrapper {
+    width: 56px;
+    height: 56px;
+  }
+  
+  .stat-icon-wrapper i {
+    font-size: 1.625rem;
+  }
+  
+  .stat-label {
+    font-size: 0.9rem;
+  }
+}
+
+/* Desktop Large - 1400px to 1599px */
+@media (min-width: 1400px) and (max-width: 1599px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .stat-card {
+    padding: 2rem;
+    border-radius: 18px;
+    min-height: 160px;
+  }
+  
+  .stat-value {
+    font-size: 2.5rem;
+  }
+  
+  .stat-icon-wrapper {
+    width: 52px;
+    height: 52px;
+  }
+  
+  .stat-icon-wrapper i {
+    font-size: 1.5rem;
+  }
+  
+  .stat-label {
+    font-size: 0.875rem;
+  }
+}
+
+/* Desktop - 1200px to 1399px */
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .stat-value {
+    font-size: 2.5rem;
+  }
+}
+
+/* Desktop Small - 992px to 1199px */
+@media (min-width: 992px) and (max-width: 1199px) {
+  .stat-value {
+    font-size: 2.25rem;
+  }
+}
+
+/* Tablet - 768px to 991px */
+@media (min-width: 768px) and (max-width: 991px) {
+  .stat-value {
+    font-size: 2rem;
+  }
+  
+  .stat-card {
+    padding: 1.5rem;
+  }
+}
+
+/* Mobile Large - 576px to 767px */
+@media (min-width: 576px) and (max-width: 767px) {
+  .stat-value {
+    font-size: 1.875rem;
+  }
+  
+  .stat-card {
+    padding: 1.25rem;
+    text-align: center;
+  }
+  
+  .stat-card-header {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  
+  .stat-footer {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+  }
+}
+
+/* Mobile Small - até 575px */
+@media (max-width: 575px) {
+  .stat-value {
+    font-size: 1.75rem;
+  }
+  
+  .stat-card {
+    padding: 1rem;
+    text-align: center;
+    border-radius: 16px;
+  }
+  
+  .stat-card-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+  
+  .stat-label {
+    font-size: 0.8rem;
+    margin-bottom: 0;
+  }
+  
+  .stat-icon-wrapper {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .stat-icon-wrapper i {
+    font-size: 1.125rem;
+  }
+  
+  .stat-footer {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+  }
+}
+
+/* Ajuste específico para o card "Valor em Aberto" */
+.stat-card:nth-child(4) .stat-value {
+  font-size: 2.2rem !important;
+}

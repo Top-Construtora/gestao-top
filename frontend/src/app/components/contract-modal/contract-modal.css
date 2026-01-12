@@ -1,0 +1,339 @@
+/* CSS compartilhado para copiar em:
+   - contract-modal.component.css
+   - company-modal.component.css
+   - user-modal.component.css
+*/
+
+/* Ícones nos detalhes do contrato */
+.modal-content i {
+  color: #0a6254 !important; /* Verde escuro para ícones */
+}
+
+/* Modal Base */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal.active {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    background-color: var(--white);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-xl);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+:host-context(body.dark-mode) .modal-content {
+    background-color: var(--dark-card);
+}
+
+.modal.active .modal-content {
+    transform: scale(1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-gray);
+}
+
+:host-context(body.dark-mode) .modal-header {
+    border-bottom: 1px solid #444;
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .modal-title {
+    color: var(--dark-text);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-gray);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+:host-context(body.dark-mode) .close-btn {
+    color: #ccc;
+}
+
+.close-btn:hover {
+    background-color: var(--light-gray);
+    color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .close-btn:hover {
+    background-color: #333;
+    color: var(--dark-text);
+}
+
+.modal-footer {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-gray);
+}
+
+:host-context(body.dark-mode) .modal-footer {
+    border-top: 1px solid #444;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    font-size: 0.875rem;
+}
+
+:host-context(body.dark-mode) .form-label {
+    color: var(--dark-text);
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-gray);
+    border-radius: 10px;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    background-color: var(--white);
+}
+
+:host-context(body.dark-mode) .form-control {
+    background-color: #333;
+    border-color: #444;
+    color: var(--dark-text);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(14, 155, 113, 0.1);
+}
+
+.form-control::placeholder {
+    color: var(--text-gray);
+}
+
+:host-context(body.dark-mode) .form-control::placeholder {
+    color: #777;
+}
+
+select.form-control {
+    cursor: pointer;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+}
+
+.btn:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+    color: var(--white);
+    box-shadow: 0 4px 12px rgba(14, 155, 113, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(14, 155, 113, 0.4);
+}
+
+.btn-secondary {
+    background-color: var(--light-gray);
+    color: var(--text-dark);
+    border: 1px solid var(--border-gray);
+}
+
+:host-context(body.dark-mode) .btn-secondary {
+    background-color: #333;
+    color: var(--dark-text);
+    border-color: #444;
+}
+
+.btn-secondary:hover {
+    background-color: var(--white);
+    border-color: var(--primary-green);
+    color: var(--primary-green);
+}
+
+:host-context(body.dark-mode) .btn-secondary:hover {
+    background-color: #444;
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: var(--white);
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
+.btn-info:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(23, 162, 184, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .modal-content {
+        margin: 1rem;
+        max-height: calc(100vh - 2rem);
+    }
+}
+
+/* ========================================
+   ESTILOS ESPECÍFICOS DO CONTRACT MODAL
+   ======================================== */
+/* Adicionar apenas em contract-modal.component.css */
+
+/* Checkbox Group */
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 0.75rem;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.checkbox-item:hover {
+    background-color: var(--light-gray);
+}
+
+:host-context(body.dark-mode) .checkbox-item:hover {
+    background-color: #333;
+}
+
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-green);
+    cursor: pointer;
+}
+
+/* Service Grid */
+.service-grid {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.service-item {
+    background: linear-gradient(135deg, var(--light-gray) 0%, rgba(245, 245, 245, 0.5) 100%);
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-gray);
+    transition: all 0.3s ease;
+}
+
+:host-context(body.dark-mode) .service-item {
+    background: linear-gradient(135deg, #333 0%, #2a2a2a 100%);
+    border-color: #444;
+}
+
+.service-item:hover {
+    border-color: var(--primary-green);
+    box-shadow: var(--shadow-md);
+}
+
+.service-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.service-name {
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 1rem;
+}
+
+:host-context(body.dark-mode) .service-name {
+    color: var(--dark-text);
+}

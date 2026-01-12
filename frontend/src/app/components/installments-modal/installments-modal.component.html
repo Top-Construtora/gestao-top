@@ -1,0 +1,210 @@
+<div class="modal" [class.active]="isOpen" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <i class="fas fa-credit-card"></i>
+        Gerenciar Parcelas - Contrato #{{ contractNumber }}
+      </h2>
+      <button class="close-btn" (click)="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Estatísticas -->
+      <div class="stats-container" *ngIf="stats">
+        <div class="stat-card">
+          <div class="stat-label">Total</div>
+          <div class="stat-value">{{ formatCurrency(totalValue) }}</div>
+        </div>
+        <div class="stat-card success">
+          <div class="stat-label">Pago</div>
+          <div class="stat-value">{{ formatCurrency(paidValue) }}</div>
+        </div>
+        <div class="stat-card warning">
+          <div class="stat-label">Pendente</div>
+          <div class="stat-value">{{ formatCurrency(pendingValue) }}</div>
+        </div>
+        <div class="stat-card info">
+          <div class="stat-label">Progresso</div>
+          <div class="stat-value">{{ progressPercentage }}%</div>
+        </div>
+      </div>
+
+      <!-- Barra de Progresso -->
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="progressPercentage"></div>
+        </div>
+        <div class="progress-labels">
+          <span>{{ stats?.paid || 0 }} pagas</span>
+          <span>{{ stats?.pending || 0 }} pendentes</span>
+          <span *ngIf="stats?.overdue">{{ stats.overdue }} vencidas</span>
+        </div>
+      </div>
+
+      <!-- Carregando -->
+      <div class="loading-container" *ngIf="isLoading">
+        <i class="fas fa-spinner fa-spin"></i>
+        <span>Carregando parcelas...</span>
+      </div>
+
+      <!-- Lista de Parcelas -->
+      <div class="installments-list" *ngIf="!isLoading && installments.length > 0">
+        <div
+          *ngFor="let installment of installments"
+          class="installment-item"
+          [class.paid]="installment.payment_status === 'pago'"
+          [class.overdue]="installment.payment_status === 'atrasado'"
+          [class.editing]="editingInstallment?.id === installment.id">
+
+          <!-- Modo Visualização -->
+          <div class="installment-view" *ngIf="editingInstallment?.id !== installment.id">
+            <div class="installment-header">
+              <div class="installment-number">
+                Parcela {{ installment.installment_number }}
+              </div>
+              <div class="installment-status">
+                <span
+                  class="status-badge"
+                  [style.background-color]="getStatusColor(installment.payment_status) + '20'"
+                  [style.color]="getStatusColor(installment.payment_status)">
+                  <i [class]="getStatusIcon(installment.payment_status)"></i>
+                  {{ getStatusText(installment.payment_status) }}
+                </span>
+              </div>
+            </div>
+
+            <div class="installment-details">
+              <div class="detail-row">
+                <span class="detail-label">Vencimento:</span>
+                <span class="detail-value">{{ formatDate(installment.due_date) }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Valor:</span>
+                <span class="detail-value amount">{{ formatCurrency(installment.amount) }}</span>
+              </div>
+              <div class="detail-row" *ngIf="installment.payment_status === 'pago'">
+                <span class="detail-label">Pago em:</span>
+                <span class="detail-value">{{ formatDate(installment.paid_date || '') }}</span>
+              </div>
+              <div class="detail-row" *ngIf="installment.payment_status === 'pago' && installment.paid_amount">
+                <span class="detail-label">Valor Pago:</span>
+                <span class="detail-value amount">{{ formatCurrency(installment.paid_amount) }}</span>
+              </div>
+              <div class="detail-row" *ngIf="installment.notes">
+                <span class="detail-label">Observações:</span>
+                <span class="detail-value">{{ installment.notes }}</span>
+              </div>
+            </div>
+
+            <div class="installment-actions">
+              <button
+                class="btn btn-sm btn-primary"
+                (click)="startEditing(installment)"
+                title="Editar parcela">
+                <i class="fas fa-edit"></i>
+                Editar
+              </button>
+              <button
+                *ngIf="installment.payment_status !== 'pago'"
+                class="btn btn-sm btn-success"
+                (click)="markAsPaid(installment)"
+                title="Marcar como paga">
+                <i class="fas fa-check"></i>
+                Marcar Paga
+              </button>
+              <button
+                *ngIf="installment.payment_status === 'pago'"
+                class="btn btn-sm btn-warning"
+                (click)="markAsPending(installment)"
+                title="Marcar como pendente">
+                <i class="fas fa-clock"></i>
+                Reverter
+              </button>
+            </div>
+          </div>
+
+          <!-- Modo Edição -->
+          <div class="installment-edit" *ngIf="editingInstallment?.id === installment.id">
+            <div class="edit-header">
+              <h4>Editando Parcela {{ installment.installment_number }}</h4>
+            </div>
+
+            <div class="edit-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Status</label>
+                  <select
+                    class="form-control"
+                    [(ngModel)]="editForm.payment_status">
+                    <option value="pendente">Pendente</option>
+                    <option value="pago">Paga</option>
+                    <option value="atrasado">Atrasada</option>
+                  </select>
+                </div>
+
+                <div class="form-group" *ngIf="editForm.payment_status === 'pago'">
+                  <label class="form-label">Data Pagamento</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    [(ngModel)]="editForm.paid_date">
+                </div>
+              </div>
+
+              <div class="form-row" *ngIf="editForm.payment_status === 'pago'">
+                <div class="form-group">
+                  <label class="form-label">Valor Pago</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    [(ngModel)]="editForm.paid_amount"
+                    step="0.01"
+                    min="0">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Observações</label>
+                <textarea
+                  class="form-control"
+                  [(ngModel)]="editForm.notes"
+                  rows="2"
+                  placeholder="Observações sobre esta parcela..."></textarea>
+              </div>
+
+              <div class="edit-actions">
+                <button
+                  class="btn btn-primary"
+                  (click)="saveInstallmentStatus()">
+                  <i class="fas fa-save"></i>
+                  Salvar
+                </button>
+                <button
+                  class="btn btn-secondary"
+                  (click)="cancelEditing()">
+                  <i class="fas fa-times"></i>
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sem parcelas -->
+      <div class="no-installments" *ngIf="!isLoading && installments.length === 0">
+        <i class="fas fa-info-circle"></i>
+        <span>Este contrato não possui parcelas configuradas</span>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">
+        <i class="fas fa-times"></i>
+        Fechar
+      </button>
+    </div>
+  </div>
+</div>

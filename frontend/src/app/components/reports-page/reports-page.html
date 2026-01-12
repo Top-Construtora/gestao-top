@@ -1,0 +1,391 @@
+<!-- Header -->
+<div class="page-header">
+    <h1 class="page-title">
+      Relatórios
+    </h1>
+  <app-breadcrumb></app-breadcrumb>
+</div>
+
+<!-- Reports Grid -->
+<div class="reports-grid">
+  
+  <!-- Relatório de Clientes Ativos -->
+  <div class="report-card" [class.is-loading]="activeClientsReport.isLoading">
+    <div class="card-header">
+      <div class="card-icon active-clients">
+        <i class="fas fa-users"></i>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <h3 class="card-title">Clientes Ativos</h3>
+      <p class="card-description">
+        Lista completa de clientes com contratos ativos e seus valores
+      </p>
+
+      <div class="card-controls">
+        <div class="control-group">
+          <label class="control-label">Formato de Exportação</label>
+          <div class="format-selector">
+            <button
+              class="format-btn"
+              [class.active]="activeClientsReport.format === 'pdf'"
+              (click)="activeClientsReport.format = 'pdf'"
+              [disabled]="activeClientsReport.isLoading">
+              <i class="fas fa-file-pdf"></i>
+              PDF
+            </button>
+            <button
+              class="format-btn"
+              [class.active]="activeClientsReport.format === 'excel'"
+              (click)="activeClientsReport.format = 'excel'"
+              [disabled]="activeClientsReport.isLoading">
+              <i class="fas fa-file-excel"></i>
+              Excel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <button
+        class="btn-generate"
+        (click)="generateReport('activeClients', activeClientsReport)"
+        [disabled]="activeClientsReport.isLoading">
+        <i class="fas" [class.fa-download]="!activeClientsReport.isLoading" [class.fa-spinner]="activeClientsReport.isLoading" [class.fa-spin]="activeClientsReport.isLoading"></i>
+        <span>{{ activeClientsReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Relatório Mensal -->
+  <div class="report-card" [class.is-loading]="monthlyReport.isLoading">
+    <div class="card-header">
+      <div class="card-icon monthly">
+        <i class="fas fa-calendar-alt"></i>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <h3 class="card-title">Relatório Mensal</h3>
+      <p class="card-description">
+        Resumo completo das atividades e contratos do mês atual
+      </p>
+
+      <div class="card-controls">
+        <div class="control-group">
+          <label class="control-label">Formato de Exportação</label>
+          <div class="format-selector">
+            <button
+              class="format-btn"
+              [class.active]="monthlyReport.format === 'pdf'"
+              (click)="monthlyReport.format = 'pdf'"
+              [disabled]="monthlyReport.isLoading">
+              <i class="fas fa-file-pdf"></i>
+              PDF
+            </button>
+            <button
+              class="format-btn"
+              [class.active]="monthlyReport.format === 'excel'"
+              (click)="monthlyReport.format = 'excel'"
+              [disabled]="monthlyReport.isLoading">
+              <i class="fas fa-file-excel"></i>
+              Excel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <button
+        class="btn-generate"
+        (click)="generateReport('monthly', monthlyReport)"
+        [disabled]="monthlyReport.isLoading">
+        <i class="fas" [class.fa-download]="!monthlyReport.isLoading" [class.fa-spinner]="monthlyReport.isLoading" [class.fa-spin]="monthlyReport.isLoading"></i>
+        <span>{{ monthlyReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Relatório por Cliente -->
+  <div class="report-card" [class.is-loading]="clientReport.isLoading">
+    <div class="card-header">
+      <div class="card-icon client">
+        <i class="fas fa-user-tie"></i>
+      </div>
+    </div>
+    
+    <div class="card-body">
+      <h3 class="card-title">Relatório por Cliente</h3>
+      <p class="card-description">
+        Análise detalhada dos contratos de um cliente específico
+      </p>
+      
+      <div class="card-controls">
+        <div class="control-group">
+          <label class="control-label">Selecione o Cliente</label>
+          <select 
+            class="form-select client-select" 
+            [(ngModel)]="clientReport.clientId"
+            [disabled]="clientReport.isLoading">
+            <option value="">Escolha um cliente...</option>
+            <option *ngFor="let client of clients" [value]="client.id">
+              {{ client.name }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">Formato de Exportação</label>
+          <div class="format-selector">
+            <button 
+              class="format-btn" 
+              [class.active]="clientReport.format === 'pdf'"
+              (click)="clientReport.format = 'pdf'"
+              [disabled]="clientReport.isLoading">
+              <i class="fas fa-file-pdf"></i>
+              PDF
+            </button>
+            <button 
+              class="format-btn" 
+              [class.active]="clientReport.format === 'excel'"
+              (click)="clientReport.format = 'excel'"
+              [disabled]="clientReport.isLoading">
+              <i class="fas fa-file-excel"></i>
+              Excel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card-footer">
+      <button 
+        class="btn-generate"
+        (click)="generateReport('client', clientReport)"
+        [disabled]="!clientReport.clientId || clientReport.isLoading">
+        <i class="fas" [class.fa-download]="!clientReport.isLoading" [class.fa-spinner]="clientReport.isLoading" [class.fa-spin]="clientReport.isLoading"></i>
+        <span>{{ clientReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Relatório de Serviços -->
+  <div class="report-card" [class.is-loading]="servicesReport.isLoading">
+    <div class="card-header">
+      <div class="card-icon services">
+        <i class="fas fa-cogs"></i>
+      </div>
+    </div>
+    
+    <div class="card-body">
+      <h3 class="card-title">Relatório de Serviços</h3>
+      <p class="card-description">
+        Performance e análise de um serviço específico
+      </p>
+      
+      <div class="card-controls">
+        <div class="control-group">
+          <label class="control-label">Selecione o Serviço</label>
+          <select 
+            class="form-select" 
+            [(ngModel)]="servicesReport.serviceId"
+            [disabled]="servicesReport.isLoading">
+            <option value="">Escolha um serviço...</option>
+            <option *ngFor="let service of services" [value]="service.id">
+              {{ service.name }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">Formato de Exportação</label>
+          <div class="format-selector">
+            <button 
+              class="format-btn" 
+              [class.active]="servicesReport.format === 'pdf'"
+              (click)="servicesReport.format = 'pdf'"
+              [disabled]="servicesReport.isLoading">
+              <i class="fas fa-file-pdf"></i>
+              PDF
+            </button>
+            <button 
+              class="format-btn" 
+              [class.active]="servicesReport.format === 'excel'"
+              (click)="servicesReport.format = 'excel'"
+              [disabled]="servicesReport.isLoading">
+              <i class="fas fa-file-excel"></i>
+              Excel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card-footer">
+      <button 
+        class="btn-generate"
+        (click)="generateReport('services', servicesReport)"
+        [disabled]="!servicesReport.serviceId || servicesReport.isLoading">
+        <i class="fas" [class.fa-download]="!servicesReport.isLoading" [class.fa-spinner]="servicesReport.isLoading" [class.fa-spin]="servicesReport.isLoading"></i>
+        <span>{{ servicesReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Relatório Comercial -->
+  <div class="report-card" [class.is-loading]="commercialReport.isLoading">
+    <div class="card-header">
+      <div class="card-icon commercial">
+        <i class="fas fa-handshake"></i>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <h3 class="card-title">Relatório Comercial</h3>
+      <p class="card-description">
+        Análise de propostas enviadas vs assinadas, valores e taxa de conversão
+      </p>
+
+      <div class="card-controls">
+        <div class="control-group">
+          <label class="control-label">Cliente <span class="optional">(Opcional)</span></label>
+          <select
+            class="form-select client-select"
+            [(ngModel)]="commercialReport.clientId"
+            [disabled]="commercialReport.isLoading">
+            <option value="">Todos os clientes</option>
+            <option *ngFor="let client of clients" [value]="client.id">
+              {{ client.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="control-row">
+          <div class="control-group">
+            <label class="control-label">Data Inicial</label>
+            <input
+              type="date"
+              class="form-input"
+              [(ngModel)]="commercialReport.startDate"
+              [disabled]="commercialReport.isLoading">
+          </div>
+
+          <div class="control-group">
+            <label class="control-label">Data Final</label>
+            <input
+              type="date"
+              class="form-input"
+              [(ngModel)]="commercialReport.endDate"
+              [disabled]="commercialReport.isLoading">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">Formato de Exportação</label>
+          <div class="format-selector">
+            <button
+              class="format-btn"
+              [class.active]="commercialReport.format === 'pdf'"
+              (click)="commercialReport.format = 'pdf'"
+              [disabled]="commercialReport.isLoading">
+              <i class="fas fa-file-pdf"></i>
+              PDF
+            </button>
+            <button
+              class="format-btn"
+              [class.active]="commercialReport.format === 'excel'"
+              (click)="commercialReport.format = 'excel'"
+              [disabled]="commercialReport.isLoading">
+              <i class="fas fa-file-excel"></i>
+              Excel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <button
+        class="btn-generate"
+        (click)="generateReport('commercial', commercialReport)"
+        [disabled]="commercialReport.isLoading">
+        <i class="fas" [class.fa-download]="!commercialReport.isLoading" [class.fa-spinner]="commercialReport.isLoading" [class.fa-spin]="commercialReport.isLoading"></i>
+        <span>{{ commercialReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Relatório Financeiro -->
+  <div class="report-card" [class.is-loading]="financialReport.isLoading">
+    <div class="card-header">
+      <div class="card-icon financial">
+        <i class="fas fa-chart-line"></i>
+      </div>
+    </div>
+    
+    <div class="card-body">
+      <h3 class="card-title">Relatório Financeiro</h3>
+      <p class="card-description">
+        Análise financeira completa com receitas e projeções
+      </p>
+      
+      <div class="card-controls">
+        <div class="control-row">
+          <div class="control-group">
+            <label class="control-label">Data Inicial</label>
+            <input 
+              type="date" 
+              class="form-input" 
+              [(ngModel)]="financialReport.startDate"
+              [disabled]="financialReport.isLoading">
+          </div>
+          
+          <div class="control-group">
+            <label class="control-label">Data Final</label>
+            <input 
+              type="date" 
+              class="form-input" 
+              [(ngModel)]="financialReport.endDate"
+              [disabled]="financialReport.isLoading">
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">Formato de Exportação</label>
+          <div class="format-selector">
+            <button 
+              class="format-btn" 
+              [class.active]="financialReport.format === 'pdf'"
+              (click)="financialReport.format = 'pdf'"
+              [disabled]="financialReport.isLoading">
+              <i class="fas fa-file-pdf"></i>
+              PDF
+            </button>
+            <button 
+              class="format-btn" 
+              [class.active]="financialReport.format === 'excel'"
+              (click)="financialReport.format = 'excel'"
+              [disabled]="financialReport.isLoading">
+              <i class="fas fa-file-excel"></i>
+              Excel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card-footer">
+      <button 
+        class="btn-generate"
+        (click)="generateReport('financial', financialReport)"
+        [disabled]="financialReport.isLoading">
+        <i class="fas" [class.fa-download]="!financialReport.isLoading" [class.fa-spinner]="financialReport.isLoading" [class.fa-spin]="financialReport.isLoading"></i>
+        <span>{{ financialReport.isLoading ? 'Gerando...' : 'Gerar Relatório' }}</span>
+      </button>
+    </div>
+  </div>
+
+</div>

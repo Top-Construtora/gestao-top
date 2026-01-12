@@ -1,0 +1,123 @@
+@import "../../../styles/variables.css";
+
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--top-primary) 0%, var(--top-primary-hover) 100%);
+}
+
+form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+}
+
+/* IMPORTANTE: Garantir visibilidade dos componentes */
+app-login-primary-input {
+  display: block !important;
+  width: 100% !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Link esqueceu senha aprimorado */
+.forgot-pwd-link {
+  align-self: flex-end;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--top-primary);
+  text-decoration: none;
+  margin-top: -8px;
+  margin-bottom: 24px;
+  position: relative;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: inline-block;
+  animation: fadeIn 0.6s ease-out 0.3s;
+  animation-fill-mode: both;
+}
+
+.forgot-pwd-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--top-secondary), var(--top-accent));
+  transition: width 0.3s ease;
+}
+
+.forgot-pwd-link:hover {
+  color: var(--top-secondary);
+  transform: translateX(2px);
+}
+
+.forgot-pwd-link:hover::after {
+  width: 100%;
+}
+
+/* Garantir que o layout preencha toda a tela */
+app-login-layout {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+}
+.login-logo {
+  display: block;
+  margin: 0 auto 40px auto;
+  width: 240px;
+  height: auto;
+  animation: fadeIn 0.6s ease-out 0.05s;
+  animation-fill-mode: both;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 16px 24px;
+  background-color: var(--top-accent);
+  color: var(--top-white);
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  box-shadow: 0 4px 12px rgba(186, 166, 115, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #a89560;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(186, 166, 115, 0.5);
+}
+
+.btn-primary:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.btn-primary i {
+  font-size: 14px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

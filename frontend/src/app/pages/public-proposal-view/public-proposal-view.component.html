@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<div class="proposal-landing">
+  
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-container">
+      <div class="hero-content">
+        <div class="hero-left">
+          <div class="company-branding">
+            <div class="company-info">
+              <img src="/logoTOPNeg.png" alt="TOP Construtora" class="company-logo">
+            </div>
+            <!-- CEO image moved here for mobile layout -->
+            <div class="ceo-presentation mobile-ceo">
+              <div class="ceo-image-container">
+                <img src="/naue.jpg" alt="Mariana TOP" class="ceo-photo" (error)="onImageError($event)">
+                <div class="ceo-title">CEO & FUNDADORA</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Tagline centralizada -->
+          <p class="company-tagline-centered">
+            Primeira consultoria especializada em mercado<span class="mobile-break"><br></span> imobiliário do Brasil.
+          </p>
+          
+          <!-- Proposal Info -->
+          <div class="proposal-info">
+            <h2 class="proposal-type">
+              <span class="outline-text" data-text="Proposta">Proposta Estratégica</span><span class="green-dot">.</span>
+            </h2>
+            <div class="client-name" *ngIf="proposal">
+              {{ (proposal.client.type === 'PJ' && proposal.client.company) ?
+                  (proposal.client.company.trade_name || proposal.client.company.company_name) :
+                  (proposal.client.type === 'PF' && proposal.client.person) ?
+                  proposal.client.person.full_name : 'Cliente' }}
+            </div>
+            <div class="solicitante-info" *ngIf="proposal && (proposal.solicitante_name || proposal.solicitante_email)">
+              <div class="solicitante-name" *ngIf="proposal.solicitante_name">
+                {{ proposal.solicitante_name }}
+              </div>
+              <div class="solicitante-email" *ngIf="proposal.solicitante_email">
+                {{ proposal.solicitante_email }}
+              </div>
+            </div>
+          </div>
+          
+        </div>
+        
+        <div class="hero-right">
+          <div class="ceo-presentation">
+            <div class="ceo-image-container">
+              <img src="/naue.jpg" alt="Mariana TOP" class="ceo-photo" (error)="onImageError($event)">
+              <div class="ceo-title">CEO & FUNDADORA</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="about-section">
+    <div class="section-container">
+      <div class="about-content">
+        <!-- Left Side: Statistics Cards -->
+        <div class="about-left">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-number">+15</div>
+              <div class="stat-text">Anos no Mercado</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">360°</div>
+              <div class="stat-text">Soluções completas</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">+100</div>
+              <div class="stat-text">Empresas Atendidas</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">380%</div>
+              <div class="stat-text">ROI em 18 Meses</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Center: Brazil Map -->
+        <div class="about-center">
+          <img src="/estados.png" alt="Mapa do Brasil - Estados" class="map-image" (error)="onImageError($event)">
+        </div>
+        
+        <!-- Right Side: Presence Info -->
+        <div class="about-right">
+          <div class="presence-section">
+            <h3 class="presence-title">Presença Nacional</h3>
+            <div class="locations-list">
+              <div class="location-item">1. Goiás-GO</div>
+              <div class="location-item">2. Mato Grosso-MT</div>
+              <div class="location-item">3. Paraíba-PB</div>
+              <div class="location-item">4. Pernambuco-PE</div>
+              <div class="location-item">5. Paraná-PR</div>
+              <div class="location-item">6. Rio de Janeiro-RJ</div>
+              <div class="location-item">7. Tocantins-TO</div>
+              <div class="location-item">8. Alagoas-AL</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Section -->
+  <section class="team-section">
+    <div class="section-container">
+      <div class="team-content">
+        <!-- Section Header -->
+        <div class="team-header">
+          <h2 class="team-title">
+            <span class="no-wrap">Nosso Time de <span class="highlight-text">Especialistas</span></span>
+          </h2>
+          <p class="team-subtitle">
+            Profissionais altamente qualificados e experientes, dedicados ao sucesso do seu projeto imobiliário
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Team Members Carousel - Full Width -->
+    <div class="team-grid-container">
+          <!-- Loading State -->
+          <div *ngIf="teamLoading" class="team-loading">
+            <div class="loading-spinner"></div>
+            <p>Carregando nossa equipe de especialistas...</p>
+          </div>
+          
+          <!-- Team Carousel -->
+          <div class="team-carousel-container" *ngIf="!teamLoading && teamMembers.length > 0">
+            <div class="team-carousel"
+                 (mouseenter)="pauseTeamCarousel()"
+                 (mouseleave)="resumeTeamCarousel()"
+                 (mousedown)="startTeamDrag($event)"
+                 (mousemove)="onTeamDrag($event)"
+                 (mouseup)="endTeamDrag()"
+                 (mouseleave)="endTeamDrag()"
+                 (touchstart)="startTeamTouch($event)"
+                 (touchmove)="onTeamTouchMove($event)"
+                 (touchend)="endTeamTouch()">
+              
+              <!-- Carousel Track -->
+              <div class="team-carousel-track"
+                   [class.is-dragging]="isTeamDragging"
+                   [style.transform]="currentTeamTransform">
+                <div *ngFor="let member of duplicatedTeamMembers; trackBy: trackByMemberId" 
+                     class="specialist-card">
+                  
+                  <!-- Photo Section -->
+                  <div class="specialist-photo-section">
+                    <div class="photo-frame">
+                      <img *ngIf="getTeamMemberPhotoUrl(member) && getTeamMemberPhotoUrl(member) !== ''" 
+                           [src]="getTeamMemberPhotoUrl(member)" 
+                           [alt]="member.name"
+                           class="specialist-photo"
+                           (error)="onImageError($event)"
+                           style="display: block;"
+                           draggable="false">
+                      <div *ngIf="!getTeamMemberPhotoUrl(member) || getTeamMemberPhotoUrl(member) === ''" 
+                           class="photo-placeholder" 
+                           style="display: flex !important;">
+                        <div class="initials-avatar">
+                          {{ getTeamMemberInitials(member.name) }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Info Section -->
+                  <div class="specialist-info">
+                    <h3 class="specialist-name">{{ member.name }}</h3>
+                    <p class="specialist-position" *ngIf="member.cargo">{{ member.cargo }}</p>
+                    <p class="specialist-position" *ngIf="!member.cargo && member.is_fixed">CEO & Fundadora</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Empty State -->
+          <div *ngIf="!teamLoading && teamMembers.length === 0" class="team-empty-state">
+            <div class="empty-illustration">
+              <div class="empty-icon">
+                <i class="fas fa-user-friends"></i>
+              </div>
+              <div class="empty-dots">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+            <h3>Equipe de Especialistas</h3>
+            <p>Nossa equipe altamente qualificada está sendo preparada para apresentação.<br>
+               Em breve você conhecerá todos os profissionais dedicados ao seu sucesso.</p>
+            <div class="empty-features">
+              <div class="feature-item">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Altamente Qualificados</span>
+              </div>
+              <div class="feature-item">
+                <i class="fas fa-award"></i>
+                <span>Experiência Comprovada</span>
+              </div>
+              <div class="feature-item">
+                <i class="fas fa-handshake"></i>
+                <span>Foco em Resultados</span>
+              </div>
+            </div>
+          </div>
+        </div>
+  </section>
+
+  <!-- Clients Partners Section -->
+  <section class="partners-section">
+    <div class="section-container">
+      <div class="section-header">
+        <h2 class="section-title">Nossos Clientes <span class="highlight-text">Parceiros</span></h2>
+        <p class="section-subtitle">Empresas que confiam na TOP Construtora</p>
+      </div>
+      
+      <div class="partners-showcase">
+        <div class="partners-carousel" 
+             (mouseenter)="pauseCarousel()" 
+             (mouseleave)="resumeCarousel()"
+             (mousedown)="startDrag($event)"
+             (mousemove)="onDrag($event)"
+             (mouseup)="endDrag()"
+             (mouseleave)="endDrag()"
+             (touchstart)="startTouch($event)"
+             (touchmove)="onTouchMove($event)"
+             (touchend)="endTouch()">
+          
+          <!-- Carousel Track -->
+          <div class="carousel-track"
+               [class.is-dragging]="isDragging"
+               [style.transform]="currentTransform">
+            <div *ngFor="let client of clients; let i = index" class="partner-logo">
+              <img [src]="client.logo" 
+                   [alt]="client.name" 
+                   (error)="onClientLogoError($event)" 
+                   draggable="false"
+                   width="120"
+                   height="80"
+                   loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <h3>Carregando sua proposta personalizada...</h3>
+      <p>Aguarde enquanto preparamos os detalhes do seu projeto</p>
+    </div>
+  </div>
+
+  <!-- Main Proposal Content -->
+  <div *ngIf="!isLoading && proposal" class="proposal-content">
+    
+    <!-- Unified Proposal Section -->
+    <section class="proposal-unified-section">
+      <div class="section-container">
+
+        <div class="proposal-intro-compact">
+          <h1 class="proposal-title">Seu Investimento <span class="highlight-text">Estratégico</span></h1>
+          <p class="proposal-subtitle">
+            Conheça em detalhes cada serviço que será desenvolvido para impulsionar seu negócio. 
+            Cada solução foi pensada estrategicamente para gerar resultados concretos e transformar sua empresa.
+          </p>
+        </div>
+        
+        <!-- Services Sections Wrapper -->
+        <div class="services-sections-wrapper">
+          <div
+            *ngFor="let service of proposal.services; let i = index"
+            class="service-section"
+            [class.selected]="isServiceSelected(service.service_id)">
+
+            <!-- Service Header with Title and Selection -->
+            <div class="service-header">
+              <div class="service-title-wrapper">
+                <div class="service-checkbox-wrapper">
+                  <input
+                    type="checkbox"
+                    [id]="'service-checkbox-' + service.service_id"
+                    [checked]="isServiceSelected(service.service_id)"
+                    (change)="toggleService(service.service_id)"
+                    class="service-select-checkbox">
+                  <label [for]="'service-checkbox-' + service.service_id" class="service-checkbox-mark">
+                    <i class="fas fa-check"></i>
+                  </label>
+                </div>
+                <div class="service-title-group">
+                  <h2 class="service-header-title">
+                    {{ service.service.name }}
+                    <span class="quantity-indicator" *ngIf="service.quantity > 1">
+                      ({{ service.quantity }} unidades)
+                    </span>
+                  </h2>
+                  <p class="service-subtitle" *ngIf="service.service.subtitle">{{ service.service.subtitle }}</p>
+                </div>
+              </div>
+              <div class="service-selection">
+                <button class="service-toggle-btn"
+                        type="button"
+                        (click)="toggleDescription(service.service_id)"
+                        *ngIf="service.service.description">
+                  <span class="toggle-text">{{ isDescriptionExpanded(service.service_id) ? 'Ver menos' : 'Ver mais' }}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Service Content -->
+            <div class="service-content">
+
+              <!-- Service Description -->
+              <div class="service-description-section" *ngIf="service.service.description && isDescriptionExpanded(service.service_id)">
+                <div class="description-content"
+                     [innerHTML]="formatDescription(service.service.description)"
+                     [class.expanded]="true">
+                </div>
+              </div>
+
+              <!-- Service Details -->
+              <div class="service-details-row">
+                <!-- Summary -->
+                <div class="detail-item summary" *ngIf="service.service.summary">
+                  <div class="detail-value">
+                    <span>{{ service.service.summary }}</span>
+                  </div>
+                </div>
+
+                <!-- Duration -->
+                <div class="detail-item duration">
+                  <div class="detail-label">
+                    <i class="fas fa-clock"></i>
+                    <span>Duração</span>
+                  </div>
+                  <div class="detail-value">
+                    <span *ngIf="service.service.duration_unit === 'Projeto'">{{ service.service.duration_unit }}</span>
+                    <span *ngIf="service.service.duration_unit && service.service.duration_unit !== 'Projeto'">
+                      {{ service.service.duration_amount }} {{ service.service.duration_unit }}
+                    </span>
+                    <span *ngIf="!service.service.duration_unit || (!service.service.duration_amount && service.service.duration_unit !== 'Projeto')">
+                      A definir
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Investment - Ocultar completamente quando usar valor global -->
+                <div class="detail-item highlight" *ngIf="shouldShowServiceValues()">
+                  <div class="detail-label">
+                    <i class="fas fa-coins"></i>
+                    <span>Investimento</span>
+                  </div>
+                  <div class="detail-value">
+                    <div class="price-total">{{ formatCurrency(getServiceTotal(service)) }}</div>
+                    <div class="price-unit" *ngIf="service.quantity > 1">
+                      {{ formatCurrency(getServiceValue(service)) }} por unidade
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Services Summary -->
+        <div class="services-summary">
+          <div class="selected-count">
+            <i class="fas fa-check-circle"></i>
+            <span>{{ getSelectedServicesCount() }} serviços selecionados</span>
+          </div>
+
+
+          <div class="summary-total">
+            <div class="total-label">Investimento Total</div>
+            <div class="total-amount">{{ formatCurrency(getFinalValueWithDiscount()) }}</div>
+            <div class="discount-note" *ngIf="canGetDiscount()">
+              <div class="original-price-summary">
+                De: <s>{{ formatCurrency(getBaseTotal()) }}</s>
+              </div>
+              <div class="discount-amount-summary" *ngIf="getCurrentDiscountPercentage() > 0">
+                Economia de {{ formatCurrency(getDiscountAmount()) }} ({{ getCurrentDiscountPercentage().toFixed(1) }}% OFF)
+              </div>
+              <div class="discount-amount-summary" *ngIf="getCurrentDiscountPercentage() === 0 && getDiscountAmount() > 0">
+                Economia de {{ formatCurrency(getDiscountAmount()) }}
+              </div>
+            </div>
+            <div class="discount-note">
+              <span *ngIf="paymentType === 'prazo' && hasVistaDiscount()">
+                <ng-container *ngIf="proposal && proposal.vista_discount_percentage && proposal.vista_discount_percentage > 0">
+                  *desconto de {{ proposal.vista_discount_percentage }}% para pagamento à vista
+                </ng-container>
+                <ng-container *ngIf="proposal && (!proposal.vista_discount_percentage || proposal.vista_discount_percentage === 0) && proposal.vista_discount_value && proposal.vista_discount_value > 0">
+                  *desconto de {{ formatCurrency(proposal.vista_discount_value || 0) }} para pagamento à vista
+                </ng-container>
+              </span>
+              <span *ngIf="paymentType === 'vista' && hasPrazoDiscount()">
+                <ng-container *ngIf="proposal && proposal.prazo_discount_percentage && proposal.prazo_discount_percentage > 0">
+                  *desconto de {{ proposal.prazo_discount_percentage }}% para pagamento à prazo
+                </ng-container>
+                <ng-container *ngIf="proposal && (!proposal.prazo_discount_percentage || proposal.prazo_discount_percentage === 0) && proposal.prazo_discount_value && proposal.prazo_discount_value > 0">
+                  *desconto de {{ formatCurrency(proposal.prazo_discount_value || 0) }} para pagamento à prazo
+                </ng-container>
+              </span>
+            </div>
+            <div class="discount-info" *ngIf="canGetDiscount() && getCurrentDiscountPercentage() > 0">
+              <i class="fas fa-tag"></i>
+              <span>Desconto de {{ getCurrentDiscountPercentage().toFixed(1) }}% aplicado!</span>
+            </div>
+            <div class="discount-info" *ngIf="canGetDiscount() && getCurrentDiscountPercentage() === 0 && getDiscountAmount() > 0">
+              <i class="fas fa-tag"></i>
+              <span>Desconto de {{ formatCurrency(getDiscountAmount()) }} aplicado!</span>
+            </div>
+            <div class="discount-unavailable" *ngIf="paymentType === 'vista' && !areAllServicesSelected()">
+              <i class="fas fa-exclamation-triangle"></i>
+              <span>Selecione todos os serviços para o desconto</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Digital Signature Section -->
+    <section class="signature-section" *ngIf="proposal.status === 'sent' && !proposalExpired">
+      <div class="section-container">
+        <div class="section-header">
+          <h2 class="section-title">Finalize Sua <span class="highlight-text">Proposta</span></h2>
+          <p class="section-subtitle">Preencha os dados abaixo e assine digitalmente para confirmar sua aceitação. Este é o último passo para iniciarmos nossa parceria de sucesso.</p>
+
+          <!-- Toggle Button -->
+          <button type="button" class="toggle-signature-btn"
+                  (click)="toggleSignatureForm()"
+                  [class.expanded]="isSignatureFormExpanded">
+            <span class="toggle-btn-text">
+              <i class="fas" [class.fa-chevron-down]="!isSignatureFormExpanded" [class.fa-chevron-up]="isSignatureFormExpanded"></i>
+              {{ isSignatureFormExpanded ? 'Ocultar Formulário de Assinatura' : 'Mostrar Formulário de Assinatura' }}
+            </span>
+          </button>
+        </div>
+
+        <div class="signature-form-container" [class.expanded]="isSignatureFormExpanded" [class.collapsed]="!isSignatureFormExpanded">
+          <form [formGroup]="signatureForm" class="signature-form">
+            
+            <!-- Personal Information -->
+            <div class="form-section">
+              <h3 class="form-section-title">
+                <i class="fas fa-user"></i>
+                Informações Pessoais
+              </h3>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label for="client_name" class="field-label">Nome Completo *</label>
+                  <input 
+                    type="text" 
+                    id="client_name" 
+                    formControlName="client_name"
+                    class="field-input"
+                    placeholder="Digite seu nome completo"
+                    [class.error]="isFieldInvalid(signatureForm, 'client_name')">
+                  <div class="field-error" *ngIf="isFieldInvalid(signatureForm, 'client_name')">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Nome completo é obrigatório
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label for="client_email" class="field-label">Email *</label>
+                  <input 
+                    type="email" 
+                    id="client_email" 
+                    formControlName="client_email"
+                    class="field-input"
+                    placeholder="seu@email.com"
+                    [class.error]="isFieldInvalid(signatureForm, 'client_email')">
+                  <div class="field-error" *ngIf="isFieldInvalid(signatureForm, 'client_email')">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Email válido é obrigatório
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label for="client_phone" class="field-label">Telefone</label>
+                  <input 
+                    type="tel" 
+                    id="client_phone" 
+                    formControlName="client_phone"
+                    class="field-input"
+                    placeholder="(11) 99999-9999"
+                    maxlength="15"
+                    (input)="onPhoneInput($event)"
+                    (keypress)="onPhoneKeyPress($event)">
+                </div>
+
+                <div class="form-field">
+                  <label for="client_document" class="field-label">CPF/CNPJ</label>
+                  <input 
+                    type="text" 
+                    id="client_document" 
+                    formControlName="client_document"
+                    class="field-input"
+                    placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                    maxlength="18"
+                    (input)="onDocumentInput($event)"
+                    (keypress)="onDocumentKeyPress($event)">
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment Options -->
+            <div class="form-section">
+              <h3 class="form-section-title">
+                <i class="fas fa-credit-card"></i>
+                Opções de Pagamento
+              </h3>
+              
+              <!-- Warning when not all services selected -->
+              <div class="discount-warning" *ngIf="!areAllServicesSelected() && proposal && proposal.vista_discount_percentage && proposal.vista_discount_percentage > 0">
+                <i class="fas fa-info-circle"></i>
+                <strong>Atenção:</strong> O desconto de {{ proposal.vista_discount_percentage }}% no pagamento à vista só é válido quando todos os serviços da proposta são selecionados.
+              </div>
+              
+              <div class="payment-options">
+                <!-- Payment Type Selection -->
+                <div class="payment-type-selection">
+                  <label class="field-label">Forma de Pagamento *</label>
+                  <div class="payment-type-cards">
+                    <div class="payment-type-card" 
+                         [class.selected]="paymentType === 'vista'"
+                         [class.has-discount]="canGetDiscount()"
+                         (click)="onPaymentTypeChange('vista')">
+                      <div class="card-header">
+                        <input type="radio" 
+                               name="payment_type" 
+                               [checked]="paymentType === 'vista'"
+                               (change)="onPaymentTypeChange('vista')">
+                        <span class="card-title">À Vista</span>
+                        <span class="discount-badge" *ngIf="areAllServicesSelected() && hasVistaDiscount()">
+                          <ng-container *ngIf="proposal && proposal.vista_discount_percentage && proposal.vista_discount_percentage > 0">
+                            {{ proposal.vista_discount_percentage }}% OFF
+                          </ng-container>
+                          <ng-container *ngIf="proposal && (!proposal.vista_discount_percentage || proposal.vista_discount_percentage === 0) && proposal.vista_discount_value && proposal.vista_discount_value > 0">
+                            -{{ formatCurrency(proposal.vista_discount_value || 0) }}
+                          </ng-container>
+                        </span>
+                      </div>
+                      <div class="card-content">
+                        <div class="price-display">
+                          <span class="original-price" *ngIf="hasVistaDiscount() && areAllServicesSelected()">
+                            De: {{ formatCurrency(getBaseTotal()) }}
+                          </span>
+                          <span class="final-price">
+                            {{ formatCurrency(getVistaValueWithDiscount()) }}
+                          </span>
+                        </div>
+                        <div class="savings" *ngIf="areAllServicesSelected() && hasVistaDiscount()">
+                          Economia de {{ formatCurrency(getBaseTotal() - getVistaValueWithDiscount()) }}
+                        </div>
+                        <div class="no-discount-info" *ngIf="!areAllServicesSelected() && hasVistaDiscount()">
+                          <small>Desconto disponível apenas com todos os serviços</small>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="payment-type-card" 
+                         [class.selected]="paymentType === 'prazo'"
+                         (click)="onPaymentTypeChange('prazo')">
+                      <div class="card-header">
+                        <input type="radio" 
+                               name="payment_type" 
+                               [checked]="paymentType === 'prazo'"
+                               (change)="onPaymentTypeChange('prazo')">
+                        <span class="card-title">A Prazo</span>
+                        <span class="discount-badge" *ngIf="areAllServicesSelected() && hasPrazoDiscount()">
+                          <ng-container *ngIf="proposal && proposal.prazo_discount_percentage && proposal.prazo_discount_percentage > 0">
+                            {{ proposal.prazo_discount_percentage }}% OFF
+                          </ng-container>
+                          <ng-container *ngIf="proposal && (!proposal.prazo_discount_percentage || proposal.prazo_discount_percentage === 0) && proposal.prazo_discount_value && proposal.prazo_discount_value > 0">
+                            -{{ formatCurrency(proposal.prazo_discount_value || 0) }}
+                          </ng-container>
+                        </span>
+                      </div>
+                      <div class="card-content">
+                        <div class="price-display">
+                          <span class="original-price" *ngIf="hasPrazoDiscount() && areAllServicesSelected()">
+                            De: {{ formatCurrency(getBaseTotal()) }}
+                          </span>
+                          <span class="final-price">
+                            {{ formatCurrency(getPrazoValueWithDiscount()) }}
+                          </span>
+                        </div>
+                        <div class="installments-info">
+                          Em até {{ (proposal && proposal.max_installments) || 12 }}x de {{ formatCurrency(getPrazoValueWithDiscount() / ((proposal && proposal.max_installments) || 12)) }}
+                        </div>
+                        <div class="savings" *ngIf="areAllServicesSelected() && hasPrazoDiscount()">
+                          Economia de {{ formatCurrency(getBaseTotal() - getPrazoValueWithDiscount()) }}
+                        </div>
+                        <div class="no-discount-info" *ngIf="!areAllServicesSelected() && hasPrazoDiscount()">
+                          <small>Desconto disponível apenas com todos os serviços</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Payment Method Selection -->
+                <div class="payment-method-selection">
+                  <label class="field-label">Método de Pagamento *</label>
+                  <div class="payment-methods">
+                    <label class="payment-method-option" 
+                           *ngFor="let method of getAvailablePaymentMethods()">
+                      <input type="radio" 
+                             name="payment_method" 
+                             [value]="method.value"
+                             [checked]="paymentMethod === method.value"
+                             (change)="onPaymentMethodChange(method.value)">
+                      <span class="method-label">
+                        <i [class]="method.icon"></i>
+                        {{ method.label }}
+                      </span>
+                    </label>
+                  </div>
+                </div>
+                
+                <!-- Installments Selection (only for installable payment methods) -->
+                <div class="installments-selection" *ngIf="paymentType === 'prazo' && isPaymentMethodInstallable(paymentMethod)">
+                  <label for="installments" class="field-label">Número de Parcelas</label>
+                  <div class="installments-select-wrapper">
+                    <select 
+                      id="installments"
+                      name="installments"
+                      class="installments-select"
+                      [value]="installments || ''"
+                      (change)="onInstallmentsChange($event)">
+                      <option value="" disabled>Selecione o número de parcelas</option>
+                      <option *ngFor="let i of getInstallmentOptions()" [value]="i">
+                        {{ i }}x {{ i === 1 ? 'à vista' : 'mensais' }} - 
+                        {{ formatCurrency(getSelectedTotal() / i) }}
+                        {{ i === 1 ? ' (total)' : '' }}
+                      </option>
+                    </select>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                  </div>
+                  
+                </div>
+              </div>
+            </div>
+
+            <!-- Digital Signature -->
+            <div class="form-section">
+              <h3 class="form-section-title">
+                <i class="fas fa-signature"></i>
+                Assinatura Digital *
+              </h3>
+              <div class="signature-area">
+                <div class="signature-instructions">
+                  <p>Desenhe sua assinatura no campo abaixo usando o mouse ou toque na tela</p>
+                </div>
+                
+                <div class="signature-canvas-wrapper">
+                  <canvas 
+                    #signatureCanvas
+                    class="signature-canvas"
+                    (mousedown)="startDrawing($event)"
+                    (mousemove)="draw($event)"
+                    (mouseup)="stopDrawing()"
+                    (mouseleave)="stopDrawing()"
+                    (touchstart)="startTouchDrawing($event)"
+                    (touchmove)="touchDraw($event)"
+                    (touchend)="stopTouchDrawing($event)">
+                  </canvas>
+                  <div class="signature-placeholder" *ngIf="!signatureDrawn">
+                    <i class="fas fa-pen"></i>
+                    <span>Clique aqui para assinar</span>
+                  </div>
+                </div>
+                
+                <div class="signature-actions">
+                  <button type="button" class="btn-secondary" (click)="clearSignature()">
+                    <i class="fas fa-eraser"></i>
+                    Limpar
+                  </button>
+                  <div class="signature-status" *ngIf="signatureDrawn">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Assinatura capturada</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional Comments -->
+            <div class="form-section">
+              <h3 class="form-section-title">
+                <i class="fas fa-comments"></i>
+                Observações Adicionais
+              </h3>
+              <div class="form-field full-width">
+                <label for="client_observations" class="field-label">Comentários ou dúvidas (opcional)</label>
+                <textarea 
+                  id="client_observations" 
+                  formControlName="client_observations"
+                  class="field-textarea"
+                  placeholder="Adicione qualquer observação, dúvida ou solicitação especial sobre o projeto..."
+                  rows="4">
+                </textarea>
+              </div>
+            </div>
+            
+            <!-- Submit Button -->
+            <div class="form-submit-section">
+              <button 
+                type="button"
+                class="btn-submit-signature" 
+                [disabled]="!canSignProposal() || isSubmitting"
+                (click)="signProposal()">
+                <i *ngIf="!isSubmitting" class="fas fa-signature"></i>
+                <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin"></i>
+                <span *ngIf="!isSubmitting && areAllServicesSelected()">Aceitar e Assinar Proposta</span>
+                <span *ngIf="!isSubmitting && !areAllServicesSelected()">Assinar Parcialmente</span>
+                <span *ngIf="isSubmitting">Processando assinatura...</span>
+              </button>
+              
+              <div class="requirements-hint" *ngIf="!canSignProposal()">
+                <p>Complete todos os campos obrigatórios e adicione sua assinatura digital para prosseguir</p>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="modal-backdrop" *ngIf="showSuccessModal" (click)="closeSuccessModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-content success-modal">
+        <div class="success-icon-wrapper">
+          <div class="success-icon">
+            <i class="fas fa-check"></i>
+          </div>
+        </div>
+        <h2 class="modal-title">Proposta Assinada!</h2>
+        <p class="modal-message">A proposta foi assinada com sucesso!</p>
+        <p class="modal-submessage">Em breve entraremos em contato para os próximos passos.</p>
+        <button class="btn-modal-close" (click)="closeSuccessModal()">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <img src="/logoTOPNeg.png" alt="TOP Construtora" class="footer-logo-img">
+          </div>
+          <p>Transformando o mercado imobiliário brasileiro com excelência e inovação</p>
+        </div>
+        
+        <div class="footer-contact">
+          <h4>Contato</h4>
+          <div class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <span>mariana&#64;naueconsultoria.com.br</span>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-phone"></i>
+            <span>(62) 99411-8289</span>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Flamboyant Park Business<br>
+            Jardim Goiás, Goiânia - GO</span>
+          </div>
+          
+          <div class="social-media">
+            <h5>Siga-nos</h5>
+            <div class="social-links">
+              <a href="https://instagram.com/naueconsultoria.rh" target="_blank" rel="noopener noreferrer" class="social-link instagram">
+                <i class="fab fa-instagram"></i>
+              </a>
+              <a href="https://linkedin.com/company/naue-consultoria" target="_blank" rel="noopener noreferrer" class="social-link linkedin">
+                <i class="fab fa-linkedin-in"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; {{ currentYear }} TOP Construtora. Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+</div>

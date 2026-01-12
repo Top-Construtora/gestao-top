@@ -1,0 +1,38 @@
+<div class="help-page-content">
+  <div class="page-header">
+    <h1 class="page-title">Suporte e Ajuda</h1>
+    <app-breadcrumb></app-breadcrumb>
+  </div>
+
+  <div class="table-container">
+    <div class="section-header">
+      <h3 class="section-description">Encontre respostas para suas dúvidas ou entre em contato conosco</h3>
+    </div>
+    
+    <div class="help-grid">
+      <div *ngFor="let card of helpCards" class="help-card">
+        <div class="card-header">
+          <div class="card-icon">
+            <i [class]="card.icon"></i>
+          </div>
+          <h3 class="card-title">{{ card.title }}</h3>
+        </div>
+        <div class="card-content">
+          <p class="card-description">{{ card.description }}</p>
+          <ul class="card-features" *ngIf="card.features">
+            <li *ngFor="let feature of card.features">
+              <i class="fas fa-check"></i>
+              {{ feature }}
+            </li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-primary" (click)="onHelpAction(card.title)">
+            <i [class]="card.buttonIcon"></i>
+            {{ card.buttonText }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

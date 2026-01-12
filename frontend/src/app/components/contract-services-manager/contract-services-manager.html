@@ -1,0 +1,62 @@
+<div class="services-manager">
+  <div class="services-table">
+    <div class="table-header-row">
+      <div class="col-service">Serviço</div>
+      <div class="col-status">Status</div>
+      <div class="col-progress">Progresso</div>
+      <div class="col-actions">Acompanhamento</div>
+    </div>
+    
+    <div *ngFor="let service of services" class="service-row">
+      <div class="col-service">
+        <div class="service-info">
+          <h4 class="service-name">{{ service.service.name }}</h4>
+          <span class="service-category">{{ service.service.category || 'Geral' }}</span>
+        </div>
+      </div>
+      
+      <div class="col-status">
+        <!-- Edit Mode -->
+        <div class="status-controls" *ngIf="isEditMode()">
+          <select
+            [(ngModel)]="service.status"
+            (ngModelChange)="updateServiceStatus(service, $event)"
+            class="status-select"
+            [class.status-not-started]="service.status === 'not_started'"
+            [class.status-scheduled]="service.status === 'scheduled'"
+            [class.status-in-progress]="service.status === 'in_progress'"
+            [class.status-completed]="service.status === 'completed'"
+            [class.status-cancelled]="service.status === 'cancelled'">
+            <option *ngFor="let status of serviceStatuses" [value]="status.value">
+              {{ status.label }}
+            </option>
+          </select>
+        </div>
+        
+        <!-- View Mode -->
+        <div class="status-display" *ngIf="!isEditMode()">
+          <span class="status-badge" [style.background-color]="getStatusColor(getRoutineStatus(service))">
+            <i [class]="getStatusIcon(getRoutineStatus(service))"></i>
+            {{ getStatusText(getRoutineStatus(service)) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="col-progress">
+        <div class="progress-display">
+          <div *ngIf="isLoadingProgress(service.id)" class="progress-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span class="loading-text">Carregando...</span>
+          </div>
+          <div *ngIf="!isLoadingProgress(service.id)" class="service-progress">
+            <div class="progress-bar-small">
+              <div class="progress-fill-small" [style.width.%]="getServiceProgressPercentage(service.id)"></div>
+            </div>
+            <span class="progress-percentage">{{ getServiceProgressPercentage(service.id) }}%</span>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>

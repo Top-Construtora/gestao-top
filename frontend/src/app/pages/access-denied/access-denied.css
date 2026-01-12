@@ -1,0 +1,158 @@
+/* Container principal */
+.access-denied-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+  padding: 2rem;
+}
+
+/* Conteúdo centralizado */
+.access-denied-content {
+  background: var(--white, #ffffff);
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 3rem 2rem;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+/* Ícone de cadeado */
+.icon-container {
+  margin-bottom: 1.5rem;
+}
+
+.icon-container i {
+  font-size: 4rem;
+  color: var(--primary-green, #0e9b71);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Título */
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-dark, #1a202c);
+  margin-bottom: 1rem;
+}
+
+/* Mensagem principal */
+.message {
+  font-size: 1.125rem;
+  color: var(--text-gray, #6c757d);
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+
+/* Sub-mensagem */
+.sub-message {
+  font-size: 0.95rem;
+  color: var(--text-muted, #95a5a6);
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+/* Botão de ação */
+.actions {
+  display: flex;
+  justify-content: center;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-md, 8px);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: var(--primary-green, #0e9b71);
+  color: var(--white, #ffffff);
+}
+
+.btn-primary:hover {
+  background: #0a7d5a;
+}
+
+
+.btn i {
+  font-size: 0.9rem;
+}
+
+/* Animações */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .access-denied-content {
+    padding: 2rem 1.5rem;
+  }
+
+  .title {
+    font-size: 1.75rem;
+  }
+
+  .icon-container i {
+    font-size: 3rem;
+  }
+
+  .message {
+    font-size: 1rem;
+  }
+
+}
+
+@media (max-width: 480px) {
+  .access-denied-container {
+    padding: 1rem;
+  }
+
+  .access-denied-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .icon-container i {
+    font-size: 2.5rem;
+  }
+}

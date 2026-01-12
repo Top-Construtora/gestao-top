@@ -1,0 +1,163 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Clientes</h1>
+    <app-breadcrumb></app-breadcrumb>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header">
+      <h2 class="table-title">Lista de Clientes</h2>
+      
+      <!-- Barra de pesquisa -->
+      <div class="search-input-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input 
+          type="text" 
+          class="search-input" 
+          placeholder="Buscar por nome, documento, cidade..." 
+          [(ngModel)]="searchTerm"
+          (input)="filterClients()"
+        />
+        <button 
+          *ngIf="searchTerm" 
+          class="clear-search-btn" 
+          (click)="clearSearch()"
+        >
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <button class="btn btn-primary" (click)="openNewClientPage()">
+        <i class="fas fa-plus"></i>
+        Novo Cliente
+      </button>
+    </div>
+    
+    <!-- Mensagem de erro -->
+    <div *ngIf="error" class="error-message">
+      <i class="fas fa-exclamation-circle"></i>
+      {{ error }}
+    </div>
+    
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-container">
+      <i class="fas fa-spinner fa-spin"></i>
+      Carregando clientes...
+    </div>
+    
+    <!-- Tabela -->
+    <div class="table-wrapper" *ngIf="!isLoading">
+      <!-- Mensagem quando não há empresas -->
+      <div *ngIf="filteredClients.length === 0 && !error" class="empty-state">
+        <i class="fas fa-building empty-icon"></i>
+        <h3 *ngIf="!searchTerm">Nenhum cliente cadastrado</h3>
+        <h3 *ngIf="searchTerm">Nenhum cliente encontrado</h3>
+        <p *ngIf="!searchTerm">Clique no botão "Novo Cliente" para adicionar o primeiro cliente.</p>
+        <p *ngIf="searchTerm">Tente buscar com outros termos ou limpe a pesquisa.</p>
+      </div>
+      
+      <!-- Tabela de clientes -->
+      <table class="custom-table" *ngIf="filteredClients.length > 0">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Tipo</th>
+            <th>Cidade/UF</th>
+            <th>Documento</th>
+            <th>Contratos</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let client of filteredClients" class="clickable" (click)="viewClient(client.id)">
+            <td>
+              <div class="client-info">
+                <div class="client-avatar" [style.background]="client.gradient" *ngIf="!client.logo_path">
+                  {{ client.initials }}
+                </div>
+                <div class="client-logo" *ngIf="client.logo_path">
+                  <img [src]="client.logoUrl" [alt]="client.name + ' logo'" />
+                </div>
+                <div class="client-name-container">
+                  <span class="client-name">{{ client.name }}</span>
+                  <span class="client-trade-name" *ngIf="client.type === 'PJ' && client.company_name && client.trade_name && client.trade_name !== client.company_name">
+                    {{ client.company_name }}
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge" [ngClass]="client.type === 'PF' ? 'badge-info' : 'badge-primary'">
+                {{ client.type }}
+              </span>
+            </td>
+            <td class="client-location">{{ client.location }}</td>
+            <td>{{ client.document }}</td>
+            <td>
+              <div class="contracts-info">
+                <span class="total">{{ client.contracts }}</span>
+                <span class="active" *ngIf="client.activeContracts > 0">({{ client.activeContracts }} ativos)</span>
+              </div>
+            </td>
+            <td>
+              <div class="actions-cell">
+                <div class="dropdown" [class.active]="dropdownOpen === client.id">
+                  <button 
+                    class="action-btn dropdown-toggle" 
+                    (click)="toggleDropdown(client.id, $event)"
+                    title="Ações">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                  <div class="dropdown-menu" *ngIf="dropdownOpen === client.id">
+                    <button 
+                      class="dropdown-item" 
+                      (click)="viewClient(client.id); closeDropdown()"
+                      title="Ver Detalhes">
+                      <i class="fas fa-eye"></i>
+                      Ver Cliente
+                    </button>
+                    <button 
+                      class="dropdown-item" 
+                      (click)="editClient(client.id); closeDropdown()"
+                      title="Editar">
+                      <i class="fas fa-edit"></i>
+                      Editar
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button 
+                      class="dropdown-item" 
+                      (click)="softDeleteClient(client, $event); closeDropdown()"
+                      title="Desativar">
+                      <i class="fas fa-archive"></i>
+                      Desativar
+                    </button>
+                    <button 
+                      *ngIf="authService.isAdmin()"
+                      class="dropdown-item danger" 
+                      (click)="hardDeleteClient(client, $event); closeDropdown()"
+                      title="Excluir Permanentemente">
+                      <i class="fas fa-trash"></i>
+                      Excluir
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<app-delete-confirmation-modal
+  [isVisible]="showDeleteModal"
+  [title]="getDeleteModalTitle()"
+  [message]="getDeleteModalMessage()"
+  [itemName]="selectedClientForDeletion ? selectedClientForDeletion.name + ' (' + selectedClientForDeletion.document + ')' : ''"
+  [isDeleting]="isDeleting"
+  [deleteButtonText]="getDeleteButtonText()"
+  (onConfirm)="confirmDeleteClient()"
+  (onCancel)="cancelDeleteClient()">
+</app-delete-confirmation-modal>

@@ -1,0 +1,202 @@
+<div class="page-header">
+  <h1 class="page-title">Detalhes do Cliente</h1>
+  <app-breadcrumb></app-breadcrumb>
+</div>
+
+<!-- Mensagem de erro -->
+<div class="error-container" *ngIf="!isLoading && !client">
+  <div class="error-icon">
+    <i class="fas fa-exclamation-triangle"></i>
+  </div>
+  <h3>Cliente não encontrado</h3>
+  <p>Não foi possível carregar os dados do cliente.</p>
+  <button class="btn btn-primary" routerLink="/home/clientes">
+    <i class="fas fa-arrow-left"></i> Voltar para Clientes
+  </button>
+</div>
+
+<!-- Main Content -->
+<div class="content" *ngIf="!isLoading && client">
+  
+  <!-- Unified Client Details Section -->
+  <div class="client-details-unified">
+    <!-- Client Overview Header -->
+    <div class="client-overview-header">
+      <!-- Edit Button -->
+      <button class="btn-edit-client" (click)="editClient()" *ngIf="authService.isAdmin()">
+        <i class="fas fa-edit"></i>
+        Editar
+      </button>
+      
+      <!-- Primary Info -->
+      <div class="primary-info">
+        <div class="client-header">
+          <div class="client-avatar-section">
+            <div class="client-avatar-large" [style.background]="generateGradient(getClientName())" *ngIf="!client.logo_path">
+              {{ getInitials(getClientName()) }}
+            </div>
+            <div class="client-logo-large" *ngIf="client.logo_path">
+              <img [src]="logoUrl" [alt]="getClientName() + ' logo'" />
+            </div>
+          </div>
+          <div class="client-info">
+            <h2 class="client-name">{{ getClientName() }}</h2>
+            <div class="client-badges">
+              <span class="type-badge" [ngClass]="client.type === 'PF' ? 'badge-info' : 'badge-primary'">
+                {{ client.type === 'PF' ? 'Pessoa Física' : 'Pessoa Jurídica' }}
+              </span>
+              <span class="document-badge">{{ getClientDocument() }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Contact Information -->
+      <div class="contact-info">
+        <!-- E-mails para PF (apenas um) -->
+        <div class="info-group" *ngIf="client.type === 'PF'">
+          <span class="info-label">E-mail</span>
+          <span class="info-value">{{ client.email || 'Não informado' }}</span>
+        </div>
+        
+        <!-- E-mails para PJ (múltiplos) -->
+        <div class="info-group emails-group" *ngIf="client.type === 'PJ'">
+          <span class="info-label">E-mails da Empresa</span>
+          <div class="emails-container" *ngIf="clientEmails.length > 0; else noEmails">
+            <div class="email-item" *ngFor="let email of clientEmails; trackBy: trackByEmailId">
+              <span class="email-value">{{ email.email }}</span>
+            </div>
+          </div>
+          <ng-template #noEmails>
+            <span class="info-value">Nenhum e-mail cadastrado</span>
+          </ng-template>
+        </div>
+        
+        <div class="info-group" *ngIf="client.phone">
+          <span class="info-label">Telefone</span>
+          <span class="info-value">{{ client.phone }}</span>
+        </div>
+        <div class="info-group" *ngIf="client.type === 'PJ' && client.legal_representative">
+          <span class="info-label">Representante Legal</span>
+          <span class="info-value">{{ client.legal_representative }}</span>
+        </div>
+        <div class="info-group" *ngIf="client.type === 'PJ' && client.employee_count">
+          <span class="info-label">Nº de Funcionários</span>
+          <span class="info-value">{{ client.employee_count }}</span>
+        </div>
+        <div class="info-group">
+          <span class="info-label">Endereço</span>
+          <span class="info-value">{{ getAddress() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+      <button class="tab-button" 
+              [class.active]="isTabActive('contracts')"
+              (click)="setActiveTab('contracts')">
+        <i class="fas fa-file-contract"></i>
+        <span>Contratos</span>
+        <span class="tab-count">{{ contracts.length }}</span>
+      </button>
+      <button class="tab-button" 
+              [class.active]="isTabActive('attachments')"
+              (click)="setActiveTab('attachments')">
+        <i class="fas fa-paperclip"></i>
+        <span>Anexos</span>
+        <span class="tab-count">{{ attachmentsCount }}</span>
+      </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+      
+      <!-- Contracts Tab -->
+      <div class="tab-panel" [class.active]="isTabActive('contracts')" *ngIf="isTabActive('contracts')">
+        <div class="contracts-section-content">
+          
+          <!-- Empty State -->
+          <div *ngIf="contracts.length === 0" class="empty-state">
+            <div class="empty-icon">
+              <i class="fas fa-file-contract"></i>
+            </div>
+            <h4>Nenhum contrato encontrado</h4>
+            <p>Este cliente ainda não possui contratos cadastrados no sistema.</p>
+          </div>
+          
+          <!-- Contracts Grid -->
+          <div class="contracts-grid" *ngIf="contracts.length > 0">
+            <div *ngFor="let contract of contracts" class="contract-card" (click)="viewContract(contract.id)">
+              <div class="contract-card-header">
+                <div class="contract-number">{{ contract.contract_number }}</div>
+                <div class="status-badge" [attr.data-status]="contract.status">
+                  {{ getStatusText(contract.status) }}
+                </div>
+              </div>
+              
+              <div class="contract-card-body">
+                <div class="contract-detail">
+                  <span class="detail-label">Tipo:</span>
+                  <span class="detail-value">{{ getTypeText(contract.type) }}</span>
+                </div>
+                
+                <div class="contract-detail">
+                  <span class="detail-label">Valor:</span>
+                  <span class="detail-value">{{ formatValue(contract.total_value) }}</span>
+                </div>
+                
+                <div class="contract-detail">
+                  <span class="detail-label">Início:</span>
+                  <span class="detail-value">{{ formatDate(contract.start_date) }}</span>
+                </div>
+                
+                <div class="contract-detail" *ngIf="contract.end_date">
+                  <span class="detail-label">Fim:</span>
+                  <span class="detail-value">{{ formatDate(contract.end_date) }}</span>
+                </div>
+                
+                <div class="contract-detail">
+                  <span class="detail-label">Serviços:</span>
+                  <span class="detail-value">{{ contract.contract_services.length || 0 }} item(s)</span>
+                </div>
+              </div>
+              
+              <div class="contract-card-footer">
+                <button class="btn btn-sm btn-primary">
+                  <i class="fas fa-eye"></i>
+                  Ver Detalhes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attachments Tab -->
+      <div class="tab-panel" [class.active]="isTabActive('attachments')" *ngIf="isTabActive('attachments')">
+        <app-client-attachments [clientId]="client.id" [clientName]="getClientName()"></app-client-attachments>
+      </div>
+
+    </div>
+  </div>
+  
+</div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="loading-spinner"></div>
+    <p>Carregando cliente...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && !client && error">
+    <div class="empty-icon">
+      <i class="fas fa-user-times"></i>
+    </div>
+    <h3>{{ error }}</h3>
+    <p>Verifique se o ID do cliente está correto ou tente novamente.</p>
+  </div>

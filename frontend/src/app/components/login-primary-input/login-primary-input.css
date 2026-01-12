@@ -1,0 +1,133 @@
+@import "../../../styles/variables.css";
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.input-wrapper {
+  width: 100%;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeIn 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+.input-wrapper:nth-of-type(1) {
+  animation-delay: 0.1s;
+}
+
+.input-wrapper:nth-of-type(2) {
+  animation-delay: 0.2s;
+}
+
+.input-wrapper label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--top-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.input-content {
+  position: relative;
+  width: 100%;
+  display: block;
+}
+
+.input-content input {
+  width: 100%;
+  padding: 16px 48px 16px 20px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--top-black);
+  transition: all 0.3s ease;
+  outline: none;
+  box-sizing: border-box;
+  backdrop-filter: blur(10px);
+}
+
+.input-content input::placeholder {
+  color: var(--top-text-gray);
+  font-weight: 300;
+}
+
+.input-content input:focus {
+  border-color: var(--top-secondary);
+  box-shadow:
+    0 0 0 4px rgba(18, 176, 160, 0.15),
+    0 4px 16px rgba(18, 176, 160, 0.1);
+  background-color: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+.input-content input:hover:not(:focus) {
+  border-color: #cbd5e1;
+}
+
+.input-content .icon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-content .icon svg {
+  width: 100%;
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.input-content .icon svg path,
+.input-content .icon svg circle,
+.input-content .icon svg rect,
+.input-content .icon svg line,
+.input-content .icon svg polyline {
+  stroke: #8b95a1;
+  transition: stroke 0.3s ease;
+  stroke-width: 1.8;
+}
+
+.input-content .icon svg circle[fill] {
+  fill: #8b95a1;
+  stroke: none;
+  transition: fill 0.3s ease;
+}
+
+.input-content input:focus ~ .icon svg path,
+.input-content input:focus ~ .icon svg circle,
+.input-content input:focus ~ .icon svg rect,
+.input-content input:focus ~ .icon svg line,
+.input-content input:focus ~ .icon svg polyline {
+  stroke: var(--top-secondary);
+}
+
+.input-content input:focus ~ .icon svg circle[fill] {
+  fill: var(--top-secondary);
+}
+
+/* Animação */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

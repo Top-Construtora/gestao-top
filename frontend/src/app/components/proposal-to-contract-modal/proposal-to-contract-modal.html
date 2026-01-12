@@ -1,0 +1,234 @@
+<!-- src/app/components/proposal-to-contract-modal/proposal-to-contract-modal.html -->
+<div class="modal" [class.active]="isOpen" (click)="onBackdropClick($event)">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title">Converter Proposta em Contrato</h2>
+      <button class="close-btn" (click)="close.emit()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="proposal-info">
+        <h3>Dados da Proposta</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">Número:</span>
+            <span class="value">{{ proposal?.proposal_number }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Cliente:</span>
+            <span class="value">{{ getClientName() }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Tipo:</span>
+            <span class="value">{{ proposal?.type }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Valor Total{{ proposal?.status === 'contraproposta' ? ' (Serviços Selecionados)' : '' }}:</span>
+            <span class="value" [class.partial-signature-value]="proposal?.status === 'contraproposta'">{{ formatCurrency(getProposalFinalValue()) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Serviços da Proposta -->
+      <div class="proposal-services" *ngIf="getProposalServices().length > 0">
+        <h3>Serviços Incluídos {{ proposal?.status === 'contraproposta' ? '(Selecionados pelo Cliente)' : '' }}</h3>
+        <div class="services-grid">
+          <div *ngFor="let service of getProposalServices()" class="service-item">
+            <div class="service-header">
+              <span class="service-name">{{ service.service_name }}</span>
+              <span class="service-value">{{ formatCurrency(service.total_value || 0) }}</span>
+            </div>
+            <div class="service-details" *ngIf="service.service_description">
+              <p class="service-description">{{ stripHtmlTags(service.service_description) }}</p>
+            </div>
+            <div class="service-meta">
+              <span class="service-unit-value">Valor unitário: {{ formatCurrency(service.unit_value || 0) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <form class="contract-form" (ngSubmit)="onSubmit()" #contractForm="ngForm">
+        <h3>Informações Adicionais do Contrato</h3>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Data de Início <span class="required">*</span></label>
+            <input
+              type="date"
+              class="form-control"
+              [(ngModel)]="contractData.start_date"
+              name="start_date"
+              required
+              [min]="today"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Data de Término</label>
+            <input
+              type="date"
+              class="form-control"
+              [(ngModel)]="contractData.end_date"
+              name="end_date"
+              [min]="contractData.start_date"
+            />
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Forma de Pagamento</label>
+            <select
+              class="form-control"
+              [(ngModel)]="contractData.payment_method"
+              name="payment_method"
+              (ngModelChange)="onPaymentMethodChange()"
+            >
+              <option value="">Selecione a forma de pagamento</option>
+              <option *ngFor="let method of paymentMethods" [value]="method.value">
+                {{ method.label }}
+              </option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Data Prevista para Pagamento</label>
+            <input
+              type="date"
+              class="form-control"
+              [(ngModel)]="contractData.expected_payment_date"
+              name="expected_payment_date"
+              [disabled]="contractData.installment_count > 1 && isPaymentMethodInstallable(contractData.payment_method)"
+            />
+            <span class="help-text" *ngIf="contractData.installment_count > 1 && isPaymentMethodInstallable(contractData.payment_method)">
+              <i class="fas fa-info-circle"></i>
+              Data automaticamente definida como vencimento da última parcela
+            </span>
+          </div>
+        </div>
+
+        <!-- Campos de Parcelamento -->
+        <div *ngIf="isPaymentMethodInstallable(contractData.payment_method)" class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Número de Parcelas</label>
+            <select 
+              class="form-control" 
+              [(ngModel)]="contractData.installment_count" 
+              (ngModelChange)="onInstallmentCountChange($event)"
+              name="installmentCount">
+              <option value="1">À vista</option>
+              <option *ngFor="let i of [2,3,4,5,6,7,8,9,10,11,12,18,24,36]" [value]="i">
+                {{ i }}x
+              </option>
+            </select>
+          </div>
+          
+          <div class="form-group" *ngIf="contractData.installment_count > 1">
+            <label class="form-label">Primeira Parcela</label>
+            <input 
+              type="date" 
+              class="form-control" 
+              [(ngModel)]="firstInstallmentDate"
+              (ngModelChange)="onFirstInstallmentDateChange($event)"
+              name="firstInstallmentDate">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Status do Pagamento</label>
+          <select
+            class="form-control"
+            [(ngModel)]="contractData.payment_status"
+            name="payment_status"
+          >
+            <option value="pendente">Pendente</option>
+            <option value="pago">Pago</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Usuários Atribuídos</label>
+          <div class="user-section">
+            <button 
+              type="button" 
+              class="btn btn-secondary btn-sm" 
+              (click)="openUserModal()">
+              <i class="fas fa-plus"></i> 
+              Adicionar Usuário
+            </button>
+            
+            <div *ngIf="assignedUsers.length === 0" class="no-users-message">
+              Nenhum usuário atribuído. O criador do contrato será automaticamente definido como proprietário.
+            </div>
+
+            <div *ngFor="let assignedUser of assignedUsers" class="user-assignment-row">
+              <div class="user-details">
+                <span class="user-name">{{ assignedUser.user.name }}</span>
+                <span class="user-email">{{ assignedUser.user.email }}</span>
+              </div>
+              <div class="user-controls">
+                <select 
+                  class="form-control form-control-sm" 
+                  [(ngModel)]="assignedUser.role"
+                  [name]="'role_' + assignedUser.user.id">
+                  <option value="editor">Editor</option>
+                  <option value="viewer">Visualizador</option>
+                </select>
+                <button type="button" class="remove-btn" (click)="removeUser(assignedUser)" title="Remover usuário">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Observações</label>
+          <textarea
+            class="form-control"
+            [(ngModel)]="contractData.notes"
+            name="notes"
+            rows="3"
+            placeholder="Adicione observações sobre este contrato..."
+          ></textarea>
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="close.emit()">
+        Cancelar
+      </button>
+      <button 
+        type="button" 
+        class="btn btn-primary" 
+        (click)="onSubmit()"
+        [disabled]="!contractForm.form.valid || isLoading">
+        <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
+        <i class="fas fa-file-contract" *ngIf="!isLoading"></i>
+        {{ isLoading ? 'Convertendo...' : 'Converter em Contrato' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<app-user-selection-modal
+  [isOpen]="isUserModalOpen"
+  [allUsers]="allUsers"
+  [initialSelectedIds]="getAssignedUserIds()"
+  (close)="closeUserModal()"
+  (selectionConfirmed)="updateAssignedUsers($event)"
+>
+</app-user-selection-modal>
+
+<app-view-contract-confirmation-modal
+  [isVisible]="showViewContractModal"
+  [contractNumber]="createdContractNumber"
+  [contractId]="createdContractId"
+  (onViewContract)="onViewContract()"
+  (onCancel)="onCancelViewContract()"
+>
+</app-view-contract-confirmation-modal>

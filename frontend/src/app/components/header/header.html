@@ -1,0 +1,77 @@
+<header class="header" [class.search-open]="isSearchActive">
+  <div class="header-content">
+    <button class="mobile-menu-btn" (click)="toggleMobileSidebar.emit()">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <a class="logo" routerLink="/home/dashboard">
+        <img src="top.png" alt="TOP Construtora" class="logo-image">
+    </a>
+
+    <div class="datetime-display">
+      <div class="date-info">
+        <div class="date-line">
+          <span class="day-name">{{ currentDayName }}</span>
+          <span class="date-separator">•</span>
+          <span class="month-day">{{ currentDate }}</span>
+          <span class="year">{{ currentYear }}</span>
+        </div>
+      </div>
+      <div class="time-info">
+        <i class="fas fa-clock time-icon"></i>
+        <span class="time-text">{{ currentTime }}</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        class="notification-btn"
+        (click)="toggleNotifications.emit()"
+        [class.has-notifications]="unreadNotificationsCount > 0"
+      >
+        <i class="fas fa-bell"></i>
+        <span class="notification-badge" *ngIf="unreadNotificationsCount > 0">
+          {{ unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount }}
+        </span>
+      </button>
+
+      <div class="header-actions">
+        <div class="user-menu-wrapper">
+          <div class="user-info" (click)="toggleUserMenu()" [class.open]="isUserMenuOpen">
+            <div class="user-avatar" *ngIf="!profilePictureUrl">{{ userInitials }}</div>
+            <img *ngIf="profilePictureUrl" [src]="profilePictureUrl" alt="Foto de perfil" class="user-profile-picture">
+            <i class="fas fa-chevron-down dropdown-arrow" [class.rotate]="isUserMenuOpen"></i>
+          </div>
+          
+          <div class="user-dropdown" *ngIf="isUserMenuOpen">
+            <div class="user-dropdown-header">
+              <div class="user-avatar-large" *ngIf="!profilePictureUrl">{{ userInitials }}</div>
+              <img *ngIf="profilePictureUrl" [src]="profilePictureUrl" alt="Foto de perfil" class="user-profile-picture-large">
+              <div class="user-dropdown-info">
+                <div class="user-dropdown-name">{{ userName }}</div>
+                <div class="user-dropdown-role"><i class="fas fa-shield-alt"></i> {{ userRole }}</div>
+              </div>
+            </div>
+            <ul class="user-dropdown-menu">
+              <li>
+                <a routerLink="/home/configuracoes" (click)="closeUserMenu()">
+                  <i class="fas fa-cog"></i>
+                  Configurações
+                </a>
+              </li>
+              <li class="divider"></li>
+              <li>
+                <a href="#" (click)="handleLogout($event)" class="logout-link">
+                  <i class="fas fa-sign-out-alt"></i>
+                  Sair
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</header>

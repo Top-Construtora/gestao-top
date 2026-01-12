@@ -1,0 +1,115 @@
+<div class="settings-page-content">
+  <div class="page-header">
+    <h1 class="page-title">Configurações</h1>
+    <app-breadcrumb></app-breadcrumb>
+  </div>
+
+  <div class="table-container">
+    <div class="settings-tabs">
+      <button *ngFor="let tab of tabs" 
+              type="button"
+              class="tab-button" 
+              [class.active]="activeTab === tab.id"
+              (click)="setActiveTab(tab.id)">
+        <i [class]="tab.icon"></i>
+        <span>{{ tab.label }}</span>
+      </button>
+    </div>
+    
+    <div class="settings-content">
+      <div *ngIf="activeTab === 'general'" class="settings-panel">
+        <div class="settings-card">
+          <div class="card-header">
+            <div class="card-icon">
+              <i class="fas fa-user"></i>
+            </div>
+            <div class="card-title-group">
+              <h3 class="card-title">Informações do Usuário</h3>
+              <p class="card-subtitle">Dados básicos da sua conta no sistema</p>
+            </div>
+          </div>
+          
+          <div class="card-content">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Nome Completo</label>
+                <div class="input-wrapper">
+                  <input type="text" class="form-control" [(ngModel)]="usuario.nome" disabled>
+                  <span class="input-hint">
+                    <i class="fas fa-info-circle"></i>
+                    Este campo não pode ser editado
+                  </span>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <div class="input-wrapper">
+                  <input type="email" class="form-control" [(ngModel)]="usuario.email" disabled>
+                  <span class="input-hint">
+                    <i class="fas fa-info-circle"></i>
+                    Entre em contato com o administrador para alterar
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div *ngIf="activeTab === 'security'" class="settings-panel">
+        <div class="settings-card">
+          <div class="card-header">
+            <div class="card-icon">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="card-title-group">
+              <h3 class="card-title">Segurança da Conta</h3>
+              <p class="card-subtitle">Mantenha sua conta segura e protegida</p>
+            </div>
+          </div>
+          
+          <div class="card-content">
+            <div class="security-info">
+              <div class="info-item">
+                <div class="info-icon">
+                  <i class="fas fa-clock"></i>
+                </div>
+                <div class="info-content">
+                  <span class="info-label">Última alteração de senha</span>
+                  <span class="info-value">{{ formatarData(seguranca.ultimaAlteracaoSenha) }}</span>
+                </div>
+              </div>
+              
+              <div class="info-item">
+                <div class="info-icon">
+                  <i class="fas fa-shield-check"></i>
+                </div>
+                <div class="info-content">
+                  <span class="info-label">Força da senha</span>
+                  <div class="password-strength">
+                    <div class="strength-bar">
+                      <div class="strength-fill"></div>
+                    </div>
+                    <span class="strength-text">Forte</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="security-actions">
+              <div class="action-info">
+                <i class="fas fa-info-circle"></i>
+                <p>Recomendamos que você altere sua senha periodicamente para manter sua conta segura.</p>
+              </div>
+              <button class="btn btn-primary" (click)="alterarSenha()">
+                <i class="fas fa-key"></i>
+                Alterar Senha
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

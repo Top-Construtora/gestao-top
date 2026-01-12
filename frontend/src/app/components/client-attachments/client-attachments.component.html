@@ -1,0 +1,117 @@
+<div class="attachments-section">
+
+  <!-- Error Message -->
+  <div class="alert alert-danger" *ngIf="error">
+    <i class="fas fa-exclamation-circle"></i>
+    {{ error }}
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="loading-spinner"></div>
+    <span>Carregando anexos...</span>
+  </div>
+
+  <!-- Upload Drop Zone - Always visible -->
+  <div class="upload-section" *ngIf="!isLoading">
+    <div class="file-drop-zone" 
+         [class.drag-over]="dragOver && !isUploading"
+         [class.uploading]="isUploading"
+         (dragover)="onDragOver($event)"
+         (dragleave)="onDragLeave($event)"
+         (drop)="onDrop($event)"
+         (click)="!isUploading && fileInput.click()">
+      
+      <div class="drop-zone-content" *ngIf="!isUploading">
+        <div class="drop-icon">
+          <i class="fas fa-cloud-upload-alt"></i>
+        </div>
+        <p class="drop-text">
+          <strong>Clique para selecionar</strong> ou arraste arquivos aqui
+        </p>
+        <p class="drop-subtitle">
+          Máximo 25MB por arquivo • PDF, Word, Excel, Imagens, Texto, ZIP
+        </p>
+      </div>
+
+      <!-- Upload Progress -->
+      <div class="upload-status" *ngIf="isUploading">
+        <div class="uploading-icon">
+          <i class="fas fa-spinner fa-spin"></i>
+        </div>
+        <div class="upload-info">
+          <p class="upload-main-text">Enviando {{ totalUploads }} arquivo(s)...</p>
+          <div class="current-file" *ngIf="currentUploadingFile">
+            {{ currentUploadingFile }}
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+          </div>
+          <div class="progress-text">
+            {{ currentUploadIndex + 1 }} de {{ totalUploads }} - {{ uploadProgress }}%
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <input #fileInput 
+           type="file" 
+           class="file-input" 
+           multiple
+           (change)="onFileSelected($event)">
+  </div>
+
+  <!-- Attachments Grid -->
+  <div class="attachments-container" *ngIf="!isLoading">
+    <div class="attachments-header" *ngIf="attachments.length > 0">
+      <h4><i class="fas fa-paperclip"></i> Anexos ({{ attachments.length }})</h4>
+    </div>
+    
+    <div class="empty-state" *ngIf="attachments.length === 0">
+      <div class="empty-icon">
+        <i class="fas fa-paperclip"></i>
+      </div>
+      <p>Nenhum anexo encontrado. Arraste arquivos na área acima para começar.</p>
+    </div>
+
+    <div class="attachments-grid" *ngIf="attachments.length > 0">
+      <div *ngFor="let attachment of attachments" class="attachment-card">
+        <div class="attachment-header">
+          <div class="file-icon">
+            <i [class]="getFileIcon(attachment)"></i>
+          </div>
+          <div class="file-actions">
+            <button class="action-btn" 
+                    (click)="viewAttachment(attachment)" 
+                    title="Visualizar/Baixar">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button class="action-btn action-btn-danger" 
+                    (click)="deleteAttachment(attachment)"
+                    *ngIf="canDeleteAttachment(attachment)" 
+                    title="Excluir">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="attachment-body">
+          <div class="file-name" [title]="attachment.original_name">
+            {{ attachment.original_name }}
+          </div>
+          
+          <div class="file-meta">
+            <span class="file-size">{{ formatFileSize(attachment.file_size) }}</span>
+          </div>
+          
+          <div class="file-info">
+            <span class="uploaded-by">Por {{ attachment.uploader_name || 'Usuário' }}</span>
+            <span class="uploaded-date">{{ formatDate(attachment.uploaded_at) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+

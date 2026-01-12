@@ -1,0 +1,40 @@
+<div class="modal-overlay" *ngIf="isVisible" (click)="cancel()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <i class="fas fa-file-contract"></i>
+        Contrato Criado com Sucesso!
+      </h3>
+      <button class="modal-close" (click)="cancel()" aria-label="Fechar modal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="success-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      
+      <div class="modal-message">
+        <p>Proposta convertida com sucesso!</p>
+        <p class="contract-info">
+          <strong>Contrato: {{ contractNumber }}</strong>
+        </p>
+        <p class="modal-question">
+          Deseja visualizar o novo contrato criado?
+        </p>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="cancel()">
+        <i class="fas fa-times"></i>
+        Não, obrigado
+      </button>
+      <button class="btn btn-primary" (click)="viewContract()">
+        <i class="fas fa-eye"></i>
+        Sim, visualizar contrato
+      </button>
+    </div>
+  </div>
+</div>

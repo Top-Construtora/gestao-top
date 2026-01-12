@@ -1,0 +1,320 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">{{ isEditMode ? 'Editar Serviço' : 'Novo Serviço' }}</h1>
+    <app-breadcrumb></app-breadcrumb>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <i class="fas fa-spinner fa-spin"></i>
+    Carregando dados do serviço...
+  </div>
+
+  <!-- Form -->
+  <div class="form-container" *ngIf="!isLoading">
+    <form (ngSubmit)="save($event)" class="service-form">
+      <div class="form-layout">
+        
+        <!-- COLUNA ESQUERDA - Informações Básicas -->
+        <div class="left-column">
+          
+          <!-- Seção Informações Básicas -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-tag"></i>
+              Informações Básicas
+            </h3>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label required">Nome do Serviço</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="formData.name"
+                  name="name"
+                  placeholder="Ex: Consultoria Estratégica"
+                  [class.error]="formSubmitted && errors.name"
+                  maxlength="255">
+                <span class="error-message" *ngIf="formSubmitted && errors.name">{{ errors.name }}</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Categoria</label>
+                <select
+                  class="form-control"
+                  [(ngModel)]="formData.category"
+                  name="category">
+                  <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Subtítulo (Opcional)</label>
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="formData.subtitle"
+                name="subtitle"
+                placeholder="Ex: Solução estratégica para otimização de resultados"
+                maxlength="255">
+              <div class="help-text">Aparece logo abaixo do nome do serviço nas propostas</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Resumo (Opcional)</label>
+              <textarea
+                class="form-control"
+                [(ngModel)]="formData.summary"
+                name="summary"
+                placeholder="Ex: Implementação completa com acompanhamento especializado, suporte técnico dedicado..."
+                rows="3"
+                maxlength="500"></textarea>
+              <div class="help-text">Breve descrição que aparece na visualização rápida do serviço</div>
+            </div>
+
+            <div class="form-group" *ngIf="isEditMode">
+              <label class="form-label">Status do Serviço</label>
+              <div class="status-toggle-group">
+                <label class="toggle-switch">
+                  <input 
+                    type="checkbox" 
+                    [(ngModel)]="formData.is_active"
+                    name="is_active">
+                  <span class="toggle-slider"></span>
+                  <span class="toggle-label">{{ formData.is_active ? 'Ativo' : 'Inativo' }}</span>
+                </label>
+                <div class="help-text">Serviços inativos não aparecem para seleção em novos contratos</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção Duração -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-clock"></i>
+              Duração e Prazo
+            </h3>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label required">Tipo de Duração</label>
+                <select 
+                  class="form-control" 
+                  [(ngModel)]="formData.duration_unit"
+                  name="duration_unit"
+                  (change)="onDurationUnitChange()">
+                  <option value="dias">Dias</option>
+                  <option value="semanas">Semanas</option>
+                  <option value="meses">Meses</option>
+                  <option value="encontros">Encontros</option>
+                  <option value="Projeto">Projeto</option>
+                </select>
+              </div>
+
+              <div class="form-group" *ngIf="formData.duration_unit !== 'Projeto'">
+                <label class="form-label required">Quantidade</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  [(ngModel)]="formData.duration_amount"
+                  name="duration_amount"
+                  min="1"
+                  placeholder="Ex: 30"
+                  [class.error]="formSubmitted && errors.duration">
+                <span class="error-message" *ngIf="formSubmitted && errors.duration">{{ errors.duration }}</span>
+              </div>
+            </div>
+
+            <div class="form-group" *ngIf="formData.duration_unit === 'Projeto'">
+              <div class="help-text">
+                <i class="fas fa-info-circle"></i>
+                Duração do tipo "Projeto" não requer especificação de tempo, pois varia conforme o escopo do projeto.
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção Descrição -->
+          <div class="form-section description-section">
+            <div class="section-header-enhanced">
+              <div class="section-title-wrapper">
+                <h3 class="section-title">
+                  <i class="fas fa-file-alt"></i>
+                  Descrição do Serviço
+                </h3>
+              </div>
+            </div>
+
+            <div class="editor-container">
+              <div class="editor-toolbar-wrapper">
+                <div class="toolbar-section">
+                  <div class="toolbar-group">
+                    <label class="toolbar-label">Formatação</label>
+                    <div class="toolbar-buttons">
+                      <!-- Dropdown de Título -->
+                      <div class="title-dropdown enhanced">
+                        <button type="button"
+                                class="toolbar-btn dropdown-toggle"
+                                (click)="toggleTitleDropdown()"
+                                title="Tamanho do texto">
+                          <i class="fas fa-heading"></i>
+                          <span>{{ selectedTitle }}</span>
+                          <i class="fas fa-caret-down"></i>
+                        </button>
+                        <div class="dropdown-menu enhanced" *ngIf="showTitleDropdown">
+                          <button type="button"
+                                  class="dropdown-item"
+                                  *ngFor="let option of titleOptions"
+                                  (click)="applyTitle(option)">
+                            <span class="dropdown-icon">{{ option.icon || 'T' }}</span>
+                            {{ option.label }}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="toolbar-group">
+                    <label class="toolbar-label">Ferramentas</label>
+                    <div class="toolbar-buttons">
+                      <ngx-editor-menu [editor]="editor" [toolbar]="toolbar"></ngx-editor-menu>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <ngx-editor
+                [editor]="editor"
+                [(ngModel)]="formData.description"
+                name="description"
+                [placeholder]="'Descreva detalhadamente o serviço: objetivos, metodologia, benefícios...'"
+                class="enhanced-editor"
+                [class.has-content]="formData.description && formData.description.length > 0"
+              ></ngx-editor>
+
+              <div class="editor-footer">
+                <span class="char-count">
+                  <i class="fas fa-keyboard"></i>
+                  {{ descriptionTextLength }}/10000 caracteres
+                </span>
+              </div>
+
+              <span class="error-message" *ngIf="formSubmitted && errors.description">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ errors.description }}
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- COLUNA DIREITA - Etapas -->
+        <div class="right-column">
+          <div class="form-section">
+            <div class="section-header">
+              <h3 class="section-title">
+                <i class="fas fa-tasks"></i>
+                Etapas do Serviço
+              </h3>
+              <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                (click)="addStage()"
+                [disabled]="isSaving"
+              >
+                <i class="fas fa-plus"></i>
+                Nova Etapa
+              </button>
+            </div>
+
+            <!-- Estado vazio -->
+            <div class="empty-stages" *ngIf="serviceStages.length === 0">
+              <div class="empty-icon">
+                <i class="fas fa-list-check"></i>
+              </div>
+              <h4>Nenhuma etapa definida</h4>
+              <p>As etapas ajudam a organizar e acompanhar o progresso durante a execução do serviço</p>
+              <button type="button" class="btn btn-primary btn-sm" (click)="addStage()">
+                <i class="fas fa-plus"></i>
+                Adicionar Primeira Etapa
+              </button>
+            </div>
+
+            <!-- Lista de etapas -->
+            <div class="stages-list" *ngIf="serviceStages.length > 0">
+              <div class="stage-item" *ngFor="let stage of serviceStages; let i = index">
+                <button type="button" class="btn-remove-stage" 
+                        (click)="removeStage(i)"
+                        title="Remover etapa">
+                  <i class="fas fa-trash"></i>
+                </button>
+                <div class="stage-header">
+                  <div class="stage-number">{{ i + 1 }}</div>
+                </div>
+                <div class="stage-content">
+                  <div class="form-row">
+                    <div class="form-group form-group-name">
+                      <input 
+                        type="text" 
+                        class="form-control"
+                        [(ngModel)]="stage.name"
+                        name="stageName{{ i }}"
+                        placeholder="Nome da etapa"
+                        [class.error]="formSubmitted && stage.error">
+                      <span class="error-message" *ngIf="formSubmitted && stage.error">{{ stage.error }}</span>
+                    </div>
+                    <div class="form-group form-group-category">
+                      <input 
+                        type="text" 
+                        class="form-control"
+                        [(ngModel)]="stage.category"
+                        name="stageCategory{{ i }}"
+                        placeholder="Categoria (opcional)">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <textarea 
+                      class="form-control"
+                      [(ngModel)]="stage.description"
+                      name="stageDescription{{ i }}"
+                      placeholder="Descrição da etapa (opcional)"
+                      rows="2"></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botão Nova Etapa no canto inferior direito -->
+            <div class="stages-footer">
+              <button
+                type="button"
+                class="btn btn-primary btn-sm btn-add-stage"
+                (click)="addStage()"
+                [disabled]="isSaving"
+              >
+                <i class="fas fa-plus"></i>
+                Nova Etapa
+              </button>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">
+          <i class="fas fa-times"></i>
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="isSaving">
+          <i class="fas fa-save" *ngIf="!isSaving"></i>
+          <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+          {{ isEditMode ? 'Atualizar' : 'Criar' }} Serviço
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

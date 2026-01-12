@@ -1,0 +1,117 @@
+:root {
+    /* Cores da Identidade Visual TOP Construtora */
+    --top-black: #282C2A;
+    --top-dark-blue: #1e6076;
+    --top-primary: #1e6076;         /* Cor primária - azul esverdeado */
+    --top-secondary: #12b0a0;       /* Verde água como secundária */
+    --top-accent: #baa673;          /* Dourado como cor de destaque */
+
+    /* Cores derivadas */
+    --top-primary-hover: #164b5d;   /* Hover da cor primária */
+    --top-primary-light: rgba(30, 96, 118, 0.15);
+    --top-secondary-light: rgba(18, 176, 160, 0.15);
+    --top-accent-light: rgba(186, 166, 115, 0.15);
+    --top-gray-light: #f8f9fa;
+    --top-gray-border: #e5e7eb;
+    --top-text-gray: #6b7280;
+    --top-white: #FFFFFF;
+
+    /* Sistema de cores para compatibilidade */
+    --primary-green: #1e6076;        /* Principal - azul esverdeado */
+    --primary-green-alt: #2a7a95;    /* Tom alternativo */
+    --primary-green-dark: #164b5d;   /* Tom escuro */
+    --primary-green-darker: #0d3340; /* Mais escuro */
+    --primary-green-light: #4ca3c7;  /* Tom claro */
+
+    /* Para manter compatibilidade com variáveis antigas */
+    --naue-neon-green: #12b0a0;      /* Agora aponta para a cor secundária */
+    --naue-neon-green-hover: #0e8c7e;
+    --naue-neon-green-light: rgba(18, 176, 160, 0.15);
+
+    /* Variáveis antigas mapeadas para novas cores */
+    --naue-black: #282C2A;
+    --naue-dark-green: #1e6076;
+    --naue-primary: #1e6076;
+    --naue-secondary: #12b0a0;
+    --naue-primary-hover: #164b5d;
+    --naue-primary-light: rgba(30, 96, 118, 0.15);
+    --naue-dark-green-light: rgba(30, 96, 118, 0.1);
+    --naue-gray-light: #f8f9fa;
+    --naue-gray-border: #e5e7eb;
+    --naue-text-gray: #6b7280;
+    --naue-white: #FFFFFF;
+
+    /* Escala completa de cores primárias (azul esverdeado) */
+    --green-50: #e8f3f6;    /* Muito claro - backgrounds */
+    --green-100: #c7e4ec;   /* Claro - hover backgrounds */
+    --green-200: #9dd3de;   /* Claro médio - badges */
+    --green-300: #73c1d0;   /* Médio claro - bordas ativas */
+    --green-400: #4db0c2;   /* Médio - ícones secundários */
+    --green-500: #1e6076;   /* PRIMÁRIA - botões, links */
+    --green-600: #164b5d;   /* Escuro - hover states */
+    --green-700: #1e6076;   /* SECUNDÁRIA - textos, headers */
+    --green-800: #0d3340;   /* Muito escuro - ênfase */
+    --green-900: #061a20;   /* Extra escuro - sombras */
+
+    /* Cores neutras */
+    --dark-gray: #282C2A;
+    --medium-gray: #2C2C2C;
+    --light-gray: #f8f9fa;
+    --bg-light: #f9fafb;
+    --white: #FFFFFF;
+    --border-gray: #e5e7eb;
+    --text-gray: #6b7280;
+    --text-dark: #111827;
+
+    /* Cores de status */
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #12b0a0;        /* Usando a cor secundária para info */
+
+    /* Sombras */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    /* Dark mode variables */
+    --dark-bg: #121212;
+    --dark-card: #1e1e1e;
+    --dark-text: #f0f0f0;
+    --dark-border: #333333;
+
+    /* Tipografia - Sistema de fontes */
+    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    --font-secondary: Georgia, 'Times New Roman', serif;
+
+    /* Tamanhos de fonte */
+    --text-xs: 12px;
+    --text-sm: 14px;
+    --text-base: 16px;
+    --text-lg: 18px;
+    --text-xl: 20px;
+    --text-2xl: 24px;
+    --text-3xl: 32px;
+    --text-4xl: 40px;
+
+    /* Espaçamentos */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
+
+    /* Border radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
+
+    /* Transições */
+    --transition-fast: 0.15s ease-in-out;
+    --transition-base: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}

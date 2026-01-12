@@ -1,0 +1,224 @@
+<div class="modal-overlay" *ngIf="isVisible" (click)="close()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>
+        <span *ngIf="currentStep === 'client'">Dados do Cliente</span>
+        <span *ngIf="currentStep === 'email'">Enviar por Email</span>
+        <span *ngIf="currentStep === 'success'">Proposta Enviada!</span>
+      </h2>
+      <button class="close-button" (click)="close()" [disabled]="isLoading">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-content">
+      <!-- Step 1: Client Data -->
+      <div *ngIf="currentStep === 'client'" class="step-content">
+        <div class="step-description">
+          <p>Informe os dados do cliente que receberá a proposta:</p>
+        </div>
+
+        <form [formGroup]="clientForm" class="client-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="client_name">Nome do Cliente *</label>
+              <input 
+                type="text" 
+                id="client_name"
+                formControlName="client_name"
+                [class.error]="isFieldInvalid(clientForm, 'client_name')"
+                placeholder="Nome completo do cliente">
+              <div *ngIf="isFieldInvalid(clientForm, 'client_name')" class="error-message">
+                Nome do cliente é obrigatório
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="client_email">Email do Cliente *</label>
+              <input 
+                type="email" 
+                id="client_email"
+                formControlName="client_email"
+                [class.error]="isFieldInvalid(clientForm, 'client_email')"
+                placeholder="email@exemplo.com">
+              <div *ngIf="isFieldInvalid(clientForm, 'client_email')" class="error-message">
+                Email válido é obrigatório
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="client_phone">Telefone</label>
+              <input 
+                type="tel" 
+                id="client_phone"
+                formControlName="client_phone"
+                placeholder="(11) 99999-9999">
+            </div>
+
+            <div class="form-group">
+              <label for="client_document">CPF/CNPJ</label>
+              <input 
+                type="text" 
+                id="client_document"
+                formControlName="client_document"
+                placeholder="000.000.000-00">
+            </div>
+          </div>
+        </form>
+
+        <div class="action-buttons">
+          <button class="btn-secondary" (click)="close()" [disabled]="isLoading">
+            Cancelar
+          </button>
+          <button 
+            class="btn-primary" 
+            (click)="prepareProposal()" 
+            [disabled]="isLoading || clientForm.invalid">
+            <span *ngIf="isLoading">Preparando...</span>
+            <span *ngIf="!isLoading">Continuar</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Email Configuration -->
+      <div *ngIf="currentStep === 'email'" class="step-content">
+        <div class="step-description">
+          <p>Configure o email que será enviado ao cliente:</p>
+        </div>
+
+        <!-- Public URL Display -->
+        <div class="public-url-section">
+          <h3>Link da Proposta Interativa</h3>
+          <div class="url-container">
+            <input 
+              type="text" 
+              [value]="publicUrl" 
+              readonly 
+              class="url-input">
+            <div class="url-actions">
+              <button class="btn-copy" (click)="copyPublicUrl()" title="Copiar link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
+              <button class="btn-open" (click)="openPublicUrl()" title="Abrir link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15,3 21,3 21,9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </button>
+              <button class="btn-regenerate" (click)="regenerateToken()" title="Gerar novo link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23,4 23,10 17,10"></polyline>
+                  <path d="M20.49,15a9,9,0,1,1-2.12-9.36L23,10"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <p class="url-description">
+            O cliente poderá acessar este link para visualizar, selecionar serviços e assinar a proposta.
+          </p>
+        </div>
+
+        <form [formGroup]="emailForm" class="email-form">
+          <div class="form-group">
+            <label for="email">Email de Destino *</label>
+            <input 
+              type="email" 
+              id="email"
+              formControlName="email"
+              [class.error]="isFieldInvalid(emailForm, 'email')"
+              placeholder="email@exemplo.com">
+            <div *ngIf="isFieldInvalid(emailForm, 'email')" class="error-message">
+              Email válido é obrigatório
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="subject">Assunto</label>
+            <input 
+              type="text" 
+              id="subject"
+              formControlName="subject"
+              placeholder="Assunto do email">
+          </div>
+
+          <div class="form-group">
+            <label for="message">Mensagem Personalizada</label>
+            <textarea 
+              id="message"
+              formControlName="message"
+              rows="6"
+              placeholder="Digite uma mensagem personalizada...">
+            </textarea>
+          </div>
+        </form>
+
+        <div class="action-buttons">
+          <button class="btn-secondary" (click)="backToClient()" [disabled]="isLoading">
+            Voltar
+          </button>
+          <button 
+            class="btn-primary" 
+            (click)="sendProposal()" 
+            [disabled]="isLoading || emailForm.invalid">
+            <span *ngIf="isLoading">Enviando...</span>
+            <span *ngIf="!isLoading">Enviar Proposta</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Success -->
+      <div *ngIf="currentStep === 'success'" class="step-content success-content">
+        <div class="success-icon">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22,4 12,14.01 9,11.01"></polyline>
+          </svg>
+        </div>
+
+        <h3>Proposta Enviada com Sucesso!</h3>
+        
+        <div class="success-details">
+          <p>A proposta foi enviada para <strong>{{ proposal?.client_email }}</strong></p>
+          <p>O cliente receberá um email com o link para visualizar e assinar a proposta.</p>
+          
+          <div class="public-url-final">
+            <h4>Link da Proposta:</h4>
+            <div class="url-container">
+              <input 
+                type="text" 
+                [value]="publicUrl" 
+                readonly 
+                class="url-input">
+              <button class="btn-copy" (click)="copyPublicUrl()" title="Copiar link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button class="btn-primary" (click)="close()">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div *ngIf="isLoading" class="loading-overlay">
+      <div class="loading-spinner"></div>
+    </div>
+  </div>
+</div>

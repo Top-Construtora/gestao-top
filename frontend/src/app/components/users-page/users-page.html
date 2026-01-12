@@ -1,0 +1,152 @@
+<!-- src/app/components/users-page/users-page.component.html -->
+<div class="page-header">
+  <h1 class="page-title">Usuários</h1>
+  <app-breadcrumb></app-breadcrumb>
+</div>
+
+<div class="table-section">
+  <div class="table-header">
+    <h2 class="table-title">Lista de Usuários</h2>
+    <!-- Botão Novo Usuário - APENAS para Admin -->
+    <button *ngIf="canManageUsers" class="btn btn-primary" (click)="openNewUserPage()">
+      <i class="fas fa-plus"></i>
+      Novo Usuário
+    </button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab" [class.active]="currentFilter === 'active'" (click)="setFilter('active')">
+      Ativos
+    </button>
+    <button class="tab" [class.active]="currentFilter === 'inactive'" (click)="setFilter('inactive')">
+      Inativos
+    </button>
+    <button class="tab" [class.active]="currentFilter === 'all'" (click)="setFilter('all')">
+      Todos
+    </button>
+  </div>
+  
+  <!-- Loading state -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <span>Carregando usuários...</span>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="error && !loading" class="error-container">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+    <span>{{ error }}</span>
+    <button class="retry-btn" (click)="loadUsers()">Tentar novamente</button>
+  </div>
+  
+  <!-- Users table -->
+  <div class="table-wrapper" *ngIf="!loading && !error">
+    <table class="users-table" *ngIf="users.length > 0">
+      <thead>
+        <tr>
+          <th>USUÁRIO</th>
+          <th>EMAIL</th>
+          <th>PERMISSÃO</th>
+          <th>AÇÕES</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of users; trackBy: trackByUserId">
+          <td>
+            <div class="user-cell">
+              <div class="user-avatar" [style.background]="user.avatarGradient" *ngIf="!user.profilePictureUrl">
+                {{ user.initials }}
+              </div>
+              <img *ngIf="user.profilePictureUrl" [src]="user.profilePictureUrl" alt="Foto de perfil" class="user-profile-picture">
+              <div class="user-info">
+                <div class="user-name">{{ user.name }}</div>
+                <div class="user-cargo" *ngIf="user.cargo">{{ user.cargo }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="user-email">{{ user.email }}</div>
+          </td>
+          <td>
+            <span class="permission-badge"
+                  [class.permission-admin]="user.permission === 'Admin'"
+                  [class.permission-admin-gerencial]="user.permission === 'Admin Gerencial'"
+                  [class.permission-consultor-rs]="user.permission === 'Consultor R&S'"
+                  [class.permission-colaborador]="user.permission === 'Colaborador'">
+              {{ user.permission }}
+            </span>
+          </td>
+          <td>
+            <!-- Ações - APENAS para Admin -->
+            <div class="actions-cell" *ngIf="canManageUsers">
+              <button class="action-btn"
+                      title="Editar"
+                      (click)="editUser(user.id); $event.stopPropagation()">
+                <i class="fas fa-edit"></i>
+              </button>
+              <div class="dropdown-container" [class.open]="user.id === openDropdownId">
+                <button class="action-btn dropdown-toggle"
+                        title="Mais ações"
+                        (click)="toggleDropdown(user.id, $event); $event.stopPropagation()">
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <div class="dropdown-menu" *ngIf="user.id === openDropdownId">
+                  <button class="dropdown-item" 
+                          (click)="toggleUserStatus(user); $event.stopPropagation()">
+                    <i [class]="user.status === 'active' ? 'fas fa-user-slash' : 'fas fa-user-check'"></i>
+                    {{ user.status === 'active' ? 'Desativar usuário' : 'Ativar usuário' }}
+                  </button>
+                  <button class="dropdown-item" 
+                          (click)="resetPassword(user); $event.stopPropagation()">
+                    <i class="fas fa-key"></i>
+                    Resetar senha
+                  </button>
+                  <button class="dropdown-item" 
+                          (click)="toggleTeamVisibility(user); $event.stopPropagation()">
+                    <i [class]="user.show_in_team ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                    {{ user.show_in_team ? 'Remover da equipe pública' : 'Adicionar à equipe pública' }}
+                  </button>
+                  <div class="dropdown-divider"></div>
+                  <button class="dropdown-item danger" 
+                          (click)="deleteUser(user.id, user.name); $event.stopPropagation()">
+                    <i class="fas fa-trash"></i>
+                    Excluir usuário
+                  </button>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="users.length === 0">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>
+      <h3>{{ getEmptyStateTitle() }}</h3>
+      <p>{{ getEmptyStateMessage() }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<app-delete-confirmation-modal
+  [isVisible]="showDeleteModal"
+  [title]="getDeleteModalTitle()"
+  [message]="getDeleteModalMessage()"
+  [itemName]="selectedUserForDeletion ? selectedUserForDeletion.name + ' (' + selectedUserForDeletion.email + ')' : ''"
+  [isDeleting]="isDeleting"
+  [deleteButtonText]="getDeleteButtonText()"
+  [cancelButtonText]="getCancelButtonText()"
+  (onConfirm)="confirmDeleteUser()"
+  (onCancel)="cancelDeleteUser()">
+</app-delete-confirmation-modal>

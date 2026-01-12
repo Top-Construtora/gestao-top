@@ -1,0 +1,2572 @@
+/* ========================================
+   CONTRACT FORM - TOP CONSULTORIA
+   ======================================== */
+
+@import "../../../styles/variables.css";
+
+/* ========================================
+   BASE STYLES
+   ======================================== */
+
+/* Container principal já é o main.main-content */
+
+.contract-page-content {
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================================
+   PAGE HEADER
+   ======================================== */
+
+.page-header {
+  margin-bottom: 32px;
+}
+
+.page-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+/* ========================================
+   PROGRESS INDICATOR
+   ======================================== */
+
+.form-progress {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--space-8);
+  border: 1px solid var(--gray-200);
+}
+
+.progress-steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.progress-step::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--gray-200);
+  z-index: 1;
+}
+
+.progress-step:last-child::after {
+  display: none;
+}
+
+.progress-step.active::after {
+  background: var(--primary-500);
+}
+
+.step-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--gray-500);
+  position: relative;
+  z-index: 2;
+  transition: var(--transition-all);
+}
+
+.progress-step.completed .step-circle {
+  background: var(--success-500);
+  color: white;
+}
+
+.progress-step.active .step-circle {
+  background: var(--primary-500);
+  color: white;
+  transform: scale(1.1);
+}
+
+.step-label {
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--gray-600);
+  text-align: center;
+}
+
+.progress-step.completed .step-label,
+.progress-step.active .step-label {
+  color: var(--gray-900);
+  font-weight: 600;
+}
+
+/* ========================================
+   LOADING STATE
+   ======================================== */
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 64px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid #e1e4e8;
+  color: #6c737f;
+  font-size: 14px;
+  gap: 8px;
+}
+
+.loading-container i {
+  color: var(--naue-primary);
+  font-size: 16px;
+}
+
+/* ========================================
+   FORM CONTAINER
+   ======================================== */
+
+.table-container {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e1e4e8;
+  overflow: hidden;
+}
+
+.contract-form {
+  padding: 24px;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* ========================================
+   FORM LAYOUT
+   ======================================== */
+
+.form-layout {
+  display: grid;
+  grid-template-columns: 580px 1fr;
+  gap: 28px;
+  align-items: start;
+  overflow: visible;
+}
+
+.left-column,
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow: visible;
+}
+
+/* ========================================
+   FORM SECTIONS
+   ======================================== */
+
+.form-section {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 28px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 4px 8px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+}
+
+.form-section:hover {
+  box-shadow: 0 4px 16px rgba(0, 59, 43, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 59, 43, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Seção de serviços - Container principal SEM SCROLL */
+.right-column .form-section:first-child {
+  min-height: 620px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  padding: 28px !important;
+  overflow: hidden !important;
+}
+
+.section-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 24px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.section-title i {
+  color: var(--naue-primary) !important;
+  font-size: 20px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 59, 43, 0.08);
+  border-radius: 10px;
+}
+
+/* ========================================
+   FORM FIELDS
+   ======================================== */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.form-grid:last-child {
+  margin-bottom: 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Checkbox personalizado */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 1.5rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 14px;
+  color: #344054;
+  user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+  display: none;
+}
+
+.checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #d0d5dd;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.checkbox-label:hover .checkbox-custom {
+  border-color: var(--naue-primary);
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkbox-custom {
+  background: var(--naue-primary);
+  border-color: var(--naue-primary);
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkbox-custom::after {
+  content: "✓";
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.checkbox-label input[type="checkbox"]:disabled + .checkbox-custom {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Interface simplificada de formas de pagamento */
+.payment-methods-simple {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e1e4e8;
+}
+
+.payment-method-row {
+  background: white;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.payment-method-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.payment-number {
+  background: var(--naue-primary);
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.payment-method-content {
+  display: grid;
+  gap: 1rem;
+  align-items: start;
+}
+
+/* Quando há duas formas de pagamento */
+.payment-method-row:has(.value-config) .payment-method-content {
+  grid-template-columns: 2fr 1fr 1fr;
+}
+
+/* Quando há apenas uma forma de pagamento */
+.payment-method-row:has(.single-payment-value) .payment-method-content {
+  grid-template-columns: 1fr 1fr;
+}
+
+.method-select {
+  flex: 1;
+}
+
+.value-config {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.value-type-toggle {
+  display: flex;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  overflow: hidden;
+  background: white;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 0.375rem 0.5rem;
+  border: none;
+  background: white;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1875rem;
+  font-size: 0.75rem;
+}
+
+.toggle-btn:hover {
+  background: #f3f4f6;
+}
+
+.toggle-btn.active {
+  background: var(--naue-primary);
+  color: white;
+}
+
+.toggle-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.value-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  grid-column: 2;
+}
+
+.form-control.small {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  height: auto;
+}
+
+.input-suffix {
+  position: absolute;
+  right: 0.75rem;
+  color: #6b7280;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.calculated-value {
+  color: var(--naue-primary);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 0.25rem 0.375rem;
+  background: rgba(0, 59, 43, 0.08);
+  border-radius: 4px;
+  border: 1px dashed var(--naue-primary);
+  grid-column: 3;
+  white-space: nowrap;
+}
+
+/* Valor único quando só há uma forma */
+.single-payment-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.total-value-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--naue-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 59, 43, 0.1);
+  border-radius: 6px;
+  border: 1px solid var(--naue-primary);
+}
+
+.total-value-display i {
+  color: #10b981;
+  font-size: 1rem;
+}
+
+/* Seção para adicionar forma de pagamento */
+.add-payment-section {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+.btn-add-payment {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--primary-green);
+  border: 1px solid var(--primary-green);
+  border-radius: 8px;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-add-payment:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(14, 155, 113, 0.3);
+}
+
+.btn-add-payment:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-add-payment i {
+  font-size: 0.75rem;
+}
+
+/* Novo sistema de pagamento (preview) */
+.new-payment-system-preview {
+  background: linear-gradient(135deg, rgba(14, 155, 113, 0.08), rgba(14, 155, 113, 0.12));
+  border: 1px solid rgba(14, 155, 113, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.preview-header h5 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--primary-green);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.beta-badge {
+  background: linear-gradient(45deg, #ff6b35, #f7931e);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.625rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.preview-text {
+  color: var(--text-gray);
+  font-size: 0.875rem;
+  margin: 0;
+  font-style: italic;
+}
+
+.new-payment-button {
+  text-align: center;
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px dashed rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+}
+
+.btn-new-system {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  background: transparent;
+  border: 2px solid var(--primary-blue);
+  border-radius: 8px;
+  color: var(--primary-blue);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 0.5rem;
+}
+
+.btn-new-system:hover {
+  background: var(--primary-blue);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+}
+
+.btn-new-system:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.help-text {
+  font-size: 0.75rem;
+  color: var(--text-gray);
+  margin: 0.5rem 0 0 0;
+  font-style: italic;
+}
+
+/* Header da seção de pagamento */
+.payment-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-gray);
+}
+
+:host-context(body.dark-mode) .payment-section-header {
+  border-bottom-color: var(--dark-border);
+}
+
+.payment-section-header .subsection-title {
+  margin: 0;
+}
+
+.btn-add-payment-method {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  background: var(--primary-green);
+  border: 1px solid var(--primary-green);
+  border-radius: 6px;
+  color: white;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-add-payment-method:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(14, 155, 113, 0.3);
+}
+
+.btn-add-payment-method:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Botão para gerenciar parcelas */
+.btn-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
+}
+
+.btn-info:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4);
+  background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
+}
+
+.btn-info:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-info i {
+  font-size: 16px;
+}
+
+.btn-add-payment-method i {
+  font-size: 0.75rem;
+}
+
+/* Botão de remoção de forma de pagamento */
+.btn-remove-payment {
+  background: none;
+  border: none;
+  color: #dc3545;
+  padding: 0.25rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: auto;
+}
+
+.btn-remove-payment:hover {
+  background: rgba(220, 53, 69, 0.1);
+  color: #c82333;
+}
+
+.btn-remove-payment i {
+  font-size: 0.75rem;
+}
+
+/* Resumo das formas de pagamento - idêntico ao contract-total-summary */
+.payment-summary-simple {
+  background: linear-gradient(135deg, var(--naue-primary) 0%, var(--naue-primary-hover) 100%);
+  border: 1px solid #075c34;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+:host-context(body.dark-mode) .payment-summary-simple {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.payment-summary-simple .summary-row {
+  margin: 0;
+}
+
+.payment-summary-simple .summary-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #059669;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+:host-context(body.dark-mode) .payment-summary-simple .summary-label {
+  color: #6ee7b7;
+}
+
+.payment-summary-simple .summary-label i {
+  margin-right: 4px;
+}
+
+.payment-summary-simple .summary-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #065f46;
+  display: block;
+  line-height: 1;
+}
+
+:host-context(body.dark-mode) .payment-summary-simple .summary-value {
+  color: #10b981;
+}
+
+.payment-summary-simple .summary-value.warning {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* Opções de parcelamento - nova linha embaixo */
+.installment-options {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  clear: both;
+}
+
+:host-context(body.dark-mode) .installment-options {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--dark-border);
+}
+
+.installment-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.installment-grid .form-group {
+  margin: 0;
+}
+
+.form-label-small {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-dark);
+  margin-bottom: 0.375rem;
+  display: block;
+}
+
+.small-select,
+.small-date {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  background: white;
+  width: 100%;
+}
+
+:host-context(body.dark-mode) .small-select,
+:host-context(body.dark-mode) .small-date {
+  background: var(--dark-input);
+  border-color: var(--dark-border);
+  color: var(--dark-text);
+}
+
+.small-select:focus,
+.small-date:focus {
+  outline: none;
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 1px rgba(14, 155, 113, 0.2);
+}
+
+.installment-info {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.5rem;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: #3b82f6;
+}
+
+.installment-info i {
+  font-size: 0.625rem;
+}
+
+.add-payment-toggle {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+/* Resumo de pagamento */
+.payment-summary {
+  background: white;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.summary-row:last-child {
+  margin-bottom: 0;
+  font-weight: 600;
+  border-top: 1px solid #e1e4e8;
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.summary-label {
+  color: #4a5568;
+  font-size: 0.875rem;
+}
+
+.summary-value {
+  color: #2d3748;
+  font-weight: 600;
+}
+
+.summary-value.error {
+  color: #dc2626;
+}
+
+.validation-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #dc2626;
+  font-size: 0.875rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .payment-method-content {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .value-type-toggle {
+    justify-self: start;
+    width: 120px;
+  }
+  
+  .calculated-value {
+    text-align: left;
+  }
+}
+
+.subsection-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #374151;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: 0.02em;
+}
+
+.subsection-title i {
+  color: var(--naue-primary);
+  font-size: 16px;
+}
+
+/* Validação de pagamento */
+.payment-validation {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e1e4e8;
+}
+
+.validation-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.validation-summary.error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+.validation-summary i {
+  color: var(--naue-primary);
+  font-size: 1.125rem;
+  margin-top: 0.125rem;
+}
+
+.validation-summary.error i {
+  color: #dc2626;
+}
+
+.validation-content {
+  flex: 1;
+}
+
+.validation-title {
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.validation-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.validation-item {
+  font-size: 0.875rem;
+  color: #4a5568;
+}
+
+.error-text {
+  color: #dc2626 !important;
+  font-weight: 500;
+}
+
+/* ========================================
+   RECRUITMENT SERVICE PERCENTAGES - COMPACT
+   ======================================== */
+
+.recruitment-percentages {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.percentage-compact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.percentage-compact-item {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.percentage-compact-item label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #4b5563;
+  text-align: left;
+}
+
+.percentage-compact-input {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0.15rem 0.5rem;
+  width: 100px;
+  height: 28px;
+}
+
+.percentage-compact-input:focus-within {
+  border-color: var(--naue-primary);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.percentage-compact-input input {
+  border: none;
+  outline: none;
+  font-size: 0.875rem;
+  color: #1f2937;
+  background: transparent;
+  width: 100%;
+  text-align: center;
+  -moz-appearance: textfield;
+  padding: 0;
+  height: 100%;
+}
+
+.percentage-compact-input input::-webkit-outer-spin-button,
+.percentage-compact-input input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.percentage-compact-input span {
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-left: 0.25rem;
+  flex-shrink: 0;
+}
+
+.form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0;
+  letter-spacing: 0.01em;
+}
+
+.required {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.help-text {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+/* ========================================
+   INPUT STYLES
+   ======================================== */
+
+.form-control {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  background: #ffffff;
+  color: #111827;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 500;
+}
+
+.form-control::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.form-control:hover {
+  border-color: #d1d5db;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--naue-primary);
+  box-shadow: 0 0 0 4px rgba(0, 59, 43, 0.08);
+  background: #ffffff;
+}
+
+.form-control:disabled {
+  background-color: #f9fafb;
+  cursor: not-allowed;
+  opacity: 0.6;
+  border-color: #e5e7eb;
+}
+
+.form-control.error {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.form-control.error:focus {
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+}
+
+.select-input {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2398A2B3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* ========================================
+   ERROR MESSAGES
+   ======================================== */
+
+.error-message {
+  font-size: 12px;
+  color: #dc3545;
+  margin-top: 4px;
+  display: block;
+}
+
+.field-error {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* ========================================
+   SERVICES SECTION
+   ======================================== */
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+
+/* Estado vazio */
+.empty-services {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 32px;
+  text-align: center;
+  border: 2px dashed #d1d5db;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  /* Altura para preencher o espaço disponível */
+  min-height: 490px;
+  flex: 1;
+}
+
+.empty-icon {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.empty-icon i {
+  font-size: 28px;
+  color: #6b7280;
+}
+
+.empty-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 10px 0;
+  letter-spacing: -0.01em;
+}
+
+.empty-description {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 28px 0;
+  line-height: 1.6;
+  max-width: 280px;
+}
+
+/* Container principal da lista de serviços - SEM SCROLL */
+.right-column .form-section:first-child .services-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  margin-top: 20px;
+  padding-bottom: 80px;
+  overflow: hidden;
+}
+
+/* Área onde os serviços são listados - APENAS ESTE TEM SCROLL */
+.right-column .form-section:first-child .selected-services {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  padding: 18px !important;
+  background: linear-gradient(to bottom, #f9fafb, #f3f4f6) !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 14px !important;
+  /* APENAS ESTA DIV TEM SCROLL */
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  /* Altura fixa */
+  height: 400px !important;
+  max-height: 400px !important;
+  min-height: 400px !important;
+  /* Garantir que os cards não encolham */
+  align-items: stretch !important;
+  flex-shrink: 0 !important;
+}
+
+/* Scrollbar simples e limpa */
+.selected-services::-webkit-scrollbar {
+  width: 6px;
+}
+
+.selected-services::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.selected-services::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 3px;
+}
+
+.selected-services::-webkit-scrollbar-thumb:hover {
+  background: var(--naue-primary);
+}
+
+/* Card de serviço - Tamanho fixo */
+.service-card {
+  background: white;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  animation: slideIn 0.4s ease-out;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 2px 4px rgba(0, 0, 0, 0.02);
+  overflow: hidden;
+  /* Tamanho fixo para evitar redimensionamento */
+  flex-shrink: 0;
+  min-height: 120px;
+  width: 100%;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Accent border no topo - mais discreto */
+.service-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--naue-primary);
+  border-radius: 12px 12px 0 0;
+}
+
+/* Hover effect mais sutil */
+.service-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 59, 43, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+  border-color: var(--naue-primary);
+}
+
+/* Header do serviço - Layout enxuto */
+.service-header {
+  display: block;
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.service-info {
+  margin-right: 40px; /* Espaço para o botão */
+}
+
+.service-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+}
+
+.service-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.service-category,
+.service-duration {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.service-category i,
+.service-duration i {
+  color: var(--naue-primary);
+  font-size: 11px;
+}
+
+/* Botão de remover - Canto superior direito */
+.remove-service-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: none;
+  background: #fee2e2;
+  color: #dc2626;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 3;
+}
+
+.remove-service-btn:hover {
+  background: #dc2626;
+  color: white;
+  transform: scale(1.1);
+}
+
+.remove-service-btn i {
+  font-size: 12px;
+}
+
+/* Precificação do serviço - Layout enxuto */
+.service-pricing {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
+  margin-top: 8px;
+}
+
+.price-input-group {
+  flex: 1;
+}
+
+.price-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.price-input-wrapper {
+  position: relative;
+}
+
+.price-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.price-input:focus {
+  outline: none;
+  border-color: var(--naue-primary);
+  box-shadow: 0 0 0 2px rgba(0, 59, 43, 0.1);
+}
+
+/* Valor total compacto */
+.price-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--naue-primary);
+  white-space: nowrap;
+}
+
+/* Estilos para Permuta */
+.barter-section {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.radio-group {
+  display: flex;
+  gap: 24px;
+  margin-top: 8px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+}
+
+.radio-label input[type="radio"] {
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.radio-label span {
+  cursor: pointer;
+}
+
+.remaining-value-info {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.info-card {
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.info-card.highlight {
+  background: #ecfdf5;
+  border-color: #10b981;
+}
+
+.info-label {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.info-card.highlight .info-value {
+  color: #10b981;
+}
+
+.help-text {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.help-text i {
+  margin-right: 4px;
+}
+
+/* Preview das parcelas */
+.installments-preview {
+  margin-top: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.preview-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preview-title i {
+  color: #6b7280;
+}
+
+.installments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.installment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  font-size: 13px;
+}
+
+.installment-number {
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.installment-date {
+  color: #374151;
+}
+
+.installment-value {
+  font-weight: 600;
+  color: var(--naue-primary);
+}
+
+/* Resumo total - fixado no rodapé da form-section */
+.right-column .form-section:first-child .contract-total-summary {
+  background: linear-gradient(135deg, var(--naue-primary) 0%, var(--naue-primary-hover) 100%);
+  color: white;
+  border-radius: 14px;
+  padding: 18px 24px;
+  box-shadow: 0 6px 16px rgba(0, 59, 43, 0.2), 0 2px 8px rgba(0, 0, 0, 0.08);
+  /* Posicionamento absoluto no rodapé da form-section */
+  position: absolute;
+  bottom: 24px;
+  left: 28px;
+  right: 28px;
+  margin: 0;
+  z-index: 10;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.summary-row .summary-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+}
+
+.summary-row .summary-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+}
+
+/* ========================================
+   CONTRACT SUMMARY
+   ======================================== */
+
+.contract-summary {
+  background: #f0fff4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 20px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.summary-item.total {
+  border-top: 2px solid #bbf7d0;
+  margin-top: 12px;
+  padding-top: 16px;
+}
+
+.summary-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #344054;
+}
+
+.summary-item.total .summary-label {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.summary-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.summary-item.total .summary-value {
+  font-size: 24px;
+  color: var(--success);
+}
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+
+.btn {
+  padding: 11px 22px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.01em;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--naue-primary) 0%, var(--naue-primary-hover) 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 59, 43, 0.2);
+}
+
+.btn-primary:hover:not(:disabled) {
+  box-shadow: 0 6px 16px rgba(0, 59, 43, 0.3);
+  transform: translateY(-2px);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #e5e7eb;
+  border-color: #d1d5db;
+}
+
+.btn-sm {
+  padding: 7px 14px;
+  font-size: 13px;
+}
+
+/* ========================================
+   FORM ACTIONS
+   ======================================== */
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  padding: 24px 28px;
+  background: linear-gradient(to top, #f9fafb, #ffffff);
+  border-top: 2px solid #e5e7eb;
+  border-radius: 0 0 12px 12px;
+}
+
+/* ========================================
+   MODAL STYLES
+   ======================================== */
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.modal.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow-xl);
+  width: 90%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow: hidden;
+  transform: scale(0.9);
+  transition: all 0.3s ease;
+}
+
+.modal.active .modal-content {
+  transform: scale(1);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e1e4e8;
+  background: #f9fafb;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #e1e4e8;
+  color: #6c737f;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: #dc3545;
+  color: white;
+}
+
+.modal-body {
+  padding: 24px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.modal-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.modal-search {
+  flex: 1;
+  position: relative;
+}
+
+.modal-search i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #98a2b3;
+}
+
+.modal-search-input {
+  width: 100%;
+  padding: 10px 10px 10px 40px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.modal-category-filter {
+  min-width: 150px;
+  padding: 10px 14px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  font-size: 14px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2398A2B3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
+}
+
+.services-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.service-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.service-option:hover {
+  border-color: var(--naue-primary);
+  background: rgba(0, 59, 43, 0.02);
+}
+
+.service-option-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.service-option-details {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: #6c737f;
+}
+
+.service-option-details i {
+  margin-right: 4px;
+  color: var(--naue-primary);
+}
+
+.service-option-action {
+  color: var(--naue-primary);
+  font-size: 20px;
+}
+
+/* ========================================
+   VIEW MODE STYLES
+   ======================================== */
+
+.view-mode {
+  padding: 24px;
+}
+
+.view-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+}
+
+.view-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #e1e4e8;
+  box-shadow: var(--shadow-sm);
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6c737f;
+  min-width: 120px;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: #1a1a1a;
+  text-align: right;
+  flex: 1;
+}
+
+.detail-value.notes {
+  text-align: left;
+  margin-left: 16px;
+  line-height: 1.6;
+}
+
+/* User management styles */
+.assigned-users-management {
+  margin-top: 16px;
+}
+
+.no-users-message {
+  text-align: center;
+  padding: 20px;
+  color: #6c737f;
+  font-style: italic;
+}
+
+.user-management-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: #f8f9fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 14px;
+}
+
+.user-email {
+  font-size: 12px;
+  color: #6c737f;
+}
+
+.user-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.role-selector select {
+  padding: 6px 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+  font-size: 12px;
+  min-width: 120px;
+}
+
+.assigned-users-list {
+  margin-top: 16px;
+}
+
+/* Estilos para alertas */
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.alert-warning {
+  background-color: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
+}
+
+:host-context(body.dark-mode) .alert-warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-color: #f59e0b;
+  color: #fbbf24;
+}
+
+.alert i {
+  font-size: 1rem;
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: #f8f9fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.user-role-badge {
+  padding: 4px 8px;
+  background: var(--naue-primary-light);
+  color: var(--naue-primary);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ========================================
+   BADGES AND STATUS
+   ======================================== */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--naue-primary-light);
+  color: var(--naue-primary);
+}
+
+.payment-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.payment-status-badge.payment-pago {
+  background: #f0fff4;
+  color: var(--success);
+}
+
+.payment-status-badge.payment-pendente {
+  background: #fffbeb;
+  color: var(--warning);
+}
+
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 1200px) {
+  .form-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-actions {
+    flex-direction: column-reverse;
+    gap: 12px;
+  }
+  
+  .form-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .service-controls {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .view-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .user-management-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .user-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .modal-filters {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .modal-category-filter {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 28px;
+  }
+  
+  .form-section {
+    padding: 16px;
+  }
+  
+  .contract-form {
+    padding: 16px;
+  }
+
+  .view-mode {
+    padding: 16px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .service-option {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .service-option-action {
+    align-self: flex-end;
+  }
+
+  /* Responsividade da seção de serviços */
+  .service-pricing {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .price-display {
+    align-items: flex-start;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .service-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+/* ========================================
+   MÚLTIPLAS FORMAS DE PAGAMENTO - DESIGN ENXUTO PADRONIZADO
+   ======================================== */
+
+/* Seguindo padrão do sistema (similar aos serviços) */
+.payment-methods-list {
+  margin-top: 1rem;
+}
+
+/* Header das formas de pagamento */
+.payment-methods-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.payment-methods-header .subsection-title {
+  margin: 0;
+}
+
+/* Cards de forma de pagamento - design corrigido e bem alinhado */
+.payment-method-item {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  margin-bottom: 14px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.payment-method-item:hover {
+  border-color: rgba(0, 59, 43, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 59, 43, 0.08);
+  transform: translateY(-1px);
+}
+
+/* Header compacto */
+.payment-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
+  border-bottom: 1px solid #e5e7eb;
+  border-radius: 12px 12px 0 0;
+}
+
+.payment-item-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.payment-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: linear-gradient(135deg, var(--naue-primary), var(--naue-primary-hover));
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 59, 43, 0.2);
+}
+
+.payment-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.btn-remove {
+  padding: 4px 6px;
+  background: transparent;
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  transition: all 0.2s ease;
+}
+
+.btn-remove:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* Conteúdo principal */
+.payment-item-content {
+  padding: 20px;
+  background: #fafbfc;
+}
+
+/* Layout principal - duas linhas bem estruturadas */
+.payment-row-1 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+
+.payment-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.field-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+/* Campo de método */
+.method-field .form-control {
+  width: 100%;
+}
+
+/* Campo de valor - botões em cima do input */
+.value-field {
+  width: 100%;
+}
+
+.value-controls-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.value-type-buttons {
+  display: flex;
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  overflow: hidden;
+  background: white;
+}
+
+.value-type-btn {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  background: white;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.value-type-btn:hover {
+  background: #f9fafb;
+  color: #374151;
+}
+
+.value-type-btn.active {
+  background: var(--naue-primary);
+  color: white;
+}
+
+.value-input {
+  width: 100%;
+  text-align: center;
+  font-weight: 500;
+}
+
+.value-input.locked {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+  font-weight: 600;
+}
+
+/* Campos de parcelamento */
+.installment-field .form-control {
+  font-weight: 500;
+  width: 100%;
+}
+
+.date-field .form-control {
+  width: 100%;
+}
+
+
+/* Altura uniforme para todos os campos */
+.field-group .form-control {
+  font-size: 13px;
+  height: 38px;
+}
+
+/* Otimização específica para 1280x800 - Layout limpo e bem organizado */
+.payment-item-content {
+  padding: 20px;
+}
+
+.payment-row-1 {
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.payment-row-2 {
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 16px;
+}
+
+/* Garantir que todos os campos tenham altura uniforme */
+.field-group .form-control {
+  height: 40px;
+  font-size: 14px;
+}
+
+.value-type-buttons {
+  height: 36px;
+  margin-bottom: 8px;
+}
+
+.value-type-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+/* Ajustar espaçamento entre elementos */
+.field-label {
+  font-size: 13px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+/* Responsivo mobile */
+@media (max-width: 768px) {
+  .payment-row-1,
+  .payment-row-2 {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .payment-row-2 {
+    margin-top: 8px;
+  }
+  
+  .value-controls {
+    justify-content: flex-start;
+  }
+}
+
+/* Estado vazio */
+.empty-payments {
+  text-align: center;
+  padding: 24px;
+  color: var(--color-gray-500);
+  font-size: 14px;
+}
+
+.empty-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+  opacity: 0.6;
+}
+
+/* Resumo compacto */
+.payment-summary {
+  background: var(--color-blue-50);
+  border: 1px solid var(--color-blue-200);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contract-total {
+  text-align: right;
+}
+
+.summary-item span {
+  font-size: 12px;
+  color: var(--color-gray-600);
+}
+
+.summary-item strong {
+  font-size: 16px;
+  color: var(--color-gray-900);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .payment-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .payment-value {
+    justify-content: center;
+  }
+  
+  .installment-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .installment-config {
+    justify-content: center;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+}

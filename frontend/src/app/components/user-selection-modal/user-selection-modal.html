@@ -1,0 +1,55 @@
+<div class="modal" [class.active]="isOpen" (click)="onBackdropClick($event)">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Atribuir Usuários</h3>
+      <button class="close-btn" (click)="close.emit()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="modal-search">
+        <i class="fas fa-search"></i>
+        <input 
+          type="text" 
+          class="modal-search-input" 
+          placeholder="Buscar por nome ou email..."
+          [(ngModel)]="searchTerm">
+      </div>
+      
+      <div class="users-list">
+        <div 
+          class="user-option" 
+          *ngFor="let user of filteredUsers"
+          (click)="toggleSelection(user.id)"
+          [class.selected]="isSelected(user.id)">
+          
+          <div class="user-avatar" *ngIf="!user.profile_picture_path">
+            {{ getInitials(user.name) }}
+          </div>
+          <img *ngIf="user.profile_picture_path" [src]="getProfilePictureUrl(user.id)" alt="Foto de perfil" class="user-profile-picture">
+          
+          <div class="user-info">
+            <h4>{{ user.name }}</h4>
+            <p>{{ user.email }}</p>
+          </div>
+
+          <div class="user-option-action">
+            <i class="far fa-circle" *ngIf="!isSelected(user.id)"></i>
+            <i class="fas fa-check-circle" *ngIf="isSelected(user.id)"></i>
+          </div>
+        </div>
+        
+        <div class="empty-state" *ngIf="filteredUsers.length === 0">
+          <i class="fas fa-search"></i>
+          <p>Nenhum usuário encontrado</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="close.emit()">Cancelar</button>
+      <button type="button" class="btn btn-primary" (click)="confirm()">Confirmar ({{ tempSelectedIds.size }})</button>
+    </div>
+  </div>
+</div>

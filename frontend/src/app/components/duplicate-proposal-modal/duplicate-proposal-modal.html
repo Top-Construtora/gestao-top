@@ -1,0 +1,222 @@
+<div class="modal-overlay" *ngIf="show" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Duplicar Proposta</h2>
+      <button class="close-btn" (click)="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Informação da proposta original -->
+      <div class="info-card" *ngIf="proposal">
+        <div class="info-label">Duplicando proposta:</div>
+        <div class="info-value">{{ getProposalSummary() }}</div>
+        <div class="info-detail">
+          <span>Tipo: {{ proposal.type }}</span>
+          <span class="separator">•</span>
+          <span>Valor: {{ formatCurrency(proposal.total_value) }}</span>
+          <span class="separator" *ngIf="proposal.services?.length">•</span>
+          <span *ngIf="proposal.services?.length">{{ proposal.services.length }} serviço(s)</span>
+        </div>
+      </div>
+
+      <!-- Formulário de duplicação -->
+      <form class="duplicate-form">
+        <!-- Cliente -->
+        <div class="form-group">
+          <label for="client">
+            Cliente <span class="required">*</span>
+          </label>
+          <select
+            id="client"
+            class="form-control"
+            [(ngModel)]="duplicateData.client_id"
+            name="client_id"
+            [disabled]="isDuplicating">
+            <option [ngValue]="null">Selecione um cliente...</option>
+            <option *ngFor="let client of clients" [ngValue]="client.id">
+              {{ getClientDisplayName(client) }}
+              <span *ngIf="client.type">({{ client.type }})</span>
+            </option>
+          </select>
+          <small class="form-text">
+            Selecione o cliente para a nova proposta
+          </small>
+        </div>
+
+        <!-- Tipo da Proposta -->
+        <div class="form-group">
+          <label for="type">
+            Tipo da Proposta <span class="required">*</span>
+          </label>
+          <select
+            id="type"
+            class="form-control"
+            [(ngModel)]="duplicateData.type"
+            name="type"
+            [disabled]="isDuplicating">
+            <option value="">Selecione o tipo...</option>
+            <option *ngFor="let type of proposalTypes" [value]="type.value">
+              {{ type.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Data de Validade -->
+        <div class="form-group">
+          <label for="end_date">
+            Data de Validade <span class="required">*</span>
+          </label>
+          <input
+            type="date"
+            id="end_date"
+            class="form-control"
+            [(ngModel)]="duplicateData.end_date"
+            name="end_date"
+            [disabled]="isDuplicating"
+            [min]="today">
+          <small class="form-text">
+            Até quando esta proposta será válida
+          </small>
+        </div>
+
+        <!-- Dados do Solicitante -->
+        <div class="form-section">
+          <h3>Dados do Solicitante</h3>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="solicitante_name">Nome do Solicitante</label>
+              <input
+                type="text"
+                id="solicitante_name"
+                class="form-control"
+                [(ngModel)]="duplicateData.solicitante_name"
+                name="solicitante_name"
+                placeholder="Nome completo"
+                [disabled]="isDuplicating">
+            </div>
+            <div class="form-group col-md-6">
+              <label for="solicitante_email">E-mail do Solicitante</label>
+              <input
+                type="email"
+                id="solicitante_email"
+                class="form-control"
+                [(ngModel)]="duplicateData.solicitante_email"
+                name="solicitante_email"
+                placeholder="email@exemplo.com"
+                [disabled]="isDuplicating">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="solicitante_phone">Telefone do Solicitante</label>
+            <input
+              type="tel"
+              id="solicitante_phone"
+              class="form-control"
+              [(ngModel)]="duplicateData.solicitante_phone"
+              name="solicitante_phone"
+              placeholder="(00) 00000-0000"
+              [disabled]="isDuplicating">
+          </div>
+        </div>
+
+        <!-- Configurações de Pagamento -->
+        <div class="form-section">
+          <h3>Configurações de Pagamento</h3>
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label for="max_installments">Máximo de Parcelas</label>
+              <input
+                type="number"
+                id="max_installments"
+                class="form-control"
+                [(ngModel)]="duplicateData.max_installments"
+                name="max_installments"
+                min="1"
+                max="24"
+                [disabled]="isDuplicating">
+            </div>
+            <div class="form-group col-md-4">
+              <label for="vista_discount">Desconto à Vista (%)</label>
+              <input
+                type="number"
+                id="vista_discount"
+                class="form-control"
+                [(ngModel)]="duplicateData.vista_discount_percentage"
+                name="vista_discount_percentage"
+                min="0"
+                max="100"
+                step="0.01"
+                [disabled]="isDuplicating">
+            </div>
+            <div class="form-group col-md-4">
+              <label for="prazo_discount">Desconto a Prazo (%)</label>
+              <input
+                type="number"
+                id="prazo_discount"
+                class="form-control"
+                [(ngModel)]="duplicateData.prazo_discount_percentage"
+                name="prazo_discount_percentage"
+                min="0"
+                max="100"
+                step="0.01"
+                [disabled]="isDuplicating">
+            </div>
+          </div>
+        </div>
+
+        <!-- Opções de Duplicação -->
+        <div class="form-section">
+          <h3>O que duplicar?</h3>
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [(ngModel)]="duplicateData.duplicate_services"
+                name="duplicate_services"
+                [disabled]="isDuplicating">
+              <span>Duplicar serviços e valores</span>
+            </label>
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [(ngModel)]="duplicateData.duplicate_terms"
+                name="duplicate_terms"
+                [disabled]="isDuplicating">
+              <span>Duplicar termos e condições</span>
+            </label>
+            <label class="checkbox-label" *ngIf="proposal?.type === 'Recrutamento & Seleção'">
+              <input
+                type="checkbox"
+                [(ngModel)]="duplicateData.duplicate_recruitment_percentages"
+                name="duplicate_recruitment_percentages"
+                [disabled]="isDuplicating">
+              <span>Duplicar percentuais de recrutamento</span>
+            </label>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <button
+        class="btn btn-secondary"
+        (click)="closeModal()"
+        [disabled]="isDuplicating">
+        Cancelar
+      </button>
+      <button
+        class="btn btn-primary"
+        (click)="duplicateProposal()"
+        [disabled]="!isFormValid() || isDuplicating">
+        <span *ngIf="!isDuplicating">
+          <i class="fas fa-copy"></i> Duplicar Proposta
+        </span>
+        <span *ngIf="isDuplicating">
+          <i class="fas fa-spinner fa-spin"></i> Duplicando...
+        </span>
+      </button>
+    </div>
+  </div>
+</div>

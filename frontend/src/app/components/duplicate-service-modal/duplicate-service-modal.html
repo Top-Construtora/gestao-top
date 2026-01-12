@@ -1,0 +1,123 @@
+<div class="modal-overlay" *ngIf="show" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Duplicar Serviço</h2>
+      <button class="close-btn" (click)="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Informação do serviço original -->
+      <div class="info-card" *ngIf="service">
+        <div class="info-label">Duplicando serviço:</div>
+        <div class="info-value">
+          <i [class]="getCategoryIcon(service.category || 'Geral')"></i>
+          {{ service.name }}
+        </div>
+        <div class="info-detail">
+          <span>Categoria: {{ service.category }}</span>
+          <span class="separator">•</span>
+          <span>Duração: {{ formatDuration(service.duration_amount, service.duration_unit) }}</span>
+        </div>
+      </div>
+
+      <!-- Formulário de duplicação -->
+      <form class="duplicate-form">
+        <!-- Nome do Serviço -->
+        <div class="form-group">
+          <label for="name">
+            Nome do Serviço <span class="required">*</span>
+          </label>
+          <input
+            type="text"
+            id="name"
+            class="form-control"
+            [(ngModel)]="duplicateData.name"
+            name="name"
+            placeholder="Digite o nome do serviço"
+            [disabled]="isDuplicating">
+          <small class="form-text">
+            Nome que identificará o serviço duplicado
+          </small>
+        </div>
+
+        <!-- Categoria -->
+        <div class="form-group">
+          <label for="category">
+            Categoria <span class="required">*</span>
+          </label>
+          <select
+            id="category"
+            class="form-control"
+            [(ngModel)]="duplicateData.category"
+            name="category"
+            [disabled]="isDuplicating">
+            <option value="">Selecione uma categoria...</option>
+            <option *ngFor="let cat of categories" [value]="cat">
+              {{ cat }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Duração -->
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="duration_unit">
+              Unidade de Duração <span class="required">*</span>
+            </label>
+            <select
+              id="duration_unit"
+              class="form-control"
+              [(ngModel)]="duplicateData.duration_unit"
+              name="duration_unit"
+              (change)="onDurationUnitChange()"
+              [disabled]="isDuplicating">
+              <option *ngFor="let unit of durationUnits" [value]="unit.value">
+                {{ unit.label }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="duration_amount">
+              Quantidade <span class="required" *ngIf="duplicateData.duration_unit !== 'Projeto'">*</span>
+            </label>
+            <input
+              type="number"
+              id="duration_amount"
+              class="form-control"
+              [(ngModel)]="duplicateData.duration_amount"
+              name="duration_amount"
+              placeholder="Ex: 30"
+              min="1"
+              [disabled]="isDuplicating || duplicateData.duration_unit === 'Projeto'"
+              [required]="duplicateData.duration_unit !== 'Projeto'">
+            <small class="form-text" *ngIf="duplicateData.duration_unit === 'Projeto'">
+              Duração não se aplica para projetos
+            </small>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <button
+        class="btn btn-secondary"
+        (click)="closeModal()"
+        [disabled]="isDuplicating">
+        Cancelar
+      </button>
+      <button
+        class="btn btn-primary"
+        (click)="duplicateService()"
+        [disabled]="!isFormValid() || isDuplicating">
+        <span *ngIf="!isDuplicating">
+          <i class="fas fa-copy"></i> Duplicar Serviço
+        </span>
+        <span *ngIf="isDuplicating">
+          <i class="fas fa-spinner fa-spin"></i> Duplicando...
+        </span>
+      </button>
+    </div>
+  </div>
+</div>

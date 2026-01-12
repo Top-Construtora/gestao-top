@@ -1,0 +1,454 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Gestão de Contratos</h1>
+    <app-breadcrumb></app-breadcrumb>
+  </div>
+
+  <!-- Stats Cards -->
+  <app-contract-stats-cards
+    [filteredContracts]="filteredContracts"
+    [useFilteredData]="true"
+    [activeStatusFilter]="filters.status"
+    (onCardClick)="handleStatsCardClick($event)">
+  </app-contract-stats-cards>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab" [class.active]="currentTab === 'all'" (click)="changeTab('all')">
+      Todos os Contratos
+      <span class="tab-count">{{ contracts.length }}</span>
+    </div>
+    <div class="tab" [class.active]="currentTab === 'Full'" (click)="changeTab('Full')">
+      Contratos Full
+      <span class="tab-count">{{ stats.typeStats.Full }}</span>
+    </div>
+    <div class="tab" [class.active]="currentTab === 'Pontual'" (click)="changeTab('Pontual')">
+      Contratos Pontuais
+      <span class="tab-count">{{ stats.typeStats.Pontual }}</span>
+    </div>
+    <div class="tab" [class.active]="currentTab === 'Individual'" (click)="changeTab('Individual')">
+      Mentorias Individuais
+      <span class="tab-count">{{ stats.typeStats.Individual }}</span>
+    </div>
+    <div class="tab" [class.active]="currentTab === 'Recrutamento & Seleção'" (click)="changeTab('Recrutamento & Seleção')">
+      Recrutamento & Seleção
+      <span class="tab-count">{{ stats.typeStats['Recrutamento & Seleção'] }}</span>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="table-container">
+    <!-- Filters and Actions -->
+    <div class="table-header">
+      <div class="filters-section">
+        <!-- All Filters in One Row -->
+        <div class="filter-row">
+          <!-- Search Box -->
+          <div class="search-box" [class.searching]="isSearching">
+            <i class="fas fa-search search-icon" *ngIf="!isSearching"></i>
+            <i class="fas fa-spinner fa-spin search-icon" *ngIf="isSearching"></i>
+            <input
+              type="text"
+              class="search-input"
+              placeholder="Buscar por número do contrato ou nome do cliente..."
+              [(ngModel)]="filters.search"
+              (input)="onSearchInput()"
+              [disabled]="isLoading && !isSearching">
+            <button
+              *ngIf="filters.search"
+              class="clear-search-btn"
+              (click)="clearSearch()"
+              title="Limpar busca">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <!-- Status Filter -->
+          <div class="filter-item">
+            <label class="filter-label">
+              <i class="fas fa-flag"></i>
+              Status
+            </label>
+            <select class="filter-select" [(ngModel)]="filters.status" (change)="applyFilters()">
+              <option value="">Todos</option>
+              <option value="active">Ativo</option>
+              <option value="completed">Concluído</option>
+              <option value="cancelled">Cancelado</option>
+              <option value="suspended">Suspenso</option>
+              <option value="vencido">Vencido</option>
+            </select>
+          </div>
+
+          <!-- Client Filter -->
+          <div class="filter-item">
+            <label class="filter-label">
+              <i class="fas fa-user-tie"></i>
+              Cliente
+            </label>
+            <select class="filter-select client-select" [(ngModel)]="filters.client_id" (change)="applyFilters()">
+              <option [value]="null">Todos</option>
+              <option *ngFor="let client of clients" [value]="client.id">{{ client.name }}</option>
+            </select>
+          </div>
+
+          <!-- Date Type Filter -->
+          <div class="filter-item">
+            <label class="filter-label">
+              <i class="fas fa-calendar-alt"></i>
+              Tipo de Data
+            </label>
+            <select class="filter-select date-type-select" [(ngModel)]="filters.dateType" (change)="applyFilters()">
+              <option value="">Selecione</option>
+              <option value="created_at">Criação</option>
+              <option value="start_date">Início</option>
+              <option value="end_date">Término</option>
+            </select>
+          </div>
+
+          <!-- Month Filter -->
+          <div class="filter-item" [class.disabled]="!filters.dateType">
+            <label class="filter-label">
+              <i class="fas fa-calendar-check"></i>
+              Mês
+            </label>
+            <select class="filter-select month-select" [(ngModel)]="filters.month" (change)="applyFilters()" [disabled]="!filters.dateType">
+              <option value="">Todos</option>
+              <option value="1">Janeiro</option>
+              <option value="2">Fevereiro</option>
+              <option value="3">Março</option>
+              <option value="4">Abril</option>
+              <option value="5">Maio</option>
+              <option value="6">Junho</option>
+              <option value="7">Julho</option>
+              <option value="8">Agosto</option>
+              <option value="9">Setembro</option>
+              <option value="10">Outubro</option>
+              <option value="11">Novembro</option>
+              <option value="12">Dezembro</option>
+            </select>
+          </div>
+
+          <!-- Year Filter -->
+          <div class="filter-item" [class.disabled]="!filters.dateType">
+            <label class="filter-label">
+              <i class="fas fa-calendar"></i>
+              Ano
+            </label>
+            <select class="filter-select year-select" [(ngModel)]="filters.year" (change)="applyFilters()" [disabled]="!filters.dateType">
+              <option value="">Todos</option>
+              <option *ngFor="let year of availableYears" [value]="year">{{ year }}</option>
+            </select>
+          </div>
+
+          <!-- Active Filters Indicator -->
+          <div class="active-filters" *ngIf="getActiveFiltersCount() > 0">
+            <span class="active-filters-badge">
+              {{ getActiveFiltersCount() }} filtro{{ getActiveFiltersCount() > 1 ? 's' : '' }} ativo{{ getActiveFiltersCount() > 1 ? 's' : '' }}
+            </span>
+            <button class="btn-clear-inline" (click)="clearFilters()" title="Limpar todos os filtros">
+              <i class="fas fa-times-circle"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="action-buttons btn-group">
+        <button class="btn btn-primary btn-new" (click)="openNewContractPage()">
+          <i class="fas fa-plus-circle"></i>
+          <span class="btn-text">Novo Contrato</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Error Message -->
+    <div *ngIf="error" class="error-message">
+      <i class="fas fa-exclamation-circle"></i>
+      {{ error }}
+    </div>
+    
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-container">
+      <i class="fas fa-spinner fa-spin"></i>
+      Carregando contratos...
+    </div>
+    
+    <!-- Table -->
+    <div class="table-wrapper" *ngIf="!isLoading">
+      <!-- Empty State -->
+      <div *ngIf="filteredContracts.length === 0 && !error" class="empty-state">
+        <i class="fas fa-file-contract empty-icon"></i>
+        <h3 *ngIf="filters.search">Nenhum contrato encontrado para "{{ filters.search }}"</h3>
+        <h3 *ngIf="!filters.search && (filters.status || filters.client_id)">Nenhum contrato encontrado</h3>
+        <h3 *ngIf="!filters.search && !filters.status && !filters.client_id">Nenhum contrato cadastrado</h3>
+        
+        <p *ngIf="filters.search">
+          Tente buscar por outros termos ou <button class="link-button" (click)="clearSearch()">limpe a busca</button>
+        </p>
+        <p *ngIf="!filters.search && (filters.status || filters.client_id)">
+          Tente ajustar os filtros de busca ou <button class="link-button" (click)="clearFilters()">limpe todos os filtros</button>
+        </p>
+        <p *ngIf="!filters.search && !filters.status && !filters.client_id">
+          Clique no botão "Novo Contrato" para criar o primeiro contrato
+        </p>
+      </div>
+      
+      <!-- Contracts Table - Desktop -->
+      <table class="contracts-table" *ngIf="filteredContracts.length > 0">
+        <thead>
+          <tr>
+            <th class="sortable" (click)="sortBy('contractNumber')">
+              Número
+              <i [class]="getSortIcon('contractNumber')"></i>
+            </th>
+            <th class="sortable" (click)="sortBy('clientName')">
+              Cliente
+              <i [class]="getSortIcon('clientName')"></i>
+            </th>
+            <th>Tipo</th>
+            <th class="text-center sortable" (click)="sortBy('servicesCount')">
+              Serviços
+              <i [class]="getSortIcon('servicesCount')"></i>
+            </th>
+            <!-- Coluna de Valor Total - APENAS para Admin -->
+            <th *ngIf="canViewFinancialInfo" class="sortable" (click)="sortBy('totalValue')">
+              Valor Total
+              <i [class]="getSortIcon('totalValue')"></i>
+            </th>
+            <th class="sortable" (click)="sortBy('endDate')">
+              Vencimento
+              <i [class]="getSortIcon('endDate')"></i>
+            </th>
+            <th>Status</th>
+            <th>Pagamento</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let contract of filteredContracts" (click)="viewContract(contract.id, $event)" style="cursor: pointer">
+            <td>
+              <div class="contract-number" [class.expired]="contract.isExpired && contract.raw.status === 'active'">
+                {{ contract.contractNumber }}
+              </div>
+            </td>
+            <td>
+              <div class="client-info">
+                <div class="client-name-container">
+                  <span class="client-name">{{ contract.clientName }}</span>
+                  <span class="client-company-name" *ngIf="contract.clientType === 'PJ' && contract.clientCompanyName && contract.clientTradeName && contract.clientTradeName !== contract.clientCompanyName">
+                    {{ contract.clientCompanyName }}
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="contract-type">
+                <i [class]="getTypeIcon(contract.type)"></i>
+                <span class="type-badge" [attr.data-type]="contract.type">
+                  {{ contract.type }}
+                </span>
+              </div>
+            </td>
+            <td class="text-center">
+              <div class="services-count">
+                <span class="services-badge">
+                  {{ contract.servicesCount }} serviço{{ contract.servicesCount !== 1 ? 's' : '' }}
+                </span>
+              </div>
+            </td>
+            <!-- Célula de Valor Total - APENAS para Admin -->
+            <td *ngIf="canViewFinancialInfo">
+              <div class="contract-value">
+                <span class="value-amount">{{ contract.totalValue }}</span>
+                <span *ngIf="hasCancelledServices(contract.raw)" class="cancelled-indicator"
+                      [title]="'Original: ' + contractService.formatValue(contract.raw.total_value) + ' | Cancelados: ' + contractService.formatValue(getCancelledServicesValue(contract.raw)) + ' | Atual: ' + contract.totalValue">
+                  *
+                </span>
+              </div>
+            </td>
+            <td>
+              <div class="end-date">
+                <i class="fas fa-calendar-times"></i>
+                <span *ngIf="contract.endDate; else noEndDate">
+                  {{ contract.endDate }}
+                </span>
+                <ng-template #noEndDate>
+                  <span class="no-end-date">Indeterminado</span>
+                </ng-template>
+              </div>
+            </td>
+            <td>
+              <div class="status-container">
+                <span class="status-badge" [style.background-color]="contract.statusColor + '20'" [style.color]="contract.statusColor">
+                  <span class="status-dot" [style.background-color]="contract.statusColor"></span>
+                  {{ contract.status }}
+                </span>
+              </div>
+            </td>
+            <td>
+              <div class="payment-info">
+                <div class="payment-status">
+                  <span class="payment-badge" [style.background-color]="contract.paymentStatusColor + '20'" [style.color]="contract.paymentStatusColor">
+                    <i [class]="contract.paymentStatusIcon"></i>
+                    {{ contract.paymentStatus }}
+                  </span>
+                </div>
+                <div class="payment-method" *ngIf="contract.paymentMethod">
+                  <small class="payment-method-text">{{ contract.paymentMethod }}</small>
+                </div>
+                <div class="payment-date" *ngIf="contract.expectedPaymentDate">
+                  <small class="payment-date-text">
+                    <i class="fas fa-calendar-alt"></i>
+                    {{ contract.expectedPaymentDate }}
+                  </small>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="action-buttons-cell">
+                <div class="dropdown-container">
+                  <button class="action-btn dropdown-toggle" (click)="toggleDropdown(contract.id, $event)" title="Ações">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                  <div class="dropdown-menu" *ngIf="openDropdownId === contract.id" [class.show]="openDropdownId === contract.id">
+                    <button class="dropdown-item" (click)="editContract(contract.id, $event)">
+                      <i class="fas fa-edit"></i>
+                      Editar
+                    </button>
+                    <button class="dropdown-item" (click)="openExportModal(contract, $event)">
+                      <i class="fas fa-download"></i>
+                      Exportar
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item delete" (click)="deleteContract(contract.id, $event)">
+                      <i class="fas fa-trash"></i>
+                      Excluir
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Contracts Cards - Mobile -->
+      <div class="table-card-mode" *ngIf="filteredContracts.length > 0">
+        <div *ngFor="let contract of filteredContracts" class="table-card" (click)="viewContract(contract.id, $event)" style="cursor: pointer">
+          <div class="table-card-header">
+            <div class="contract-number" [class.expired]="contract.isExpired && contract.raw.status === 'active'">{{ contract.contractNumber }}</div>
+            <span class="status-badge" [style.background-color]="contract.statusColor + '20'" [style.color]="contract.statusColor">
+              <span class="status-dot" [style.background-color]="contract.statusColor"></span>
+              {{ contract.status }}
+            </span>
+          </div>
+          <div class="table-card-content">
+            <div class="table-card-row">
+              <span class="table-card-label">Cliente:</span>
+              <span class="table-card-value">
+                <div class="client-name-container">
+                  <span class="client-name">{{ contract.clientName }}</span>
+                  <span class="client-company-name" *ngIf="contract.clientType === 'PJ' && contract.clientCompanyName && contract.clientTradeName && contract.clientTradeName !== contract.clientCompanyName">
+                    {{ contract.clientCompanyName }}
+                  </span>
+                </div>
+              </span>
+            </div>
+            <div class="table-card-row">
+              <span class="table-card-label">Tipo:</span>
+              <span class="table-card-value">
+                <span class="type-badge" [attr.data-type]="contract.type">
+                  <i [class]="getTypeIcon(contract.type)"></i>
+                  {{ contract.type }}
+                </span>
+              </span>
+            </div>
+            <div class="table-card-row">
+              <span class="table-card-label">Serviços:</span>
+              <span class="table-card-value">
+                <span class="services-badge">
+                  {{ contract.servicesCount }} serviço{{ contract.servicesCount !== 1 ? 's' : '' }}
+                </span>
+              </span>
+            </div>
+            <!-- Valor Total - APENAS para Admin -->
+            <div class="table-card-row" *ngIf="canViewFinancialInfo">
+              <span class="table-card-label">Valor Total:</span>
+              <span class="table-card-value">
+                <span class="value-amount">{{ contract.totalValue }}</span>
+                <span *ngIf="hasCancelledServices(contract.raw)" class="cancelled-indicator"
+                      [title]="'Original: ' + contractService.formatValue(contract.raw.total_value) + ' | Cancelados: ' + contractService.formatValue(getCancelledServicesValue(contract.raw)) + ' | Atual: ' + contract.totalValue">
+                  *
+                </span>
+              </span>
+            </div>
+            <div class="table-card-row">
+              <span class="table-card-label">
+                <i class="fas fa-calendar-times"></i> Data de Término:
+              </span>
+              <span class="table-card-value">
+                <span *ngIf="contract.endDate; else noEndDateMobile">
+                  {{ contract.endDate }}
+                </span>
+                <ng-template #noEndDateMobile>
+                  <span class="no-end-date">Indeterminado</span>
+                </ng-template>
+              </span>
+            </div>
+            <div class="table-card-row">
+              <span class="table-card-label">
+                <i class="fas fa-credit-card"></i> Pagamento:
+              </span>
+              <span class="table-card-value">
+                <span class="payment-badge mobile" [style.background-color]="contract.paymentStatusColor + '20'" [style.color]="contract.paymentStatusColor">
+                  <i [class]="contract.paymentStatusIcon"></i>
+                  {{ contract.paymentStatus }}
+                </span>
+              </span>
+            </div>
+            <div class="table-card-row" *ngIf="contract.paymentMethod">
+              <span class="table-card-label">Forma de Pagamento:</span>
+              <span class="table-card-value">{{ contract.paymentMethod }}</span>
+            </div>
+            <div class="table-card-row" *ngIf="contract.expectedPaymentDate">
+              <span class="table-card-label">Data Prevista:</span>
+              <span class="table-card-value">{{ contract.expectedPaymentDate }}</span>
+            </div>
+          </div>
+          <div class="table-card-actions">
+            <button class="btn-sm btn-primary" (click)="editContract(contract.id, $event)">
+              <i class="fas fa-edit"></i>
+              Editar
+            </button>
+            <button class="btn-sm btn-export" (click)="openExportModal(contract, $event)">
+              <i class="fas fa-download"></i>
+              Exportar
+            </button>
+            <button class="btn-sm btn-danger" (click)="deleteContract(contract.id, $event)">
+              <i class="fas fa-trash"></i>
+              Excluir
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Export Modal -->
+  <app-contract-export-modal
+    [isVisible]="showExportModal"
+    [contract]="selectedContract"
+    (onClose)="closeExportModal()">
+  </app-contract-export-modal>
+
+  <!-- Delete Confirmation Modal -->
+  <app-delete-confirmation-modal
+    [isVisible]="showDeleteModal"
+    title="Confirmar Exclusão de Contrato"
+    message="Tem certeza que deseja excluir este contrato permanentemente? Esta ação não pode ser desfeita."
+    [itemName]="selectedContractForDeletion ? selectedContractForDeletion.contractNumber + ' (' + selectedContractForDeletion.clientName + ')' : ''"
+    [isDeleting]="isDeleting"
+    deleteButtonText="Excluir Contrato"
+    (onConfirm)="confirmDeleteContract()"
+    (onCancel)="cancelDeleteContract()">
+  </app-delete-confirmation-modal>
+</div>

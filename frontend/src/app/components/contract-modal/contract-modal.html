@@ -1,0 +1,94 @@
+<!-- src/app/components/contract-modal/contract-modal.component.html -->
+<div class="modal" [class.active]="isOpen" (click)="onBackdropClick($event)">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Detalhes do Contrato</h2>
+        <button class="close-btn" (click)="close.emit()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Empresa</label>
+        <select class="form-control">
+          <option>Selecione uma empresa</option>
+          <option>Empresa ABC</option>
+          <option>Tech Solutions</option>
+          <option>Startup XYZ</option>
+        </select>
+      </div>
+  
+      <div class="form-group">
+        <label class="form-label">Tipo de Contrato</label>
+        <select class="form-control">
+          <option>Contrato Full</option>
+          <option>Contrato Pontual</option>
+          <option>Mentoria Individual</option>
+        </select>
+      </div>
+  
+      <div class="form-group">
+        <label class="form-label">Serviços Contratados</label>
+        <div class="checkbox-group">
+          <div *ngFor="let service of servicesList" class="checkbox-item">
+            <input 
+              type="checkbox" 
+              [id]="service.id" 
+              [checked]="isServiceSelected(service.id)"
+              (change)="toggleService(service.id)">
+            <label [for]="service.id">{{ service.name }}</label>
+          </div>
+        </div>
+      </div>
+  
+      <div class="service-grid" *ngIf="selectedServices.size > 0">
+        <div *ngFor="let serviceId of selectedServices" class="service-item">
+          <div class="service-header">
+            <span class="service-name">{{ getServiceName(serviceId) }}</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Data de Agendamento</label>
+            <input type="date" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-control">
+              <option>Não iniciado</option>
+              <option>Agendado</option>
+              <option>Em andamento</option>
+              <option>Realizado</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Observações</label>
+            <textarea class="form-control" rows="3" placeholder="Adicione observações e comentários"></textarea>
+          </div>
+        </div>
+      </div>
+  
+      <div class="modal-footer">
+        <button class="btn btn-primary" (click)="openInstallmentsModal()">
+          <i class="fas fa-calendar-alt"></i>
+          Gerenciar Parcelas
+        </button>
+        <button class="btn btn-primary" (click)="save.emit()">
+          <i class="fas fa-save"></i>
+          Salvar Contrato
+        </button>
+        <button class="btn btn-secondary" (click)="close.emit()">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Parcelas -->
+  <app-installments-modal
+    [isOpen]="isInstallmentsModalOpen"
+    [contractId]="contractId"
+    [contractNumber]="contractNumber"
+    [totalValue]="totalValue"
+    [installmentCount]="installmentCount"
+    (close)="closeInstallmentsModal()"
+    (save)="handleInstallmentsSave($event)">
+  </app-installments-modal>

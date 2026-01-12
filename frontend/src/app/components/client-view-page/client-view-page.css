@@ -1,0 +1,709 @@
+/* Client View Page - Seguindo padrão do sistema */
+:host {
+  display: block;
+  animation: fadeInUp 0.5s ease;
+}
+
+/* Tab System Styles */
+.tab-navigation {
+  display: flex;
+  border-bottom: 2px solid var(--border-light);
+  margin-bottom: 2rem;
+  background: var(--white);
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+:host-context(body.dark-mode) .tab-navigation {
+  background: var(--dark-card);
+  border-bottom-color: var(--dark-border);
+}
+
+.tab-button {
+  flex: 1;
+  padding: 1.25rem 1.5rem;
+  border: none;
+  background: var(--bg-light);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  position: relative;
+}
+
+:host-context(body.dark-mode) .tab-button {
+  background: var(--dark-bg);
+  color: var(--dark-text-muted);
+}
+
+.tab-button:hover {
+  background: var(--white);
+  color: var(--text-dark);
+  border-bottom-color: var(--primary-light);
+}
+
+:host-context(body.dark-mode) .tab-button:hover {
+  background: var(--dark-card);
+  color: var(--dark-text);
+  border-bottom-color: var(--primary-light);
+}
+
+.tab-button.active {
+  background: var(--white);
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+
+:host-context(body.dark-mode) .tab-button.active {
+  background: var(--dark-card);
+  color: var(--primary-light);
+  border-bottom-color: var(--primary-light);
+}
+
+.tab-button i {
+  font-size: 1.1rem;
+}
+
+.tab-count {
+  background: var(--primary);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
+  line-height: 1;
+}
+
+.tab-button.active .tab-count {
+  background: var(--primary-dark);
+}
+
+:host-context(body.dark-mode) .tab-count {
+  background: var(--primary-light);
+}
+
+/* Tab Content */
+.tab-content {
+  position: relative;
+  min-height: 400px;
+}
+
+.tab-panel {
+  display: none;
+  animation: fadeInUp 0.3s ease;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+/* Enhanced Section Styles for Tab Content */
+.contracts-section-content {
+  padding: 0;
+}
+
+/* Remove section title from contracts as it's now in the tab */
+.contracts-section-content .section-title {
+  display: none;
+}
+
+/* Responsive Tab Design */
+@media (max-width: 768px) {
+  .tab-navigation {
+    flex-direction: column;
+  }
+  
+  .tab-button {
+    flex: none;
+    justify-content: flex-start;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+    border-right: none;
+  }
+  
+  :host-context(body.dark-mode) .tab-button {
+    border-bottom-color: var(--dark-border);
+  }
+  
+  .tab-button.active {
+    border-bottom: 1px solid var(--border-light);
+    border-left: 3px solid var(--primary);
+  }
+  
+  :host-context(body.dark-mode) .tab-button.active {
+    border-bottom-color: var(--dark-border);
+    border-left-color: var(--primary-light);
+  }
+}
+
+/* Tab Indicator Animation */
+.tab-button::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--primary);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.3s ease;
+}
+
+.tab-button.active::after {
+  transform: scaleX(1);
+}
+
+:host-context(body.dark-mode) .tab-button::after {
+  background: var(--primary-light);
+}
+
+/* Page Header */
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+:host-context(body.dark-mode) .page-title {
+  color: var(--dark-text);
+}
+
+/* Error States */
+.error-container {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 2rem;
+}
+
+:host-context(body.dark-mode) .error-container {
+  background: var(--dark-card);
+}
+
+.error-icon {
+  font-size: 4rem;
+  color: var(--danger);
+  margin-bottom: 1rem;
+}
+
+.error-container h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+:host-context(body.dark-mode) .error-container h3 {
+  color: var(--dark-text);
+}
+
+.error-container p {
+  color: var(--text-gray);
+  margin-bottom: 1.5rem;
+}
+
+:host-context(body.dark-mode) .error-container p {
+  color: #aaa;
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--light-gray);
+  border-top: 3px solid var(--primary-green);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.loading-container p {
+  color: var(--text-gray);
+}
+
+:host-context(body.dark-mode) .loading-container p {
+  color: #aaa;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Client Details */
+.client-details-unified {
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+:host-context(body.dark-mode) .client-details-unified {
+  background: var(--dark-card);
+}
+
+.client-overview-header {
+  position: relative;
+  padding: 2rem;
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-light) 100%);
+  color: var(--white);
+}
+
+/* Edit Button in Header */
+.btn-edit-client {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--white);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.btn-edit-client:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-edit-client i {
+  font-size: 0.875rem;
+  color: var(--white);
+}
+
+.client-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.client-avatar-section {
+  flex-shrink: 0;
+}
+
+.client-avatar-large {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--white);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.client-logo-large img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.client-name {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: var(--white);
+}
+
+.client-badges {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.type-badge, .document-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--white);
+}
+
+
+
+.detail-label {
+  display: block;
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 0.25rem;
+  color: var(--white);
+}
+
+.detail-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--white);
+}
+
+/* Contact Info */
+.contact-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.info-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 0.25rem;
+  color: var(--white);
+}
+
+.info-value {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--white);
+}
+
+/* Section Divider */
+.section-divider {
+  height: 1px;
+  background: var(--border-gray);
+  margin: 0;
+}
+
+:host-context(body.dark-mode) .section-divider {
+  background: #444;
+}
+
+/* Contracts Section */
+.contracts-section-content {
+  padding: 2rem;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 1.5rem 0;
+}
+
+:host-context(body.dark-mode) .section-title {
+  color: var(--dark-text);
+}
+
+.section-title i {
+  color: var(--primary-green);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: var(--text-gray);
+  margin-bottom: 1rem;
+}
+
+.empty-state h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+:host-context(body.dark-mode) .empty-state h4 {
+  color: var(--dark-text);
+}
+
+.empty-state p {
+  color: var(--text-gray);
+}
+
+:host-context(body.dark-mode) .empty-state p {
+  color: #aaa;
+}
+
+/* Contracts Grid */
+.contracts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.contract-card {
+  background: var(--light-gray);
+  border: 2px solid var(--border-gray);
+  border-radius: 12px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+:host-context(body.dark-mode) .contract-card {
+  background: #2a2a2a;
+  border-color: #444;
+}
+
+.contract-card:hover {
+  border-color: var(--primary-green);
+  box-shadow: 0 4px 12px rgba(0, 59, 43, 0.15);
+  transform: translateY(-2px);
+}
+
+.contract-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.contract-number {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+:host-context(body.dark-mode) .contract-number {
+  color: var(--dark-text);
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge[data-status="active"] {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+}
+
+.status-badge[data-status="completed"] {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--info);
+}
+
+.status-badge[data-status="cancelled"] {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+}
+
+.status-badge[data-status="suspended"] {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+}
+
+.contract-card-body {
+  margin-bottom: 1.5rem;
+}
+
+.contract-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-gray);
+}
+
+:host-context(body.dark-mode) .contract-detail {
+  border-bottom-color: #444;
+}
+
+.contract-detail:last-child {
+  border-bottom: none;
+}
+
+.contract-detail .detail-label {
+  font-weight: 500;
+  color: var(--text-gray);
+  font-size: 0.9rem;
+  opacity: 1;
+}
+
+:host-context(body.dark-mode) .contract-detail .detail-label {
+  color: #aaa;
+}
+
+.contract-detail .detail-value {
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 0.9rem;
+}
+
+:host-context(body.dark-mode) .contract-detail .detail-value {
+  color: var(--dark-text);
+}
+
+.contract-card-footer {
+  display: flex;
+  justify-content: center;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-green-dark) 0%, var(--success) 100%);
+  color: var(--white);
+  box-shadow: 0 4px 12px rgba(0, 59, 43, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 59, 43, 0.4);
+  background: linear-gradient(135deg, #002419 0%, var(--primary-green-dark) 100%);
+}
+
+.btn-secondary {
+  background-color: var(--white);
+  color: var(--text-dark);
+  border: 1px solid var(--border-gray);
+}
+
+:host-context(body.dark-mode) .btn-secondary {
+  background-color: var(--dark-card);
+  color: var(--dark-text);
+  border-color: #444;
+}
+
+.btn-secondary:hover {
+  background-color: var(--light-gray);
+  border-color: var(--text-gray);
+}
+
+.btn-sm {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  border-radius: 8px;
+}
+
+.btn-sm:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn i {
+  font-size: 0.875rem;
+}
+
+.btn-primary i {
+  color: var(--white);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .client-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .btn-edit-client {
+    top: 0.75rem;
+    right: 0.75rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+  
+  
+  .contact-info {
+    grid-template-columns: 1fr;
+  }
+  
+  .contracts-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .client-overview-header {
+    padding: 1.5rem;
+  }
+  
+  .contracts-section-content {
+    padding: 1.5rem;
+  }
+  
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .client-badges {
+    justify-content: center;
+  }
+}
+
+/* Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

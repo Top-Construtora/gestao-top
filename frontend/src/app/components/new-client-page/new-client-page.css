@@ -1,0 +1,592 @@
+/* src/app/components/new-client-page/new-client-page.css */
+@import "../../../styles/variables.css";
+
+/* O componente não tem mais wrapper .page, os estilos são aplicados diretamente */
+/* O main.main-content já tem padding: 32px e background: #fafbfc */
+
+:host {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.page-header {
+  margin-bottom: 32px;
+}
+
+.page-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #6c737f;
+}
+
+.breadcrumb-separator {
+  color: #d4d6db;
+}
+
+/* Container principal do formulário */
+.client-form-container {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Mensagem de erro */
+.error-message {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 24px 24px 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #dc3545;
+  font-size: 14px;
+}
+
+.error-message i {
+  font-size: 16px;
+}
+
+/* Formulário */
+.client-form {
+  width: 100%;
+  flex: 1;
+}
+
+/* Layout em duas colunas */
+.form-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex: 1;
+}
+
+.main-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.side-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: sticky;
+  top: 1.5rem;
+  align-self: flex-start;
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+}
+
+/* Seletor de tipo de cliente */
+.client-type-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border: 2px solid #e1e4e8;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.radio-option:hover {
+  border-color: #d0d5dd;
+}
+
+.radio-option input[type="radio"] {
+  display: none;
+}
+
+.radio-option input[type="radio"]:checked + .radio-label {
+  color: var(--naue-primary);
+}
+
+.radio-option:has(input[type="radio"]:checked),
+.radio-option.selected {
+  border-color: var(--naue-primary);
+  background-color: rgba(10, 128, 96, 0.05);
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  color: #344054;
+}
+
+.radio-label i {
+  font-size: 1.25rem;
+}
+
+/* Cards de formulário */
+.form-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  border: 1px solid #e1e4e8;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.card-header i {
+  font-size: 1.125rem;
+  color: var(--naue-primary);
+}
+
+.card-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0;
+}
+
+.card-body {
+  padding: 2rem;
+}
+
+.card-body.logo-upload-body {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.card-body.logo-upload-body app-image-upload {
+  width: 100%;
+  max-width: 280px;
+}
+
+/* Grid do formulário */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-grid:last-child {
+  margin-bottom: 0;
+}
+
+/* Grupos de formulário */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #344054;
+  margin-bottom: 8px;
+}
+
+.required {
+  color: #dc3545;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  color: #1a1a1a;
+  transition: all 0.2s ease;
+}
+
+.form-control::placeholder {
+  color: #98a2b3;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--naue-primary);
+  box-shadow: 0 0 0 3px rgba(10, 128, 96, 0.1);
+}
+
+.form-control:disabled {
+  background-color: #f9fafb;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-control.error {
+  border-color: #dc3545;
+}
+
+.form-control.error:focus {
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+/* Select */
+select.form-control {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2398A2B3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
+}
+
+/* Textarea */
+textarea.form-control {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Dica do formulário */
+.form-hint {
+  color: #6c737f;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Erro de campo */
+.field-error {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Ações do formulário */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #f9fafb;
+  border-top: 1px solid #e1e4e8;
+  border-radius: 0 0 12px 12px;
+  margin-top: 1.5rem;
+}
+
+/* Botões */
+.btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-primary {
+  background-color: var(--top-primary, #1e6076);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30, 96, 118, 0.3);
+}
+
+.btn-secondary {
+  background-color: #e1e4e8;
+  color: #344054;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #d4d6db;
+}
+
+/* Estilos para múltiplos emails */
+.emails-section {
+  margin-bottom: 20px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.add-email-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--naue-primary);
+  background: var(--naue-primary);
+  color: white;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.emails-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.email-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.email-input-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.email-input-container .form-control {
+  flex: 1;
+}
+
+.remove-email-btn {
+  padding: 8px 12px;
+  border: 1px solid #dc3545;
+  background: white;
+  color: #dc3545;
+  border-radius: 6px;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.remove-email-btn:hover:not(:disabled) {
+  background: #dc3545;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
+}
+
+.email-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6c737f;
+  font-style: italic;
+}
+
+.email-note i {
+  color: var(--naue-primary);
+  font-size: 11px;
+}
+
+/* Estilos para múltiplos telefones */
+.phones-section {
+  margin-bottom: 20px;
+}
+
+.add-phone-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--naue-primary);
+  background: var(--naue-primary);
+  color: white;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.phones-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.phone-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.phone-input-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.phone-input-container .form-control {
+  flex: 1;
+}
+
+.remove-phone-btn {
+  padding: 8px 12px;
+  border: 1px solid #dc3545;
+  background: white;
+  color: #dc3545;
+  border-radius: 6px;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.remove-phone-btn:hover:not(:disabled) {
+  background: #dc3545;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
+}
+
+.phone-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6c737f;
+  font-style: italic;
+}
+
+.phone-note i {
+  color: var(--naue-primary);
+  font-size: 11px;
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+  .form-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .side-column {
+    position: static;
+    max-height: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .card-header {
+    padding: 1rem 1.5rem;
+  }
+  
+  .card-body {
+    padding: 1.5rem;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .form-actions {
+    flex-direction: column-reverse;
+    padding: 1rem 1.5rem;
+  }
+  
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .section-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .add-email-btn,
+  .add-phone-btn {
+    align-self: flex-end;
+    width: auto;
+  }
+
+  .email-input-container,
+  .phone-input-container {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .remove-email-btn,
+  .remove-phone-btn {
+    align-self: flex-end;
+    width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    margin-bottom: 1.5rem;
+  }
+  
+  .main-column {
+    gap: 1rem;
+  }
+  
+  .form-card {
+    border-radius: 8px;
+  }
+}
+
+/* Card de informações */
+.info-card {
+  border: 1px solid #e2e8f0;
+}
+
+.info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.info-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: #4a5568;
+  line-height: 1.5;
+}
+
+.info-list li:last-child {
+  margin-bottom: 0;
+}
+
+.info-list li i {
+  color: var(--naue-primary);
+  font-size: 1rem;
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+}

@@ -1,0 +1,43 @@
+<!-- Loading state -->
+<div *ngIf="isLoading" class="loading-container">
+  <i class="fas fa-spinner fa-spin"></i>
+  Carregando estatísticas...
+</div>
+
+<!-- Error state -->
+<div *ngIf="error && !isLoading" class="error-message">
+  <i class="fas fa-exclamation-triangle"></i>
+  {{ error }}
+</div>
+
+<!-- Stats Cards - Mesmo padrão do Dashboard e Propostas -->
+<div *ngIf="!isLoading && !error" class="stats-grid" role="grid" aria-label="Estatísticas de contratos">
+  <div class="stat-card"
+       *ngFor="let card of cards; trackBy: trackByCardId"
+       [attr.aria-label]="card.title + ': ' + card.value"
+       [class.clickable]="card.id === 'expiring'"
+       (click)="handleCardClick(card.id)"
+       role="gridcell">
+    <div class="stat-card-header">
+      <span class="stat-label">{{ card.title }}</span>
+      <div class="stat-icon-wrapper" 
+           [style.background-color]="card.color + '20'"
+           [attr.aria-hidden]="true">
+        <i [class]="card.icon" [style.color]="card.color"></i>
+      </div>
+    </div>
+    <div class="stat-value" [class.value-card]="card.id === 'value'" [attr.aria-live]="'polite'">{{ card.value }}</div>
+    <div class="stat-footer">
+      <div class="stat-change" 
+           [ngClass]="card.trend ? getTrendClass(card.trend) : ''"
+           [attr.aria-label]="card.trend ? 'Mudança: ' + card.trend + '%' : ''">
+        <i class="fas" 
+           [ngClass]="card.trend && card.trend > 0 ? 'fa-arrow-up' : card.trend && card.trend < 0 ? 'fa-arrow-down' : 'fa-minus'" 
+           *ngIf="card.trend !== undefined"
+           aria-hidden="true"></i>
+        <span *ngIf="card.trend !== undefined">{{ abs(card.trend) }}%</span>
+        <span *ngIf="card.trend === undefined && card.subtitle">{{ card.subtitle }}</span>
+      </div>
+    </div>
+  </div>
+</div>

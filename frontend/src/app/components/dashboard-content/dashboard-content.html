@@ -1,0 +1,163 @@
+  <div class="page-header">
+    <h1 class="page-title">Dashboard</h1>
+    <app-breadcrumb></app-breadcrumb>
+  </div>
+
+  <!-- Stats Cards - Grid Ultra Responsivo -->
+  <div class="stats-grid" role="grid" aria-label="Estatísticas do dashboard">
+    <div class="stat-card" 
+         *ngFor="let card of statCards; trackBy: trackByCardId"
+         [attr.aria-label]="card.label + ': ' + card.value"
+         role="gridcell">
+      <div class="stat-card-header">
+        <span class="stat-label">{{ card.label }}</span>
+        <div class="stat-icon-wrapper" 
+             [style.background-color]="card.bgColor"
+             [attr.aria-hidden]="true">
+          <i [class]="card.icon" [style.color]="card.color"></i>
+        </div>
+      </div>
+      <div class="stat-value" [attr.aria-live]="'polite'">{{ card.value }}</div>
+      <div class="stat-footer">
+        <div class="stat-change" 
+             [ngClass]="card.changeType"
+             [attr.aria-label]="'Mudança: ' + card.change">
+          <i class="fas" [ngClass]="card.changeType === 'positive' ? 'fa-arrow-up' : 'fa-calendar-xmark'" aria-hidden="true"></i>
+          <span>{{ card.change }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions - Grid Responsivo -->
+  <div class="quick-actions-section"
+       role="region"
+       aria-label="Ações rápidas">
+    <div class="quick-actions-grid" role="group">
+      <button
+        class="quick-action-btn"
+        *ngFor="let action of quickActions; trackBy: trackByActionId"
+        (click)="executeQuickAction(action.action)"
+        [attr.aria-label]="'Ação rápida: ' + action.label"
+        type="button">
+        <i [class]="action.icon" aria-hidden="true"></i>
+        <span>{{ action.label }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content Grid - Layout Adaptativo -->
+  <div class="main-content-grid">
+    <!-- Chart Section - Responsivo -->
+    <section class="chart-container" 
+             role="region" 
+             aria-label="Gráfico de evolução de contratos">
+      <div class="section-header">
+        <h2 class="section-title">Evolução de Contratos</h2>
+      </div>
+      <div class="chart-wrapper" 
+           role="img" 
+           [attr.aria-label]="'Gráfico mostrando evolução de contratos ao longo do tempo'">
+        <canvas id="contractsChart" 
+                [attr.aria-label]="'Dados do gráfico de contratos'"></canvas>
+      </div>
+    </section>
+
+    <!-- Activities Section -->
+    <div class="activities-container">
+      <h2 class="section-title">Atividades Recentes</h2>
+      <div class="section-header">
+        <div class="activity-tabs">
+          <button 
+            class="tab-btn" 
+            [class.active]="activityFilter === 'all'"
+            (click)="filterActivities('all')">
+            <span>Todas</span>
+          </button>
+          <button 
+            class="tab-btn" 
+            [class.active]="activityFilter === 'not_started'"
+            (click)="filterActivities('not_started')">
+            <span>Não iniciados</span>
+          </button>
+          <button 
+            class="tab-btn" 
+            [class.active]="activityFilter === 'in_progress'"
+            (click)="filterActivities('in_progress')">
+            <span>Em andamento</span>
+          </button>
+          <button 
+            class="tab-btn" 
+            [class.active]="activityFilter === 'completed'"
+            (click)="filterActivities('completed')">
+            <span>Concluídas</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="activities-list">
+        <div class="activity-card" 
+             *ngFor="let activity of getDisplayedActivities()"
+             [class.clickable]="activity.contractId"
+             (click)="onActivityClick($event, activity)">
+          <div 
+            class="activity-icon"
+            [style.background-color]="getActivityColor(activity.type) + '20'"
+            [style.color]="getActivityColor(activity.type)">
+            <i [class]="getActivityIcon(activity.type)" [attr.aria-hidden]="true"></i>
+          </div>
+          <div class="activity-content">
+            <h4 class="activity-title">{{ activity.title }}</h4>
+            <p class="activity-description">{{ activity.description }}</p>
+            
+            <!-- Informações específicas para serviços -->
+            <div class="service-details" *ngIf="activity.type === 'service'">
+              <div class="service-info">
+                <span class="service-category" *ngIf="activity.category">
+                  <i class="fa fa-tag" aria-hidden="true"></i>
+                  {{ activity.category }}
+                </span>
+                <span class="service-duration" *ngIf="activity.duration">
+                  <i class="fa fa-clock" aria-hidden="true"></i>
+                  {{ activity.duration }}
+                </span>
+              </div>
+            </div>
+            
+            <div class="activity-meta">
+              <span class="activity-time">
+                <i class="fa fa-clock" aria-hidden="true"></i>
+                {{ activity.time }}
+              </span>
+              <span class="activity-status" 
+                    [ngClass]="'status-' + activity.status"
+                    [style.color]="getStatusColor(activity.status)">
+                {{ getStatusText(activity.status) }}
+              </span>
+            </div>
+          </div>
+          
+          <!-- Ícone de navegação para atividades com contractId -->
+          <div class="activity-action" *ngIf="activity.contractId">
+            <div class="action-indicator" title="Clique para ver o contrato">
+              <i class="fa fa-arrow-right" aria-hidden="true"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="view-all-btn" (click)="navigateToActivities()">
+        <span>Ver todas as atividades ({{ getTotalActivitiesCount() }})</span>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+      </button>
+      
+      <!-- Mensagem quando não há atividades -->
+      <div class="no-activities" *ngIf="getDisplayedActivities().length === 0">
+        <div class="no-activities-icon">
+          <i class="fa fa-calendar-times" aria-hidden="true"></i>
+        </div>
+        <p class="no-activities-text">Nenhuma atividade encontrada</p>
+        <p class="no-activities-subtext">As atividades aparecerão aqui quando houver movimentação no sistema</p>
+      </div>
+    </div>
+  </div>

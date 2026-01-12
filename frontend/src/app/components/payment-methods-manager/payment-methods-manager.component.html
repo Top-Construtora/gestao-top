@@ -1,0 +1,182 @@
+<div class="payment-methods-section">
+  <div class="section-header">
+    <h3 class="section-title">
+      <i class="fas fa-credit-card"></i>
+      Formas de Pagamento
+    </h3>
+    <button 
+      *ngIf="!readonly" 
+      class="btn btn-sm btn-primary"
+      (click)="showAddPaymentMethod()"
+      [disabled]="showAddForm">
+      <i class="fas fa-plus"></i>
+      Adicionar
+    </button>
+  </div>
+
+  <!-- Validation Warning -->
+  <div *ngIf="!validation.isValid" class="validation-warning">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span>Percentuais somam {{ validation.total }}%. Diferença: {{ validation.difference.toFixed(1) }}%</span>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-state">
+    <i class="fas fa-spinner fa-spin"></i>
+    Carregando formas de pagamento...
+  </div>
+
+  <!-- Payment Methods List -->
+  <div *ngIf="!isLoading" class="payment-methods-list">
+    <!-- Existing Payment Methods -->
+    <div *ngFor="let paymentMethod of paymentMethods; let i = index" 
+         class="payment-method-item">
+      
+      <div class="payment-info">
+        <div class="payment-main">
+          <span class="payment-name">{{ paymentMethod.payment_method }}</span>
+          <span class="payment-order">#{{ paymentMethod.sort_order }}</span>
+        </div>
+        
+        <div class="payment-details">
+          <div class="value-info">
+            <span *ngIf="paymentMethod.value_type === 'percentage'" class="percentage">
+              {{ paymentMethod.percentage }}%
+            </span>
+            <span *ngIf="paymentMethod.value_type === 'fixed_value'" class="fixed-value">
+              {{ paymentMethodService.formatValue(paymentMethod.fixed_value) }}
+            </span>
+            <span class="calculated-value">
+              ({{ getCalculatedValue(paymentMethod) }})
+            </span>
+            <span *ngIf="paymentMethod.value_type === 'fixed_value'" class="calculated-percentage">
+              {{ getPercentageFromFixed(paymentMethod) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="payment-actions" *ngIf="!readonly">
+        <button 
+          class="btn-icon btn-edit" 
+          (click)="editPaymentMethod(i)"
+          title="Editar">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button 
+          class="btn-icon btn-delete" 
+          (click)="deletePaymentMethod(i)"
+          [disabled]="paymentMethods.length === 1"
+          title="Remover">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Add New Payment Method Form -->
+    <div *ngIf="showAddForm" class="payment-method-form">
+      <div class="form-header">
+        <h4>{{ editingIndex >= 0 ? 'Editar' : 'Nova' }} Forma de Pagamento</h4>
+        <button class="btn-icon btn-close" (click)="hideAddPaymentMethod()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="form-content">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Forma de Pagamento *</label>
+            <select [(ngModel)]="newPaymentMethod.payment_method" class="form-select">
+              <option value="">Selecione...</option>
+              <option *ngFor="let option of paymentMethodOptions" [value]="option">
+                {{ option }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Tipo de Valor *</label>
+            <select [(ngModel)]="newPaymentMethod.value_type" 
+                    (change)="onValueTypeChange()" 
+                    class="form-select">
+              <option value="percentage">Percentual (%)</option>
+              <option value="fixed_value">Valor Fixo (R$)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" *ngIf="newPaymentMethod.value_type === 'percentage'">
+            <label>Percentual *</label>
+            <div class="input-with-suffix">
+              <input 
+                type="number" 
+                [(ngModel)]="newPaymentMethod.percentage"
+                min="0" 
+                max="100" 
+                step="0.01"
+                class="form-input"
+                placeholder="0.00">
+              <span class="input-suffix">%</span>
+            </div>
+          </div>
+
+          <div class="form-group" *ngIf="newPaymentMethod.value_type === 'fixed_value'">
+            <label>Valor Fixo *</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">R$</span>
+              <input 
+                type="number" 
+                [(ngModel)]="newPaymentMethod.fixed_value"
+                min="0" 
+                step="0.01"
+                class="form-input"
+                placeholder="0.00">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button 
+            class="btn btn-secondary" 
+            (click)="hideAddPaymentMethod()"
+            [disabled]="isSaving">
+            Cancelar
+          </button>
+          <button 
+            class="btn btn-primary" 
+            (click)="savePaymentMethod()"
+            [disabled]="isSaving">
+            <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+            <i class="fas fa-save" *ngIf="!isSaving"></i>
+            {{ editingIndex >= 0 ? 'Atualizar' : 'Adicionar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="paymentMethods.length === 0 && !showAddForm && !isLoading" class="empty-state">
+      <i class="fas fa-credit-card"></i>
+      <p>Nenhuma forma de pagamento configurada</p>
+      <button *ngIf="!readonly" class="btn btn-primary" (click)="showAddPaymentMethod()">
+        <i class="fas fa-plus"></i>
+        Adicionar Primeira Forma
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div *ngIf="paymentMethods.length > 0" class="payment-summary">
+    <div class="summary-item">
+      <span class="summary-label">Total de Formas:</span>
+      <span class="summary-value">{{ paymentMethods.length }}</span>
+    </div>
+    <div class="summary-item" *ngIf="validation.total !== 100">
+      <span class="summary-label">Cobertura:</span>
+      <span class="summary-value" [class.warning]="!validation.isValid">
+        {{ validation.total.toFixed(1) }}%
+      </span>
+    </div>
+  </div>
+</div>
