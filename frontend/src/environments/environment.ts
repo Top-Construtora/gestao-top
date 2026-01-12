@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000/api',
-  authUrl: 'http://localhost:3000/api/auth'
+  apiUrl: 'https://gestao-top.onrender.com/api',
+  authUrl: 'https://gestao-top.onrender.com/api/auth'
 };
