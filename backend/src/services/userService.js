@@ -53,11 +53,21 @@ class UserService {
       cargo
     });
 
-    await emailService.sendWelcomeEmailWithCredentials(email, name, temporaryPassword);
+    // Enviar email de boas-vindas (não bloquear criação em caso de erro)
+    try {
+      await emailService.sendWelcomeEmailWithCredentials(email, name, temporaryPassword);
+    } catch (emailError) {
+      console.error('❌ Erro ao enviar email de boas-vindas:', emailError.message);
+      // Continua mesmo se o email falhar
+    }
 
-    // Notificar administradores sobre novo usuário criado
+    // Notificar administradores sobre novo usuário criado (não bloquear em caso de erro)
     if (creatorId) {
-      await NotificationService.notifyAdminsNewUser(user.id, creatorId);
+      try {
+        await NotificationService.notifyAdminsNewUser(user.id, creatorId);
+      } catch (notifyError) {
+        console.error('❌ Erro ao notificar admins:', notifyError.message);
+      }
     }
 
     return {

@@ -235,14 +235,14 @@
 }
 
 .section-title i {
-  color: var(--naue-primary) !important;
+  color: var(--top-accent, #baa673) !important;
   font-size: 20px;
   width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 59, 43, 0.08);
+  background: rgba(186, 166, 115, 0.15);
   border-radius: 10px;
 }
 

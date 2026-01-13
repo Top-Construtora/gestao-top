@@ -36,34 +36,36 @@
               <span class="field-error" *ngIf="errors['name']">{{ errors['name'] }}</span>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">
-                Email Corporativo <span class="required">*</span>
-              </label>
-              <input 
-                type="email" 
-                class="form-control" 
-                [(ngModel)]="userData.email"
-                name="email"
-                placeholder="usuario@topconstrutora.com.br"
-                [class.error]="errors['email']"
-                [disabled]="isEditMode"
-                required>
-              <span class="field-error" *ngIf="errors['email']">{{ errors['email'] }}</span>
-              <span class="form-hint" *ngIf="isEditMode">
-                <i class="fas fa-info-circle"></i>
-                O email não pode ser alterado após o cadastro
-              </span>
-            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">
+                  Email Corporativo <span class="required">*</span>
+                </label>
+                <input
+                  type="email"
+                  class="form-control"
+                  [(ngModel)]="userData.email"
+                  name="email"
+                  placeholder="usuario@topconstrutora.com.br"
+                  [class.error]="errors['email']"
+                  [disabled]="isEditMode"
+                  required>
+                <span class="field-error" *ngIf="errors['email']">{{ errors['email'] }}</span>
+                <span class="form-hint" *ngIf="isEditMode">
+                  <i class="fas fa-info-circle"></i>
+                  O email não pode ser alterado após o cadastro
+                </span>
+              </div>
 
-            <div class="form-group">
-              <label class="form-label">Cargo/Função</label>
-              <input 
-                type="text" 
-                class="form-control" 
-                [(ngModel)]="userData.cargo"
-                name="cargo"
-                placeholder="Ex: Gerente de Projetos, Analista de Contratos">
+              <div class="form-group">
+                <label class="form-label">Cargo/Função</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="userData.cargo"
+                  name="cargo"
+                  placeholder="Ex: Gerente de Projetos, Analista de Contratos">
+              </div>
             </div>
           </div>
         </div>

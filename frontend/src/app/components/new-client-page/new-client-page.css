@@ -159,7 +159,7 @@
 
 .card-header i {
   font-size: 1.125rem;
-  color: var(--naue-primary);
+  color: var(--top-accent, #baa673);
 }
 
 .card-header h2 {
@@ -174,14 +174,11 @@
 }
 
 .card-body.logo-upload-body {
-  display: flex;
-  justify-content: center;
   padding: 1.5rem;
 }
 
 .card-body.logo-upload-body app-image-upload {
   width: 100%;
-  max-width: 280px;
 }
 
 /* Grid do formulário */

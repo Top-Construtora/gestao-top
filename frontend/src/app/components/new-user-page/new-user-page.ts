@@ -5,7 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { UserService } from '../../services/user';
 import { ProfilePictureService } from '../../services/profile-picture.service';
 import { ToastrService } from 'ngx-toastr';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, timeout, catchError, throwError } from 'rxjs';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 
 interface UserData {
@@ -150,20 +150,39 @@ export class NewUserPageComponent implements OnInit {
         
         this.toastr.success('Usuário atualizado com sucesso!');
       } else {
-        const response = await firstValueFrom(this.userService.createUser(payload));
-        
+        const createUser$ = this.userService.createUser(payload).pipe(
+          timeout(30000), // 30 segundos de timeout
+          catchError(err => {
+            if (err.name === 'TimeoutError') {
+              return throwError(() => new Error('Tempo limite excedido. Verifique sua conexão.'));
+            }
+            return throwError(() => err);
+          })
+        );
+
+        const response = await firstValueFrom(createUser$);
+        console.log('📝 Resposta da criação:', response);
+
         // Upload profile picture if selected for new user
-        if (this.selectedProfilePicture && response.user?.id) {
-          try {
-            await this.userService.uploadProfilePicture(response.user.id, this.selectedProfilePicture).toPromise();
-            // Invalidar cache da foto de perfil
-            this.profilePictureService.invalidateCache(response.user.id);
-          } catch (error) {
-            console.error('Erro ao fazer upload da foto de perfil:', error);
-            this.toastr.warning('Usuário criado, mas houve erro ao salvar a foto de perfil');
+        if (this.selectedProfilePicture) {
+          console.log('📷 Foto selecionada, user id:', response.user?.id);
+          if (response.user?.id) {
+            try {
+              const upload$ = this.userService.uploadProfilePicture(response.user.id, this.selectedProfilePicture).pipe(
+                timeout(30000)
+              );
+              await firstValueFrom(upload$);
+              this.profilePictureService.invalidateCache(response.user.id);
+              console.log('✅ Foto de perfil enviada com sucesso');
+            } catch (error) {
+              console.error('❌ Erro ao fazer upload da foto de perfil:', error);
+              this.toastr.warning('Usuário criado, mas houve erro ao salvar a foto de perfil');
+            }
+          } else {
+            console.warn('⚠️ ID do usuário não encontrado na resposta');
           }
         }
-        
+
         this.toastr.success('Usuário criado com sucesso! Uma senha temporária foi enviada por e-mail.');
       }
 

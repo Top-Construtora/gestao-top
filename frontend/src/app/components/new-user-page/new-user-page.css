@@ -95,7 +95,7 @@
 
 .card-header i {
   font-size: 1.125rem;
-  color: var(--top-secondary, #12b0a0);
+  color: var(--top-accent, #baa673);
 }
 
 .card-header h2 {
@@ -126,6 +126,25 @@
 .error-message i {
   font-size: 1.125rem;
   flex-shrink: 0;
+}
+
+/* Linha de formulário (campos lado a lado) */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-row .form-group {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 }
 
 /* Grupos de formulário */
@@ -307,8 +326,6 @@
 
 /* Upload de Foto de Perfil */
 .profile-upload-body {
-  display: flex;
-  justify-content: center;
   padding: 1.5rem;
 }
 
@@ -324,7 +341,6 @@
   cursor: pointer;
   transition: all 0.2s ease;
   width: 100%;
-  max-width: 240px;
 }
 
 .profile-upload-area:hover {

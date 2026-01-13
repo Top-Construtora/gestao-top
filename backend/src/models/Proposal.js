@@ -851,21 +851,29 @@ class ProposalModel {
       const byStatus = {
         draft: 0,
         sent: 0,
+        signed: 0,
         accepted: 0,
         rejected: 0,
-        expired: 0
+        expired: 0,
+        converted: 0,
+        contraproposta: 0
       };
 
       let totalValue = 0;
       let acceptedValue = 0;
+      let sentValue = 0;
       let expired = 0;
 
       (proposals || []).forEach(proposal => {
         byStatus[proposal.status] = (byStatus[proposal.status] || 0) + 1;
         totalValue += proposal.total_value || 0;
 
-        if (proposal.status === 'signed' || proposal.status === 'accepted') {
+        if (proposal.status === 'signed' || proposal.status === 'accepted' || proposal.status === 'converted') {
           acceptedValue += proposal.total_value || 0;
+        }
+
+        if (proposal.status === 'sent') {
+          sentValue += proposal.total_value || 0;
         }
 
         if (proposal.status === 'expired') {
@@ -873,13 +881,16 @@ class ProposalModel {
         }
       });
 
+      const closedCount = byStatus.signed + byStatus.accepted + byStatus.converted;
+
       return {
         total,
         byStatus,
         totalValue,
         acceptedValue,
+        sentValue,
         expired,
-        conversionRate: total > 0 ? ((byStatus.accepted / total) * 100).toFixed(2) : 0
+        conversionRate: total > 0 ? ((closedCount / total) * 100).toFixed(2) : 0
       };
     } catch (error) {
       console.error('❌ Erro no getStats:', error);
