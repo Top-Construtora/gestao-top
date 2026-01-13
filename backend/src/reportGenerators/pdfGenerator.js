@@ -8,35 +8,38 @@ const fs = require('fs');
 const STYLES = {
     FONT_NORMAL: 'Helvetica',
     FONT_BOLD: 'Helvetica-Bold',
-    COLOR_PRIMARY: '#003b2b',
+    COLOR_PRIMARY: '#1e6076',
     COLOR_TEXT: '#333333',
     COLOR_HEADER: '#666666',
     COLOR_STROKE: '#cccccc',
 };
 
 function addHeader(doc, title, subtitle = null) {
-    const logoPath = path.join(__dirname, '../../public/logoTOP.png');
+    const logoPath = path.join(__dirname, '../../../frontend/public/top2.png');
 
     // Adicionar logo se existir
     if (fs.existsSync(logoPath)) {
-        doc.image(logoPath, 50, 40, { width: 80 });
+        doc.image(logoPath, 50, 30, { width: 100 });
     }
 
     // Título ao lado do logo
     doc.fontSize(20)
        .font(STYLES.FONT_BOLD)
-       .text(title, 140, 50, { align: 'left' });
+       .fillColor(STYLES.COLOR_PRIMARY)
+       .text(title, 160, 50, { align: 'left' });
 
     // Subtítulo se fornecido
     if (subtitle) {
         doc.fontSize(12)
            .font(STYLES.FONT_NORMAL)
-           .text(subtitle, 140, 75, { align: 'left' });
+           .fillColor(STYLES.COLOR_TEXT)
+           .text(subtitle, 160, 75, { align: 'left' });
     }
 
     // Data de geração
     doc.fontSize(10)
        .font(STYLES.FONT_NORMAL)
+       .fillColor(STYLES.COLOR_HEADER)
        .text(`Gerado em: ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, 50, 100, { align: 'right' });
 
     doc.moveDown(3);

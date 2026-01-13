@@ -1474,44 +1474,32 @@ export class ContractExportService {
   }
 
   private getClientDocument(client: any): string {
-    if (!client) return '000.000.000-00';
-    
-    // Para PF (Pessoa Física)
-    if (client.clients_pf && client.clients_pf.length > 0) {
-      return client.clients_pf[0].cpf || '000.000.000-00';
-    }
-    
-    // Para PJ (Pessoa Jurídica)
+    if (!client) return '00.000.000/0000-00';
+
+    // Para PJ (Pessoa Juridica)
     if (client.clients_pj && client.clients_pj.length > 0) {
       return client.clients_pj[0].cnpj || '00.000.000/0000-00';
     }
-    
+
     // Campos diretos do cliente
-    if (client.cpf) return client.cpf;
     if (client.cnpj) return client.cnpj;
     if (client.document) return client.document;
-    
-    // Fallback padrão
-    return '000.000.000-00';
+
+    return '00.000.000/0000-00';
   }
 
   private getClientName(client: any): string {
-    if (!client) return 'Cliente não informado';
+    if (!client) return 'Cliente nao informado';
 
-    // Se já tem nome processado
+    // Se ja tem nome processado
     if (client.name) return client.name;
 
-    // Para PF (Pessoa Física)
-    if (client.clients_pf && client.clients_pf.length > 0) {
-      return client.clients_pf[0].full_name || 'Nome não informado';
-    }
-
-    // Para PJ (Pessoa Jurídica)
+    // Para PJ (Pessoa Juridica)
     if (client.clients_pj && client.clients_pj.length > 0) {
-      return client.clients_pj[0].company_name || client.clients_pj[0].trade_name || 'Empresa não informada';
+      return client.clients_pj[0].company_name || client.clients_pj[0].trade_name || 'Empresa nao informada';
     }
 
-    return 'Cliente não identificado';
+    return 'Cliente nao identificado';
   }
 
   private getClientAddress(client: any): string {

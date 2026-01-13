@@ -27,7 +27,6 @@ class PlanejamentoEstrategicoController {
           client:clients!inner(
             id,
             email,
-            clients_pf(cpf, full_name),
             clients_pj(cnpj, company_name, trade_name)
           ),
           contract:contracts!inner(
@@ -85,7 +84,6 @@ class PlanejamentoEstrategicoController {
           client:clients(
             id,
             email,
-            clients_pf(cpf, full_name),
             clients_pj(cnpj, company_name, trade_name)
           ),
           contract:contracts(
@@ -769,7 +767,6 @@ class PlanejamentoEstrategicoController {
             id,
             email,
             logo_path,
-            clients_pf(cpf, full_name),
             clients_pj(cnpj, company_name, trade_name)
           )
         `)
@@ -856,7 +853,6 @@ class PlanejamentoEstrategicoController {
             client:clients(
               id,
               email,
-              clients_pf(cpf, full_name),
               clients_pj(cnpj, company_name, trade_name),
               logo_path
             )
@@ -1127,7 +1123,6 @@ class PlanejamentoEstrategicoController {
           planejamento:planejamentos_estrategicos(
             titulo,
             client:clients(
-              clients_pf(full_name),
               clients_pj(company_name, trade_name)
             )
           )
@@ -1357,7 +1352,6 @@ class PlanejamentoEstrategicoController {
         .select(`
           *,
           client:clients(
-            clients_pf(full_name),
             clients_pj(company_name, trade_name)
           )
         `)
@@ -1404,7 +1398,6 @@ class PlanejamentoEstrategicoController {
       // Headers para download
       const clientName = planejamento.client?.clients_pj?.trade_name ||
                          planejamento.client?.clients_pj?.company_name ||
-                         planejamento.client?.clients_pf?.full_name ||
                          'Cliente';
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename=matrizes-evolucao-${clientName.replace(/\s+/g, '-')}.pdf`);
@@ -1901,7 +1894,6 @@ class PlanejamentoEstrategicoController {
           client:clients(
             id,
             email,
-            clients_pf(cpf, full_name),
             clients_pj(cnpj, company_name, trade_name),
             logo_path
           ),
@@ -1973,7 +1965,6 @@ class PlanejamentoEstrategicoController {
             client:clients(
               id,
               email,
-              clients_pf(cpf, full_name),
               clients_pj(cnpj, company_name, trade_name),
               logo_path
             )
@@ -2032,7 +2023,6 @@ class PlanejamentoEstrategicoController {
           planejamento:planejamentos_estrategicos(
             titulo,
             client:clients(
-              clients_pf(full_name),
               clients_pj(company_name, trade_name)
             )
           )
@@ -2276,7 +2266,6 @@ class PlanejamentoEstrategicoController {
           client:clients(
             id,
             email,
-            clients_pf(cpf, full_name),
             clients_pj(cnpj, company_name, trade_name)
           ),
           contract:contracts(
@@ -2438,7 +2427,6 @@ class PlanejamentoEstrategicoController {
           client:clients(
             id,
             email,
-            clients_pf(cpf, full_name),
             clients_pj(cnpj, company_name, trade_name)
           )
         `)
@@ -2594,7 +2582,6 @@ class PlanejamentoEstrategicoController {
             titulo,
             prazo_preenchimento,
             client:clients(
-              clients_pf(full_name),
               clients_pj(company_name, trade_name)
             )
           )
@@ -2750,7 +2737,6 @@ class PlanejamentoEstrategicoController {
         .select(`
           *,
           client:clients(
-            clients_pf(full_name),
             clients_pj(company_name, trade_name),
             logo_url
           )
@@ -3135,7 +3121,6 @@ class PlanejamentoEstrategicoController {
         .select(`
           *,
           client:clients(
-            clients_pf(full_name),
             clients_pj(company_name, trade_name)
           )
         `)
@@ -3185,8 +3170,6 @@ class PlanejamentoEstrategicoController {
         const client = planejamento.client;
         if (client.clients_pj) {
           clientName = client.clients_pj.trade_name || client.clients_pj.company_name || clientName;
-        } else if (client.clients_pf) {
-          clientName = client.clients_pf.full_name || clientName;
         }
       }
 
@@ -3520,7 +3503,6 @@ class PlanejamentoEstrategicoController {
         .select(`
           *,
           client:clients(
-            clients_pf(full_name),
             clients_pj(company_name, trade_name)
           )
         `)
@@ -3596,8 +3578,6 @@ class PlanejamentoEstrategicoController {
         const client = planejamento.client;
         if (client.clients_pj) {
           clientName = client.clients_pj.trade_name || client.clients_pj.company_name || clientName;
-        } else if (client.clients_pf) {
-          clientName = client.clients_pf.full_name || clientName;
         }
       }
 
@@ -3808,7 +3788,6 @@ class PlanejamentoEstrategicoController {
         .select(`
           *,
           client:clients(
-            clients_pf(full_name),
             clients_pj(company_name, trade_name)
           )
         `)
@@ -3875,8 +3854,6 @@ class PlanejamentoEstrategicoController {
         const client = planejamento.client;
         if (client.clients_pj) {
           clientName = client.clients_pj.trade_name || client.clients_pj.company_name || clientName;
-        } else if (client.clients_pf) {
-          clientName = client.clients_pf.full_name || clientName;
         }
       }
 
@@ -4237,7 +4214,6 @@ class PlanejamentoEstrategicoController {
         .select(`
           *,
           client:clients(
-            clients_pf(full_name),
             clients_pj(company_name, trade_name)
           )
         `)
@@ -4286,8 +4262,6 @@ class PlanejamentoEstrategicoController {
         const client = planejamento.client;
         if (client.clients_pj) {
           clientName = client.clients_pj.trade_name || client.clients_pj.company_name || clientName;
-        } else if (client.clients_pf) {
-          clientName = client.clients_pf.full_name || clientName;
         }
       }
 
@@ -4490,7 +4464,6 @@ class PlanejamentoEstrategicoController {
         .select(`
           *,
           client:clients(
-            clients_pf(full_name),
             clients_pj(company_name, trade_name)
           )
         `)
@@ -4570,8 +4543,6 @@ class PlanejamentoEstrategicoController {
         const client = planejamento.client;
         if (client.clients_pj) {
           clientName = client.clients_pj.trade_name || client.clients_pj.company_name || clientName;
-        } else if (client.clients_pf) {
-          clientName = client.clients_pf.full_name || clientName;
         }
       }
 
@@ -5083,7 +5054,6 @@ class PlanejamentoEstrategicoController {
           client:clients(
             id,
             email,
-            clients_pf(cpf, full_name),
             clients_pj(cnpj, company_name, trade_name)
           ),
           contract:contracts(
@@ -5497,7 +5467,6 @@ class PlanejamentoEstrategicoController {
         .select(`
           *,
           client:clients(
-            clients_pf(full_name),
             clients_pj(company_name, trade_name)
           )
         `)
@@ -5556,8 +5525,6 @@ class PlanejamentoEstrategicoController {
         const client = planejamento.client;
         if (client.clients_pj) {
           clientName = client.clients_pj.trade_name || client.clients_pj.company_name || clientName;
-        } else if (client.clients_pf) {
-          clientName = client.clients_pf.full_name || clientName;
         }
       }
 
@@ -6497,7 +6464,6 @@ class PlanejamentoEstrategicoController {
             client:clients(
               id,
               email,
-              clients_pf(cpf, full_name),
               clients_pj(cnpj, company_name, trade_name),
               logo_path
             )
@@ -6929,7 +6895,6 @@ class PlanejamentoEstrategicoController {
         .select(`
           *,
           client:clients(
-            clients_pf(full_name),
             clients_pj(company_name, trade_name)
           )
         `)
@@ -6976,8 +6941,6 @@ class PlanejamentoEstrategicoController {
         const client = planejamento.client;
         if (client.clients_pj) {
           clientName = client.clients_pj.trade_name || client.clients_pj.company_name || clientName;
-        } else if (client.clients_pf) {
-          clientName = client.clients_pf.full_name || clientName;
         }
       }
 
@@ -7176,7 +7139,6 @@ class PlanejamentoEstrategicoController {
         .select(`
           *,
           client:clients(
-            clients_pf(full_name),
             clients_pj(company_name, trade_name)
           )
         `)
@@ -7224,8 +7186,6 @@ class PlanejamentoEstrategicoController {
         const client = planejamento.client;
         if (client.clients_pj) {
           clientName = client.clients_pj.trade_name || client.clients_pj.company_name || clientName;
-        } else if (client.clients_pf) {
-          clientName = client.clients_pf.full_name || clientName;
         }
       }
 
@@ -7428,7 +7388,6 @@ class PlanejamentoEstrategicoController {
         .select(`
           *,
           client:clients(
-            clients_pf(full_name),
             clients_pj(company_name, trade_name)
           )
         `)
@@ -7530,9 +7489,6 @@ class PlanejamentoEstrategicoController {
         if (!client) return 'N/A';
         if (client.clients_pj) {
           return client.clients_pj.trade_name || client.clients_pj.company_name || 'N/A';
-        }
-        if (client.clients_pf) {
-          return client.clients_pf.full_name || 'N/A';
         }
         return 'N/A';
       };
@@ -7865,7 +7821,6 @@ class PlanejamentoEstrategicoController {
         .select(`
           *,
           client:clients(
-            clients_pf(full_name),
             clients_pj(company_name, trade_name)
           )
         `)
@@ -7951,9 +7906,6 @@ class PlanejamentoEstrategicoController {
         if (!client) return 'N/A';
         if (client.clients_pj) {
           return client.clients_pj.trade_name || client.clients_pj.company_name || 'N/A';
-        }
-        if (client.clients_pf) {
-          return client.clients_pf.full_name || 'N/A';
         }
         return 'N/A';
       };
@@ -8316,7 +8268,6 @@ class PlanejamentoEstrategicoController {
         .select(`
           *,
           client:clients(
-            clients_pf(full_name),
             clients_pj(company_name, trade_name)
           )
         `)
@@ -8402,9 +8353,6 @@ class PlanejamentoEstrategicoController {
         if (!client) return 'N/A';
         if (client.clients_pj) {
           return client.clients_pj.trade_name || client.clients_pj.company_name || 'N/A';
-        }
-        if (client.clients_pf) {
-          return client.clients_pf.full_name || 'N/A';
         }
         return 'N/A';
       };

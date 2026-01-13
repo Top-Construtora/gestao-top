@@ -8,16 +8,10 @@ class ProposalModel {
   transformClientData(proposals) {
     return proposals.map(proposal => {
       if (proposal.client) {
-        // Determine if client is PF or PJ and add name property
-        // Note: clients_pf and clients_pj are objects (1:1 relation), not arrays
-        const isPF = proposal.client.clients_pf && proposal.client.clients_pf.full_name;
+        // All clients are now PJ only
         const isPJ = proposal.client.clients_pj && proposal.client.clients_pj.company_name;
-        
-        if (isPF) {
-          proposal.client.name = proposal.client.clients_pf.full_name;
-          proposal.client.type = 'PF';
-          proposal.client.person = proposal.client.clients_pf;
-        } else if (isPJ) {
+
+        if (isPJ) {
           // Priorizar trade_name (nome fantasia) sobre company_name (razão social)
           proposal.client.name = proposal.client.clients_pj.trade_name || proposal.client.clients_pj.company_name;
           proposal.client.type = 'PJ';
@@ -72,18 +66,8 @@ class ProposalModel {
   async create(proposalData, userId) {
     const {
       client_id,
-      type = 'Full', // Tipo da proposta: Full, Pontual, Individual
-      max_installments = 12,
-      vista_discount_percentage = 6, // Desconto padrão para pagamento à vista
-      prazo_discount_percentage = 0, // Desconto padrão para pagamento à prazo
-      vista_discount_value = 0, // Valor absoluto de desconto para pagamento à vista
-      prazo_discount_value = 0, // Valor absoluto de desconto para pagamento à prazo
-      solicitante_name, // Nome do solicitante
-      solicitante_email, // Email do solicitante
-      source, // Fonte da proposta: Indicação, Site, Já era cliente, etc.
-      valor_global = null, // Valor global fixo da proposta
-      usar_valor_global = false, // Se true, usa valor_global. Se false, usa soma dos serviços
-      services // Array de objetos: [{ service_id, unit_value }]
+      type = 'Full',
+      services
     } = proposalData;
 
     try {
@@ -100,23 +84,11 @@ class ProposalModel {
         .from('proposals')
         .insert([{
           client_id,
-          type, // Tipo da proposta: Full, Pontual, Individual
+          type,
           proposal_number,
-          status: 'draft', // draft, sent, signed, rejected, expired, converted
-          total_value: 0, // Será calculado depois
-          valor_global: valor_global || null, // Valor global fixo
-          usar_valor_global: usar_valor_global || false, // Flag para usar valor global
-          unique_link,
-          max_installments: max_installments,
-          vista_discount_percentage: vista_discount_percentage,
-          prazo_discount_percentage: prazo_discount_percentage,
-          vista_discount_value: vista_discount_value,
-          prazo_discount_value: prazo_discount_value,
-          solicitante_name: solicitante_name || null,
-          solicitante_email: solicitante_email || null,
-          source: source || null,
-          created_by: userId,
-          updated_by: userId
+          status: 'draft',
+          total_value: 0,
+          unique_link
         }])
         .select('*')
         .single();
@@ -128,90 +100,24 @@ class ProposalModel {
 
       // Adicionar serviços à proposta
       if (services && services.length > 0) {
-        // Fetch service details to populate service_name and service_description
-        const servicesWithDetails = await Promise.all(
-          services.map(async (service, index) => {
-            const { data: serviceData, error } = await supabase
-              .from('services')
-              .select('name, description, category')
-              .eq('id', service.service_id)
-              .single();
+        const servicesForInsert = services.map((service, index) => ({
+          proposal_id: proposal.id,
+          service_id: service.service_id,
+          unit_value: service.unit_value || 0,
+          total_value: service.total_value || service.unit_value || 0
+        }));
 
-            if (error) {
-              console.error(`❌ Erro ao buscar detalhes do serviço ${service.service_id}:`, error);
-              throw error;
-            }
+        console.log('🔧 Attempting to insert proposal services:', JSON.stringify(servicesForInsert, null, 2));
 
-            // Para serviços de Recrutamento & Seleção, use valor 0 se não fornecido
-            const isRecruitment = serviceData.category === 'Recrutamento & Seleção';
-            const unitValue = isRecruitment && !service.unit_value ? 0 : (service.unit_value || 0);
-            const totalValue = isRecruitment && !service.total_value ? 0 : (service.total_value || unitValue);
-
-            return {
-              proposal_id: proposal.id,
-              service_id: service.service_id,
-              service_name: serviceData.name,
-              service_description: serviceData.description || '',
-              unit_value: unitValue,
-              total_value: totalValue,
-              sort_order: service.sort_order !== undefined ? service.sort_order : index,
-              recruitmentPercentages: service.recruitmentPercentages,
-              isRecruitment
-            };
-          })
-        );
-
-        console.log('🔧 Attempting to insert proposal services:', JSON.stringify(servicesWithDetails, null, 2));
-
-        // Inserir serviços (mantendo sort_order)
-        const servicesForInsert = servicesWithDetails.map(({ recruitmentPercentages, isRecruitment, ...serviceData }) => serviceData);
-
-        const { data: insertedServices, error: servicesError } = await supabase
+        const { error: servicesError } = await supabase
           .from('proposal_services')
-          .insert(servicesForInsert)
-          .select('*');
+          .insert(servicesForInsert);
 
         if (servicesError) {
           // Rollback - excluir proposta criada
           await supabase.from('proposals').delete().eq('id', proposal.id);
-          console.error('❌ Erro ao adicionar serviços à proposta na tabela proposal_services:', servicesError);
+          console.error('❌ Erro ao adicionar serviços à proposta:', servicesError);
           throw servicesError;
-        }
-
-        // Inserir porcentagens de recrutamento para serviços de Recrutamento & Seleção
-        for (let i = 0; i < servicesWithDetails.length; i++) {
-          const serviceDetail = servicesWithDetails[i];
-          const insertedService = insertedServices[i];
-
-          console.log(`🔍 Verificando serviço ${i}:`, {
-            isRecruitment: serviceDetail.isRecruitment,
-            hasPercentages: !!serviceDetail.recruitmentPercentages,
-            hasInsertedService: !!insertedService,
-            percentages: serviceDetail.recruitmentPercentages
-          });
-
-          if (serviceDetail.isRecruitment && serviceDetail.recruitmentPercentages && insertedService) {
-            const percentageData = {
-              proposal_service_id: insertedService.id,
-              administrativo_gestao: serviceDetail.recruitmentPercentages.administrativo_gestao || 100,
-              comercial: serviceDetail.recruitmentPercentages.comercial || 100,
-              operacional: serviceDetail.recruitmentPercentages.operacional || 100,
-              estagio_jovem: serviceDetail.recruitmentPercentages.estagio_jovem || 100
-            };
-
-            console.log('📊 Inserindo porcentagens de recrutamento:', percentageData);
-
-            const { error: percentError } = await supabase
-              .from('proposal_recruitment_percentages')
-              .insert(percentageData);
-
-            if (percentError) {
-              console.error('❌ Erro ao inserir porcentagens de recrutamento:', percentError);
-              // Continuar mesmo com erro, pois as tabelas podem não existir ainda
-            } else {
-              console.log('✅ Porcentagens de recrutamento inseridas com sucesso para proposal_service_id:', insertedService.id);
-            }
-          }
         }
 
         // Recalcular valor total
@@ -233,17 +139,11 @@ class ProposalModel {
       let query = supabase
         .from('proposals')
         .select(`
-          id, proposal_number, client_id, type, status, total_value, unique_link, signature_data, converted_to_contract_id,
-          signer_name, signer_email, signer_phone, signer_document, signer_observations,
-          payment_type, payment_method, installments, final_value, discount_applied, max_installments,
-          vista_discount_percentage, prazo_discount_percentage, vista_discount_value, prazo_discount_value,
-          solicitante_name, solicitante_email, source,
-          valor_global, usar_valor_global,
+          id, proposal_number, client_id, type, status, total_value, unique_link, converted_to_contract_id,
           created_at, updated_at,
           client:clients(
             id, email, phone, street, number, complement,
             neighborhood, city, state, zipcode,
-            clients_pf(full_name),
             clients_pj(company_name, trade_name)
           )
         `)
@@ -282,9 +182,8 @@ class ProposalModel {
           if (proposal.status === 'contraproposta' || proposal.status === 'converted') {
             const { data: services, error: servicesError } = await supabase
               .from('proposal_services')
-              .select('id, service_id, service_name, total_value, selected_by_client')
-              .eq('proposal_id', proposal.id)
-              .order('sort_order', { ascending: true });
+              .select('id, service_id, total_value')
+              .eq('proposal_id', proposal.id);
 
             if (!servicesError && services) {
               proposal.services = services;
@@ -310,17 +209,10 @@ class ProposalModel {
         .from('proposals')
         .select(`
           id, proposal_number, client_id, type, status, total_value,
-          unique_link, signature_data,
-          converted_to_contract_id, created_at, updated_at,
-          signer_name, signer_email, signer_phone, signer_document, signer_observations,
-          payment_type, payment_method, installments, final_value, discount_applied, max_installments,
-          vista_discount_percentage, prazo_discount_percentage, vista_discount_value, prazo_discount_value,
-          solicitante_name, solicitante_email, source,
-          valor_global, usar_valor_global,
+          unique_link, converted_to_contract_id, created_at, updated_at,
           client:clients(
             id, email, phone, street, number, complement,
             neighborhood, city, state, zipcode,
-            clients_pf(full_name),
             clients_pj(company_name, trade_name)
           )
         `)
@@ -337,33 +229,14 @@ class ProposalModel {
       const { data: services, error: servicesError } = await supabase
         .from('proposal_services')
         .select(`
-          id, service_id, service_name, service_description, unit_value, total_value, sort_order,
-          selected_by_client, client_notes,
+          id, service_id, unit_value, total_value,
           service:services(id, name, duration_amount, duration_unit, category, description)
         `)
-        .eq('proposal_id', id)
-        .order('sort_order', { ascending: true });
+        .eq('proposal_id', id);
 
       if (servicesError) {
         console.error('❌ Erro ao buscar serviços da proposta:', servicesError);
         throw servicesError;
-      }
-
-      // Buscar percentuais de recrutamento para cada serviço
-      if (services && services.length > 0) {
-        console.log('📊 [Model] Buscando percentuais de recrutamento para os serviços da proposta...');
-        for (const service of services) {
-          const { data: percentages } = await supabase
-            .from('proposal_recruitment_percentages')
-            .select('administrativo_gestao, comercial, operacional, estagio_jovem')
-            .eq('proposal_service_id', service.id)
-            .maybeSingle();
-
-          if (percentages) {
-            service.recruitmentPercentages = percentages;
-            console.log(`✅ [Model] Percentuais carregados para proposal_service_id: ${service.id}`);
-          }
-        }
       }
 
       proposal.services = services || [];
@@ -379,41 +252,14 @@ class ProposalModel {
    */
   async update(id, proposalData, userId) {
     try {
-      const {
-        services,
-        type,
-        status,
-        client_id,
-        max_installments,
-        vista_discount_percentage,
-        prazo_discount_percentage,
-        vista_discount_value,
-        prazo_discount_value,
-        solicitante_name,
-        solicitante_email,
-        source,
-        valor_global,
-        usar_valor_global
-      } = proposalData;
+      const { services, type, status, client_id } = proposalData;
 
       // Preparar dados para atualização
-      const updateData = {
-        updated_by: userId
-      };
+      const updateData = {};
 
       if (type !== undefined) updateData.type = type;
       if (status !== undefined) updateData.status = status;
       if (client_id !== undefined) updateData.client_id = client_id;
-      if (max_installments !== undefined) updateData.max_installments = max_installments;
-      if (vista_discount_percentage !== undefined) updateData.vista_discount_percentage = vista_discount_percentage;
-      if (prazo_discount_percentage !== undefined) updateData.prazo_discount_percentage = prazo_discount_percentage;
-      if (vista_discount_value !== undefined) updateData.vista_discount_value = vista_discount_value;
-      if (prazo_discount_value !== undefined) updateData.prazo_discount_value = prazo_discount_value;
-      if (solicitante_name !== undefined) updateData.solicitante_name = solicitante_name;
-      if (solicitante_email !== undefined) updateData.solicitante_email = solicitante_email;
-      if (source !== undefined) updateData.source = source;
-      if (valor_global !== undefined) updateData.valor_global = valor_global;
-      if (usar_valor_global !== undefined) updateData.usar_valor_global = usar_valor_global;
 
       // Atualizar dados básicos da proposta
       const { data: proposal, error: proposalError } = await supabase
@@ -438,34 +284,16 @@ class ProposalModel {
 
         // Adicionar novos serviços
         if (services.length > 0) {
-          const servicesWithDetails = await Promise.all(
-            services.map(async (service, index) => {
-              const { data: serviceData, error } = await supabase
-                .from('services')
-                .select('name, description')
-                .eq('id', service.service_id)
-                .single();
-
-              if (error) {
-                console.error(`❌ Erro ao buscar detalhes do serviço ${service.service_id}:`, error);
-                throw error;
-              }
-
-              return {
-                proposal_id: id,
-                service_id: service.service_id,
-                service_name: serviceData.name,
-                service_description: serviceData.description || '',
-                unit_value: service.unit_value,
-                total_value: service.unit_value,
-                sort_order: service.sort_order !== undefined ? service.sort_order : index
-              };
-            })
-          );
+          const servicesForInsert = services.map((service) => ({
+            proposal_id: id,
+            service_id: service.service_id,
+            unit_value: service.unit_value || 0,
+            total_value: service.total_value || service.unit_value || 0
+          }));
 
           const { error: servicesError } = await supabase
             .from('proposal_services')
-            .insert(servicesWithDetails);
+            .insert(servicesForInsert);
 
           if (servicesError) {
             console.error('❌ Erro ao atualizar serviços da proposta:', servicesError);
@@ -495,14 +323,7 @@ class ProposalModel {
         throw new Error(`Status inválido. Use: ${validStatuses.join(', ')}`);
       }
 
-      // Se está enviando a proposta, gerar token público
-      const updateData = {
-        status,
-        updated_by: userId
-      };
-
-      // Não precisamos definir sent_at pois a coluna não existe na tabela
-      // O timestamp de quando foi enviada pode ser inferido do updated_at quando status = 'sent'
+      const updateData = { status };
 
       const { data, error } = await supabase
         .from('proposals')
@@ -552,34 +373,7 @@ class ProposalModel {
    */
   async recalculateTotal(proposalId) {
     try {
-      // Primeiro, buscar a proposta para verificar se usa valor global
-      const { data: proposal, error: proposalError } = await supabase
-        .from('proposals')
-        .select('usar_valor_global, valor_global')
-        .eq('id', proposalId)
-        .single();
-
-      if (proposalError) {
-        console.error('❌ Erro ao buscar proposta para recálculo:', proposalError);
-        throw proposalError;
-      }
-
-      // Se usar valor global, atualizar com esse valor
-      if (proposal.usar_valor_global && proposal.valor_global !== null) {
-        const { error: updateError } = await supabase
-          .from('proposals')
-          .update({ total_value: proposal.valor_global })
-          .eq('id', proposalId);
-
-        if (updateError) {
-          console.error('❌ Erro ao atualizar valor total com valor global:', updateError);
-          throw updateError;
-        }
-
-        return proposal.valor_global;
-      }
-
-      // Caso contrário, calcular a soma dos serviços
+      // Calcular a soma dos serviços
       const { data: services, error: servicesError } = await supabase
         .from('proposal_services')
         .select('unit_value, total_value')
@@ -685,49 +479,16 @@ class ProposalModel {
       const newProposalData = {
         client_id: duplicateOptions.client_id || originalProposal.client_id,
         type: duplicateOptions.type || originalProposal.type,
-        max_installments: duplicateOptions.max_installments !== undefined ? duplicateOptions.max_installments : originalProposal.max_installments,
-        vista_discount_percentage: duplicateOptions.vista_discount_percentage !== undefined ? duplicateOptions.vista_discount_percentage : originalProposal.vista_discount_percentage,
-        prazo_discount_percentage: duplicateOptions.prazo_discount_percentage !== undefined ? duplicateOptions.prazo_discount_percentage : originalProposal.prazo_discount_percentage,
-        solicitante_name: duplicateOptions.solicitante_name || originalProposal.solicitante_name,
-        solicitante_email: duplicateOptions.solicitante_email || originalProposal.solicitante_email,
-        source: duplicateOptions.source || originalProposal.source,
-        usar_valor_global: duplicateOptions.usar_valor_global !== undefined ? duplicateOptions.usar_valor_global : originalProposal.usar_valor_global,
-        valor_global: duplicateOptions.valor_global !== undefined ? duplicateOptions.valor_global : originalProposal.valor_global,
         services: []
       };
 
       // Duplicar serviços se solicitado (padrão é true)
-      if (duplicateOptions.duplicate_services !== false) {
-        // Buscar porcentagens de recrutamento se existirem
-        const servicesWithPercentages = [];
-
-        for (const service of originalProposal.services) {
-          const serviceData = {
-            service_id: service.service_id || service.id,
-            unit_value: service.unit_value,
-            total_value: service.total_value,
-            sort_order: service.sort_order
-          };
-
-          // Se for serviço de recrutamento e duplicate_recruitment_percentages for true
-          if (service.service?.category === 'Recrutamento & Seleção' && duplicateOptions.duplicate_recruitment_percentages !== false) {
-            // Buscar porcentagens de recrutamento do serviço original
-            const { data: percentages, error: percentError } = await supabase
-              .from('proposal_recruitment_percentages')
-              .select('administrativo_gestao, comercial, operacional, estagio_jovem')
-              .eq('proposal_service_id', service.id)
-              .maybeSingle();
-
-            if (!percentError && percentages) {
-              serviceData.recruitmentPercentages = percentages;
-              console.log('📊 Porcentagens encontradas para serviço:', service.id, percentages);
-            }
-          }
-
-          servicesWithPercentages.push(serviceData);
-        }
-
-        newProposalData.services = servicesWithPercentages;
+      if (duplicateOptions.duplicate_services !== false && originalProposal.services) {
+        newProposalData.services = originalProposal.services.map(service => ({
+          service_id: service.service_id || service.id,
+          unit_value: service.unit_value,
+          total_value: service.total_value
+        }));
       }
 
       console.log('📋 Dados da nova proposta:', newProposalData);
@@ -781,17 +542,10 @@ class ProposalModel {
         .from('proposals')
         .select(`
           id, proposal_number, client_id, type, status, total_value,
-          unique_link,
-          converted_to_contract_id, created_at, updated_at,
-          signer_name, signer_email, signer_phone, signer_document, signer_observations,
-          payment_type, payment_method, installments, final_value, discount_applied, max_installments,
-          vista_discount_percentage, prazo_discount_percentage, vista_discount_value, prazo_discount_value,
-          solicitante_name, solicitante_email, source,
-          valor_global, usar_valor_global,
+          unique_link, converted_to_contract_id, created_at, updated_at,
           client:clients(
             id, email, phone, street, number, complement,
             neighborhood, city, state, zipcode,
-            clients_pf(full_name),
             clients_pj(company_name, trade_name)
           )
         `)
@@ -813,12 +567,10 @@ class ProposalModel {
       const { data: services, error: servicesError } = await supabase
         .from('proposal_services')
         .select(`
-          id, service_id, service_name, service_description, unit_value, total_value, sort_order,
-          selected_by_client, client_notes,
+          id, service_id, unit_value, total_value,
           service:services(id, name, duration_amount, duration_unit, category, description)
         `)
-        .eq('proposal_id', proposal.id)
-        .order('sort_order', { ascending: true });
+        .eq('proposal_id', proposal.id);
 
       if (servicesError) {
         console.error('❌ Erro ao buscar serviços da proposta:', servicesError);
@@ -930,34 +682,14 @@ class ProposalModel {
    */
   async updateServiceSelection(proposalId, selectedServices, clientInfo) {
     try {
-      // Atualizar cada serviço
-      const updatePromises = selectedServices.map(async (serviceUpdate) => {
-        const { error } = await supabase
-          .from('proposal_services')
-          .update({
-            selected_by_client: serviceUpdate.selected,
-            client_notes: serviceUpdate.client_notes || null
-          })
-          .eq('proposal_id', proposalId)
-          .eq('service_id', serviceUpdate.service_id);
-
-        if (error) {
-          console.error('❌ Erro ao atualizar serviço:', error);
-          throw error;
-        }
-      });
-
-      await Promise.all(updatePromises);
-
       // Buscar serviços atualizados
       const { data: updatedServices, error: fetchError } = await supabase
         .from('proposal_services')
         .select(`
-          id, service_id, unit_value, total_value, selected_by_client, client_notes,
+          id, service_id, unit_value, total_value,
           service:services(id, name, duration_amount, duration_unit, category, description)
         `)
-        .eq('proposal_id', proposalId)
-        .order('created_at');
+        .eq('proposal_id', proposalId);
 
       if (fetchError) {
         console.error('❌ Erro ao buscar serviços atualizados:', fetchError);
@@ -982,17 +714,10 @@ class ProposalModel {
         .from('proposals')
         .select(`
           id, proposal_number, client_id, type, status, total_value,
-          unique_link, max_installments,
-          signature_data, converted_to_contract_id, created_at, updated_at,
-          signer_name, signer_email, signer_phone, signer_document, signer_observations,
-          payment_type, payment_method, installments, final_value, discount_applied,
-          vista_discount_percentage, prazo_discount_percentage, vista_discount_value, prazo_discount_value,
-          solicitante_name, solicitante_email, source,
-          valor_global, usar_valor_global,
+          unique_link, max_installments, converted_to_contract_id, created_at, updated_at,
           client:clients(
             id, email, phone, street, number, complement,
             neighborhood, city, state, zipcode,
-            clients_pf(full_name),
             clients_pj(company_name, trade_name)
           )
         `)
@@ -1014,34 +739,18 @@ class ProposalModel {
         return null;
       }
 
-      // Buscar serviços da proposta com seleção do cliente
+      // Buscar serviços da proposta
       const { data: services, error: servicesError } = await supabase
         .from('proposal_services')
         .select(`
-          id, service_id, service_name, service_description, unit_value, total_value, selected_by_client, client_notes, sort_order,
+          id, service_id, unit_value, total_value,
           service:services(id, name, duration_amount, duration_unit, category, description)
         `)
-        .eq('proposal_id', proposal.id)
-        .order('sort_order', { ascending: true });
+        .eq('proposal_id', proposal.id);
 
       if (servicesError) {
         console.error('❌ Erro ao buscar serviços da proposta:', servicesError);
         throw servicesError;
-      }
-
-      // Buscar porcentagens de recrutamento para cada serviço
-      if (services && services.length > 0) {
-        for (let service of services) {
-          const { data: percentages, error: percentError } = await supabase
-            .from('proposal_recruitment_percentages')
-            .select('administrativo_gestao, comercial, operacional, estagio_jovem')
-            .eq('proposal_service_id', service.id)
-            .maybeSingle();
-
-          if (!percentError && percentages) {
-            service.recruitmentPercentages = percentages;
-          }
-        }
       }
 
       proposal.services = services || [];
@@ -1088,7 +797,6 @@ class ProposalModel {
           client:clients(
             id, email, phone, street, number, complement,
             neighborhood, city, state, zipcode,
-            clients_pf(full_name),
             clients_pj(company_name, trade_name)
           ),
           services:proposal_services(
@@ -1119,13 +827,7 @@ class ProposalModel {
         throw error;
       }
 
-      // Filtrar apenas serviços selecionados pelo cliente
-      const filteredData = (data || []).map(proposal => ({
-        ...proposal,
-        services: proposal.services.filter(s => s.selected_by_client)
-      }));
-
-      return filteredData;
+      return data || [];
     } catch (error) {
       console.error('❌ Erro no findAcceptedProposals:', error);
       throw error;
@@ -1137,45 +839,16 @@ class ProposalModel {
    */
   async signProposal(proposalId, signatureData, isCounterproposal = false, selectedServices = null) {
     try {
-      console.log('🔍 signProposal - dados recebidos:', {
-        proposalId,
-        isCounterproposal,
-        signatureData: {
-          ...signatureData,
-          signature_data: signatureData.signature_data ? '[DATA_PRESENTE]' : '[NULO]'
-        }
-      });
+      console.log('🔍 signProposal - dados recebidos:', { proposalId, isCounterproposal });
 
       // Determinar o status baseado se é contraproposta ou não
       const status = isCounterproposal ? 'contraproposta' : 'signed';
 
-      // Se pagamento à vista, atualizar o total_value com desconto
-      const updateData = {
-        status: status,
-        signature_data: signatureData.signature_data,
-        signer_name: signatureData.signer_name,
-        signer_email: signatureData.signer_email,
-        signer_phone: signatureData.signer_phone,
-        signer_document: signatureData.signer_document,
-        signer_observations: signatureData.signer_observations,
-        payment_type: signatureData.payment_type,
-        payment_method: signatureData.payment_method,
-        // Using single payment method only
-        installments: signatureData.installments,
-        final_value: signatureData.final_value,
-        discount_applied: signatureData.discount_applied
-      };
+      const updateData = { status };
 
-      // Adicionar informação sobre contraproposta nas observações temporariamente
-      if (isCounterproposal) {
-        const currentObservations = updateData.signer_observations || '';
-        updateData.signer_observations = currentObservations + (currentObservations ? '\n\n' : '') + '[CONTRAPROPOSTA] - Nem todos os serviços foram selecionados pelo cliente.';
-      }
-
-      // Atualizar total_value com o valor final (com desconto se à vista)
-      if (signatureData.payment_type === 'vista' && signatureData.final_value && signatureData.final_value > 0) {
+      // Atualizar total_value com o valor final se fornecido
+      if (signatureData.final_value && signatureData.final_value > 0) {
         updateData.total_value = signatureData.final_value;
-        console.log('💰 Atualizando total_value para pagamento à vista:', signatureData.final_value);
       }
 
       const { error } = await supabase
@@ -1186,37 +859,6 @@ class ProposalModel {
       if (error) {
         console.error('❌ Erro ao assinar proposta:', error);
         throw error;
-      }
-
-      // Atualizar serviços selecionados (tanto para proposta normal quanto contraproposta)
-      if (selectedServices && Array.isArray(selectedServices)) {
-        try {
-          console.log('🔄 Atualizando serviços selecionados:', selectedServices);
-
-          // Atualizar cada serviço com a informação de seleção
-          for (const serviceData of selectedServices) {
-            const { error: serviceUpdateError } = await supabase
-              .from('proposal_services')
-              .update({
-                selected_by_client: serviceData.selected,
-                client_notes: serviceData.client_notes || null
-              })
-              .match({
-                proposal_id: proposalId,
-                service_id: serviceData.service_id
-              });
-
-            if (serviceUpdateError) {
-              console.error('❌ Erro ao atualizar serviço:', serviceUpdateError);
-              // Não falhar a assinatura por erro nos serviços
-            }
-          }
-
-          console.log('✅ Serviços selecionados atualizados com sucesso');
-        } catch (serviceError) {
-          console.error('❌ Erro ao atualizar serviços selecionados:', serviceError);
-          // Não falhar a assinatura por erro nos serviços
-        }
       }
 
       return await this.findById(proposalId);
@@ -1232,13 +874,10 @@ class ProposalModel {
   async regenerateToken(proposalId, userId) {
     try {
       const newToken = generateProposalToken();
-      
+
       const { error } = await supabase
         .from('proposals')
-        .update({
-          unique_link: newToken,
-          updated_by: userId
-        })
+        .update({ unique_link: newToken })
         .eq('id', proposalId);
 
       if (error) {
@@ -1299,24 +938,18 @@ class ProposalModel {
    */
   async prepareForSending(proposalId, clientData, userId) {
     try {
-      const updateData = {
-        updated_by: userId
-      };
-
       // Gerar token público se não existir
       const currentProposal = await this.findById(proposalId);
       if (!currentProposal.unique_link) {
-        updateData.unique_link = generateProposalToken();
-      }
+        const { error } = await supabase
+          .from('proposals')
+          .update({ unique_link: generateProposalToken() })
+          .eq('id', proposalId);
 
-      const { error } = await supabase
-        .from('proposals')
-        .update(updateData)
-        .eq('id', proposalId);
-
-      if (error) {
-        console.error('❌ Erro ao preparar proposta:', error);
-        throw error;
+        if (error) {
+          console.error('❌ Erro ao preparar proposta:', error);
+          throw error;
+        }
       }
 
       return await this.findById(proposalId);

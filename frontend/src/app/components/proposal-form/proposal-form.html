@@ -29,7 +29,7 @@
                 <select id="client_id" formControlName="client_id" class="form-control client-select" [class.error]="isFieldInvalid('client_id')">
                   <option value="" disabled>Selecione um cliente</option>
                   <option *ngFor="let client of clients" [value]="client.id">
-                    {{ client.name }} <span *ngIf="client.headquarters" class="client-details">- {{ client.headquarters }}</span>
+                    {{ client.name }}
                   </option>
                 </select>
                 <button type="button" class="btn btn-secondary btn-sm new-client-btn" (click)="toggleNewClientForm()">
@@ -47,67 +47,41 @@
                 Cadastrar Novo Cliente
               </h3>
               <div [formGroup]="newClientForm" class="new-client-content">
-                
-                <!-- Tipo de Cliente -->
-                <div class="form-group">
-                  <label for="new_client_type" class="form-label">Tipo de Cliente <span class="required">*</span></label>
-                  <select id="new_client_type" formControlName="client_type" class="form-control" [class.error]="isNewClientFieldInvalid('client_type')">
-                    <option value="" disabled>Selecione o tipo</option>
-                    <option value="pf">Pessoa Física</option>
-                    <option value="pj">Pessoa Jurídica</option>
-                  </select>
-                  <div *ngIf="isNewClientFieldInvalid('client_type')" class="error-message">Tipo de cliente é obrigatório.</div>
-                </div>
 
                 <!-- Email -->
                 <div class="form-group">
                   <label for="new_client_email" class="form-label">Email <span class="required">*</span></label>
-                  <input id="new_client_email" type="email" formControlName="email" class="form-control" 
-                         placeholder="cliente@exemplo.com" 
+                  <input id="new_client_email" type="email" formControlName="email" class="form-control"
+                         placeholder="cliente@exemplo.com"
                          [class.error]="isNewClientFieldInvalid('email')">
-                  <div *ngIf="isNewClientFieldInvalid('email')" class="error-message">Email válido é obrigatório.</div>
+                  <div *ngIf="isNewClientFieldInvalid('email')" class="error-message">Email valido e obrigatorio.</div>
                 </div>
 
-                <!-- CPF (apenas para PF) -->
-                <div class="form-group" *ngIf="newClientForm.get('client_type')?.value === 'pf'">
-                  <label for="new_client_cpf" class="form-label">CPF <span class="required">*</span></label>
-                  <input id="new_client_cpf" type="text" formControlName="cpf" class="form-control" 
-                         placeholder="000.000.000-00" 
-                         appDocumentMask="cpf"
-                         [class.error]="isNewClientFieldInvalid('cpf')">
-                  <div *ngIf="isNewClientFieldInvalid('cpf')" class="error-message">CPF é obrigatório.</div>
-                </div>
-
-                <!-- CNPJ (apenas para PJ) -->
-                <div class="form-group" *ngIf="newClientForm.get('client_type')?.value === 'pj'">
+                <!-- CNPJ -->
+                <div class="form-group">
                   <label for="new_client_cnpj" class="form-label">CNPJ <span class="required">*</span></label>
-                  <input id="new_client_cnpj" type="text" formControlName="cnpj" class="form-control" 
-                         placeholder="00.000.000/0000-00" 
+                  <input id="new_client_cnpj" type="text" formControlName="cnpj" class="form-control"
+                         placeholder="00.000.000/0000-00"
                          appDocumentMask="cnpj"
                          [class.error]="isNewClientFieldInvalid('cnpj')">
-                  <div *ngIf="isNewClientFieldInvalid('cnpj')" class="error-message">CNPJ é obrigatório.</div>
+                  <div *ngIf="isNewClientFieldInvalid('cnpj')" class="error-message">CNPJ e obrigatorio.</div>
                 </div>
 
-                <!-- Nome/Razão Social baseado no tipo -->
+                <!-- Razão Social -->
                 <div class="form-group">
-                  <label for="new_client_name" class="form-label">
-                    <span *ngIf="newClientForm.get('client_type')?.value === 'pf'">Nome Completo</span>
-                    <span *ngIf="newClientForm.get('client_type')?.value === 'pj'">Razão Social</span>
-                    <span *ngIf="!newClientForm.get('client_type')?.value">Nome / Razão Social</span>
-                    <span class="required">*</span>
-                  </label>
-                  <input id="new_client_name" type="text" formControlName="name" class="form-control" 
-                         [placeholder]="getNewClientNamePlaceholder()" 
+                  <label for="new_client_name" class="form-label">Razão Social <span class="required">*</span></label>
+                  <input id="new_client_name" type="text" formControlName="name" class="form-control"
+                         placeholder="Razão social da empresa"
                          [class.error]="isNewClientFieldInvalid('name')">
-                  <div *ngIf="isNewClientFieldInvalid('name')" class="error-message">{{ getNewClientNameLabel() }} é obrigatório.</div>
+                  <div *ngIf="isNewClientFieldInvalid('name')" class="error-message">Razão social e obrigatoria.</div>
                 </div>
 
-                <!-- Nome Fantasia (apenas para PJ) -->
-                <div class="form-group" *ngIf="newClientForm.get('client_type')?.value === 'pj'">
+                <!-- Nome Fantasia -->
+                <div class="form-group">
                   <label for="new_client_trade_name" class="form-label">Nome Fantasia</label>
-                  <input id="new_client_trade_name" type="text" formControlName="trade_name" class="form-control" 
-                         placeholder="Nome como é conhecido no mercado">
-                  <div class="help-text">Opcional - Como a empresa é conhecida no mercado</div>
+                  <input id="new_client_trade_name" type="text" formControlName="trade_name" class="form-control"
+                         placeholder="Nome como e conhecido no mercado">
+                  <div class="help-text">Opcional - Como a empresa e conhecida no mercado</div>
                 </div>
 
                 <!-- Botões de ação -->

@@ -80,10 +80,8 @@ export class ClientViewPageComponent implements OnInit, OnDestroy {
       const contractsResponse = await firstValueFrom(this.contractService.getContracts());
       this.contracts = contractsResponse.contracts.filter(contract => contract.client.id === id);
       
-      // Load emails if PJ
-      if (this.client.type === 'PJ') {
-        await this.loadClientEmails(id);
-      }
+      // Load emails
+      await this.loadClientEmails(id);
       
       // Load attachments count
       await this.loadAttachmentsCount(id);
@@ -128,9 +126,7 @@ export class ClientViewPageComponent implements OnInit, OnDestroy {
 
   getClientName(): string {
     if (!this.client) return '';
-    return this.client.type === 'PJ' 
-      ? (this.client.trade_name || this.client.company_name || 'Nome não informado')
-      : (this.client.full_name || 'Nome não informado');
+    return this.client.trade_name || this.client.company_name || 'Nome nao informado';
   }
 
   getClientDocument(): string {

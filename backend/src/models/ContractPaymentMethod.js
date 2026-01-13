@@ -22,9 +22,7 @@ class ContractPaymentMethodModel {
           payment_method,
           value_type,
           percentage: value_type === 'percentage' ? percentage : null,
-          fixed_value: value_type === 'fixed_value' ? fixed_value : null,
-          sort_order,
-          is_active: true
+          fixed_value: value_type === 'fixed_value' ? fixed_value : null
         }])
         .select('*')
         .single();
@@ -45,9 +43,7 @@ class ContractPaymentMethodModel {
       const { data, error } = await supabase
         .from('contract_payment_methods')
         .select('*')
-        .eq('contract_id', contractId)
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true });
+        .eq('contract_id', contractId);
 
       if (error) throw error;
       return data || [];
@@ -62,21 +58,17 @@ class ContractPaymentMethodModel {
    */
   async update(id, paymentData, userId) {
     try {
-      const { 
+      const {
         payment_method,
         value_type,
         percentage,
-        fixed_value,
-        sort_order,
-        is_active
+        fixed_value
       } = paymentData;
 
       const updateObject = {};
 
       if (payment_method !== undefined) updateObject.payment_method = payment_method;
       if (value_type !== undefined) updateObject.value_type = value_type;
-      if (sort_order !== undefined) updateObject.sort_order = sort_order;
-      if (is_active !== undefined) updateObject.is_active = is_active;
 
       // Configurar valores baseado no tipo
       if (value_type === 'percentage') {
@@ -109,35 +101,13 @@ class ContractPaymentMethodModel {
     try {
       const { error } = await supabase
         .from('contract_payment_methods')
-        .update({ is_active: false })
+        .delete()
         .eq('id', id);
 
       if (error) throw error;
       return { success: true };
     } catch (error) {
       console.error('❌ Erro ao deletar forma de pagamento:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Reordenar formas de pagamento
-   */
-  async reorder(contractId, paymentMethodIds) {
-    try {
-      for (let i = 0; i < paymentMethodIds.length; i++) {
-        const { error } = await supabase
-          .from('contract_payment_methods')
-          .update({ sort_order: i + 1 })
-          .eq('id', paymentMethodIds[i])
-          .eq('contract_id', contractId);
-
-        if (error) throw error;
-      }
-
-      return { success: true };
-    } catch (error) {
-      console.error('❌ Erro ao reordenar formas de pagamento:', error);
       throw error;
     }
   }
@@ -151,15 +121,14 @@ class ContractPaymentMethodModel {
         .from('contract_payment_methods')
         .select('percentage')
         .eq('contract_id', contractId)
-        .eq('value_type', 'percentage')
-        .eq('is_active', true);
+        .eq('value_type', 'percentage');
 
       if (error) throw error;
 
       const total = (data || []).reduce((sum, pm) => sum + (pm.percentage || 0), 0);
-      
+
       return {
-        isValid: Math.abs(total - 100) < 0.01, // Permite pequenas diferenças de arredondamento
+        isValid: Math.abs(total - 100) < 0.01,
         total,
         difference: 100 - total
       };

@@ -52,7 +52,6 @@ class ContractModel {
           unit_value: unitValue,
           total_value: unitValue,
           quantity: 1,
-          scheduled_start_date: service.scheduled_start_date || null,
           status: service.status || 'not_started'
         });
         
@@ -69,17 +68,10 @@ class ContractModel {
   transformClientData(contracts) {
     return contracts.map(contract => {
       if (contract.client) {
-        
-        const isPF = contract.client.clients_pf && contract.client.clients_pf.full_name;
+        // All clients are now PJ only
         const isPJ = contract.client.clients_pj && (contract.client.clients_pj.company_name || contract.client.clients_pj.trade_name);
-        
-        
-        if (isPF) {
-          const pfName = contract.client.clients_pf.full_name;
-          contract.client.name = pfName;
-          contract.client.document = contract.client.clients_pf.cpf || null;
-          contract.client.type = 'PF';
-        } else if (isPJ) {
+
+        if (isPJ) {
           const pjName = contract.client.clients_pj.trade_name || contract.client.clients_pj.company_name;
           contract.client.name = pjName;
           contract.client.document = contract.client.clients_pj.cnpj || null;
@@ -89,7 +81,7 @@ class ContractModel {
           contract.client.document = null;
           contract.client.type = null;
         }
-        
+
         // Ensure email is available - use existing email field
         if (!contract.client.email) {
           contract.client.email = null;
@@ -153,17 +145,11 @@ class ContractModel {
             status: 'active',
             total_value: finalTotalValue,
             notes: notes || null,
-            created_by: userId,
-            updated_by: userId,
             payment_method: payment_method || null,
-            first_installment_date: first_installment_date || null,
             payment_status: payment_status,
             installment_count: installment_count,
-            installment_value: installment_count > 1 ? null : null, // Será calculado depois
             barter_type: barter_type || null,
-            barter_value: barter_value || null,
-            barter_percentage: barter_percentage || null,
-            secondary_payment_method: secondary_payment_method || null
+            barter_value: barter_value || null
           }])
           .select('*').single();
 
@@ -218,7 +204,6 @@ class ContractModel {
           service_id: service.id,
           unit_value: 0,
           total_value: 0,
-          scheduled_start_date: null,
           status: 'not_started'
         }));
 
@@ -240,16 +225,15 @@ class ContractModel {
 
       if (services && services.length > 0) {
         console.log('📝 [Model] Criando registros de contract_services individuais...');
-        
+
         const contractServices = services.map(service => ({
           contract_id: contract.id,
           service_id: service.service_id,
           unit_value: parseFloat(service.unit_value) || 0,
           total_value: parseFloat(service.unit_value) || 0,
-          scheduled_start_date: service.scheduled_start_date || null,
           status: service.status || 'not_started'
         }));
-        
+
         console.log('📋 [Model] Serviços para inserir:', JSON.stringify(contractServices, null, 2));
 
         try {
@@ -340,15 +324,8 @@ class ContractModel {
         }
 
         // Criar parcelas se necessário
-        if (installment_count > 1 && installments.length > 0) {
+        if (installments && installments.length > 0) {
           await ContractInstallment.createInstallments(contract.id, installments);
-        } else if (installment_count === 1 && first_installment_date) {
-          // Criar uma única "parcela" para contratos à vista
-          await ContractInstallment.createInstallments(contract.id, [{
-            due_date: first_installment_date,
-            amount: contract.total_value, // Usar o valor do contrato criado
-            notes: 'Pagamento à vista'
-          }]);
         }
       }
 
@@ -435,8 +412,7 @@ class ContractModel {
             .update({
               role: user.role || 'viewer',
               assigned_by: assignedBy,
-              is_active: true,
-              assigned_at: new Date().toISOString()
+              is_active: true
             })
             .match({
               contract_id: contractId,
@@ -506,7 +482,6 @@ class ContractModel {
         client:clients!inner(
           id, email, phone, street, number, complement,
           neighborhood, city, state, zipcode,
-          clients_pf(full_name, cpf),
           clients_pj(company_name, trade_name, cnpj)
         )
       `)
@@ -599,7 +574,6 @@ class ContractModel {
         client:clients!inner(
           id, email, phone, street, number, complement,
           neighborhood, city, state, zipcode,
-          clients_pf(full_name, cpf),
           clients_pj(company_name, trade_name, cnpj)
         )
       `)
@@ -693,7 +667,6 @@ class ContractModel {
         contract_id,
         total_value,
         status,
-        is_addendum,
         service:services!inner(
           id, name, category,
           service_stages(
@@ -773,15 +746,12 @@ class ContractModel {
         client:clients(
           id, email, phone, street, number, complement,
           neighborhood, city, state, zipcode,
-          clients_pf(*),
           clients_pj(*)
         ),
         contract_services(
           *,
-          service:services!inner(id, name, description, summary, subtitle, category, duration_amount, duration_unit),
-          service_routines(id, status, scheduled_date, notes, created_at, updated_at),
-          is_addendum,
-          addendum_date
+          service:services!inner(id, name, description, category, duration_amount, duration_unit),
+          service_routines(id, status, notes, created_at, updated_at)
         )
       `)
       .eq('id', id)
@@ -832,8 +802,7 @@ class ContractModel {
         .select(`
           *,
           client:clients(
-            clients_pf(full_name),
-            clients_pj(company_name)
+            clients_pj(company_name, trade_name)
           )
         `)
         .eq('client_id', clientId)
@@ -862,8 +831,7 @@ class ContractModel {
             contract_number,
             start_date,
             client:clients(
-              clients_pf(full_name),
-              clients_pj(company_name)
+              clients_pj(company_name, trade_name)
             )
           )
         `)
@@ -877,7 +845,7 @@ class ContractModel {
       return (data || []).map(item => {
         const clientData = item.contract?.client;
         if (clientData) {
-            item.contract.client.name = clientData.clients_pf?.full_name || clientData.clients_pj?.trade_name || clientData.clients_pj?.company_name || 'Cliente';
+            item.contract.client.name = clientData.clients_pj?.trade_name || clientData.clients_pj?.company_name || 'Cliente';
         }
         return item;
       });
@@ -895,12 +863,10 @@ class ContractModel {
         id,
         user:users!contract_assignments_user_id_fkey(id, name, email),
         role,
-        assigned_at,
         assigned_by_user:users!contract_assignments_assigned_by_fkey(name)
       `)
       .eq('contract_id', contractId)
-      .eq('is_active', true)
-      .order('assigned_at');
+      .eq('is_active', true);
     if (error) throw error;
     return data || [];
   }
@@ -995,9 +961,7 @@ class ContractModel {
 
       console.log('📅 [Model] first_installment_date extraído:', first_installment_date);
 
-      const updateData = {
-        updated_by: userId
-      };
+      const updateData = {};
 
       if (contract_number !== undefined) updateData.contract_number = contract_number;
       if (client_id !== undefined) updateData.client_id = client_id;
@@ -1007,14 +971,10 @@ class ContractModel {
       if (status !== undefined) updateData.status = status;
       if (notes !== undefined) updateData.notes = notes;
       if (payment_method !== undefined) updateData.payment_method = payment_method;
-      // Using single payment_method only - multiple payment methods handled by contract_payment_methods table
-      if (first_installment_date !== undefined) updateData.first_installment_date = first_installment_date;
       if (payment_status !== undefined) updateData.payment_status = payment_status;
       if (installment_count !== undefined) updateData.installment_count = installment_count;
       if (barter_type !== undefined) updateData.barter_type = barter_type;
       if (barter_value !== undefined) updateData.barter_value = barter_value;
-      if (barter_percentage !== undefined) updateData.barter_percentage = barter_percentage;
-      if (secondary_payment_method !== undefined) updateData.secondary_payment_method = secondary_payment_method;
 
       console.log('📤 [Model] Salvando no banco...');
 
@@ -1065,22 +1025,19 @@ class ContractModel {
             .in('id', idsToRemove);
         }
 
-        // Adicionar novos serviços como aditivos
+        // Adicionar novos serviços
         if (servicesToAdd.length > 0) {
-          const addendumServices = servicesToAdd.map(service => ({
+          const newServices = servicesToAdd.map(service => ({
             contract_id: id,
             service_id: service.service_id,
             unit_value: service.unit_value,
             total_value: service.unit_value,
-            scheduled_start_date: service.scheduled_start_date || null,
-            status: service.status || 'not_started',
-            is_addendum: true,  // Marcar como aditivo
-            addendum_date: new Date().toISOString()  // Data do aditivo
+            status: service.status || 'not_started'
           }));
 
-          const { data: insertedAddendums, error: addError } = await supabase
+          const { data: insertedServices, error: addError } = await supabase
             .from('contract_services')
-            .insert(addendumServices)
+            .insert(newServices)
             .select('*');
 
           if (addError) {
@@ -1088,12 +1045,12 @@ class ContractModel {
             throw addError;
           }
 
-          // Salvar percentuais de recrutamento para serviços aditivos de Recrutamento & Seleção
-          if (insertedAddendums && insertedAddendums.length > 0) {
-            console.log('📊 [Model] Verificando percentuais de recrutamento para serviços aditivos...');
+          // Salvar percentuais de recrutamento para novos serviços de Recrutamento & Seleção
+          if (insertedServices && insertedServices.length > 0) {
+            console.log('📊 [Model] Verificando percentuais de recrutamento para novos serviços...');
             for (let i = 0; i < servicesToAdd.length; i++) {
               const service = servicesToAdd[i];
-              const insertedService = insertedAddendums[i];
+              const insertedService = insertedServices[i];
 
               if (service.recruitmentPercentages && insertedService) {
                 console.log(`📊 [Model] Salvando percentuais para contract_service_id: ${insertedService.id}`, service.recruitmentPercentages);
@@ -1127,7 +1084,6 @@ class ContractModel {
               .update({
                 unit_value: service.unit_value,
                 total_value: service.unit_value,
-                scheduled_start_date: service.scheduled_start_date || null,
                 status: service.status || 'not_started'
                 // NÃO atualizar is_addendum para manter o status original
               })
@@ -1259,7 +1215,7 @@ class ContractModel {
   async updateStatus(id, status, userId) {
     const { data, error } = await supabase
       .from('contracts')
-      .update({ status, updated_by: userId })
+      .update({ status })
       .eq('id', id).select().single();
     if (error) throw error;
     return data;
@@ -1267,7 +1223,7 @@ class ContractModel {
 
   async updateContractService(contractServiceId, updateData) {
     try {
-      const allowedFields = ['status', 'scheduled_start_date'];
+      const allowedFields = ['status'];
       const filteredData = {};
       
       for (const field of allowedFields) {
@@ -1317,7 +1273,7 @@ class ContractModel {
         .from('contract_services')
         .select(`
           *,
-          service:services(id, name, description, category, duration_amount, duration_unit, subtitle, summary),
+          service:services(id, name, description, category, duration_amount, duration_unit),
           contract:contracts(id, contract_number)
         `)
         .eq('id', contractServiceId)
@@ -1357,7 +1313,7 @@ class ContractModel {
       // Buscar todos os contract_services deste contrato que não têm rotina
       const { data: contractServices, error: queryError } = await supabase
         .from('contract_services')
-        .select('id, service_id, status, scheduled_start_date')
+        .select('id, service_id, status')
         .eq('contract_id', contractId);
 
       if (queryError) throw queryError;
@@ -1370,10 +1326,7 @@ class ContractModel {
       // Criar rotinas para cada contract_service
       const routinesToCreate = contractServices.map(cs => ({
         contract_service_id: cs.id,
-        status: cs.status || 'not_started',
-        scheduled_date: cs.scheduled_start_date,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        status: cs.status || 'not_started'
       }));
 
       const { data: createdRoutines, error: insertError } = await supabase
@@ -1467,8 +1420,7 @@ class ContractModel {
       const { error } = await supabase
         .from('contracts')
         .update({
-          status: 'cancelled',
-          updated_by: userId
+          status: 'cancelled'
         })
         .eq('id', id);
 
@@ -1549,8 +1501,7 @@ class ContractModel {
       .from('contracts').select(`*, client:clients(
         id, email, phone, street, number, complement,
         neighborhood, city, state, zipcode,
-        clients_pf(full_name),
-        clients_pj(company_name, trade_name)
+        clients_pj(company_name, trade_name, cnpj)
       )`)
       .order('created_at', { ascending: false });
     if (error) throw error;
@@ -1567,8 +1518,7 @@ class ContractModel {
       .from('contracts').select(`*, client:clients(
         id, email, phone, street, number, complement,
         neighborhood, city, state, zipcode,
-        clients_pf(full_name),
-        clients_pj(company_name, trade_name)
+        clients_pj(company_name, trade_name, cnpj)
       )`)
       .in('id', contractIds).order('created_at', { ascending: false });
     if (error) throw error;
@@ -1587,7 +1537,6 @@ class ContractModel {
           *,
           client:clients(
             id, email, phone,
-            clients_pf(full_name, cpf),
             clients_pj(company_name, trade_name, cnpj)
           )
         `)
@@ -1649,13 +1598,11 @@ class ContractModel {
           id,
           status,
           updated_at,
-          scheduled_start_date,
           total_value,
           contract:contracts!contract_services_contract_id_fkey(
             id,
             contract_number,
             client:clients(
-              clients_pf(full_name),
               clients_pj(company_name, trade_name)
             )
           ),
@@ -1704,11 +1651,10 @@ class ContractModel {
           title: item.service.name,
           description: `${item.contract.contract_number} - ${clientName}`,
           time: this.formatRelativeTime(item.updated_at),
-          scheduledStartDate: item.scheduled_start_date,
           value: item.total_value,
           category: item.service.category,
-          duration: item.service.duration_amount && item.service.duration_unit 
-            ? `${item.service.duration_amount} ${item.service.duration_unit}` 
+          duration: item.service.duration_amount && item.service.duration_unit
+            ? `${item.service.duration_amount} ${item.service.duration_unit}`
             : null,
           contractId: item.contract.id,
           serviceId: item.service.id
@@ -1725,15 +1671,11 @@ class ContractModel {
    */
   getClientNameFromData(clientData) {
     if (!clientData) return 'Cliente não identificado';
-    
-    if (clientData.clients_pf && clientData.clients_pf.full_name) {
-      return clientData.clients_pf.full_name;
-    }
-    
+
     if (clientData.clients_pj) {
       return clientData.clients_pj.trade_name || clientData.clients_pj.company_name || 'Empresa não identificada';
     }
-    
+
     return 'Cliente não identificado';
   }
 
@@ -1767,7 +1709,6 @@ class ContractModel {
           *,
           client:clients(
             id, email, phone,
-            clients_pf(full_name, cpf),
             clients_pj(company_name, trade_name, cnpj)
           )
         `)
@@ -1800,7 +1741,6 @@ class ContractModel {
             start_date,
             client:clients(
               id, email, phone,
-              clients_pf(full_name, cpf),
               clients_pj(company_name, trade_name, cnpj)
             )
           )
@@ -1814,10 +1754,8 @@ class ContractModel {
       return (data || []).map(item => {
         if (item.contract && item.contract.client) {
           item.contract.client.name = this.getClientNameFromData(item.contract.client);
-          // Add document field based on client type
-          if (item.contract.client.clients_pf && item.contract.client.clients_pf.cpf) {
-            item.contract.client.document = item.contract.client.clients_pf.cpf;
-          } else if (item.contract.client.clients_pj && item.contract.client.clients_pj.cnpj) {
+          // Add document field (PJ only)
+          if (item.contract.client.clients_pj && item.contract.client.clients_pj.cnpj) {
             item.contract.client.document = item.contract.client.clients_pj.cnpj;
           }
         }
@@ -1885,7 +1823,6 @@ class ContractModel {
         name: item.service?.name || 'Serviço não identificado',
         category: item.service?.category || 'Geral',
         status: item.status,
-        scheduled_start_date: item.scheduled_start_date,
         unit_value: item.unit_value,
         total_value: item.total_value,
         duration_amount: item.service?.duration_amount,
@@ -1956,7 +1893,6 @@ class ContractModel {
           status,
           client:clients!inner(
             id,
-            clients_pf(full_name),
             clients_pj(company_name, trade_name)
           ),
           contract_services(
@@ -1983,16 +1919,12 @@ class ContractModel {
 
       // Transformar dados para formato otimizado
       const routines = (data || []).map(contract => {
-        // Extrair nome do cliente
+        // Extrair nome do cliente (PJ only)
         let clientName = 'Cliente não identificado';
-        if (contract.client) {
-          if (contract.client.clients_pf?.full_name) {
-            clientName = contract.client.clients_pf.full_name;
-          } else if (contract.client.clients_pj) {
-            clientName = contract.client.clients_pj.trade_name ||
-                         contract.client.clients_pj.company_name ||
-                         'Empresa não identificada';
-          }
+        if (contract.client && contract.client.clients_pj) {
+          clientName = contract.client.clients_pj.trade_name ||
+                       contract.client.clients_pj.company_name ||
+                       'Empresa não identificada';
         }
 
         // Calcular progresso baseado no status dos serviços

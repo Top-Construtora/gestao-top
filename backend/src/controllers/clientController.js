@@ -8,10 +8,9 @@ class ClientController {
    */
   async list(req, res) {
     try {
-      const { type, city, state, search, is_active } = req.query;
-      
+      const { city, state, search, is_active } = req.query;
+
       const filters = {
-        type,
         city,
         state,
         search,
@@ -19,7 +18,7 @@ class ClientController {
       };
 
       const clientsData = await ClientModel.findAll(filters);
-      
+
       const clientsArray = Array.isArray(clientsData) ? clientsData : (clientsData ? [clientsData] : []);
 
       res.json({
@@ -47,14 +46,14 @@ class ClientController {
     try {
       const { id } = req.params;
       const client = await ClientModel.findById(id);
-      
+
       if (!client) {
         return res.status(404).json({
           success: false,
           message: 'Cliente não encontrado'
         });
       }
-      
+
       res.json({
         success: true,
         client
@@ -77,7 +76,7 @@ class ClientController {
     try {
       const clientData = req.body;
       const userId = req.user?.id;
-      
+
       if (!userId) {
         return res.status(401).json({
           success: false,
@@ -86,7 +85,8 @@ class ClientController {
         });
       }
 
-      const requiredFields = ['type', 'email', 'street', 'number', 'neighborhood', 'city', 'state', 'zipcode'];
+      // Campos obrigatórios para cliente PJ
+      const requiredFields = ['cnpj', 'company_name', 'street', 'number', 'neighborhood', 'city', 'state', 'zipcode'];
       const validation = validateRequiredFields(clientData, requiredFields);
       if (!validation.isValid) {
         return res.status(400).json({
@@ -95,36 +95,9 @@ class ClientController {
           missingFields: validation.missingFields
         });
       }
-      
-      if (clientData.type === 'PF') {
-        const pfRequiredFields = ['cpf', 'full_name'];
-        const pfValidation = validateRequiredFields(clientData, pfRequiredFields);
-        if (!pfValidation.isValid) {
-          return res.status(400).json({
-            success: false,
-            message: 'Campos obrigatórios de pessoa física não preenchidos',
-            missingFields: pfValidation.missingFields
-          });
-        }
-      } else if (clientData.type === 'PJ') {
-        const pjRequiredFields = ['cnpj', 'company_name'];
-        const pjValidation = validateRequiredFields(clientData, pjRequiredFields);
-        if (!pjValidation.isValid) {
-          return res.status(400).json({
-            success: false,
-            message: 'Campos obrigatórios de pessoa jurídica não preenchidos',
-            missingFields: pjValidation.missingFields
-          });
-        }
-      } else {
-        return res.status(400).json({
-          success: false,
-          message: 'Tipo de cliente inválido. Use "PF" ou "PJ"'
-        });
-      }
 
       const client = await ClientModel.create(clientData, userId);
-      
+
       res.status(201).json({
         success: true,
         message: 'Cliente criado com sucesso',
@@ -134,11 +107,10 @@ class ClientController {
       console.error('Erro no create:', error);
 
       if (error.code === '23505') {
-        // Verificar em constraint, message ou details qual campo está duplicado
-        const errorInfo = (error.constraint || error.message || error.details || '').toLowerCase();
-        const isCpfDuplicate = errorInfo.includes('cpf');
-        const message = isCpfDuplicate ? 'CPF já cadastrado' : 'CNPJ já cadastrado';
-        return res.status(400).json({ success: false, message });
+        return res.status(400).json({
+          success: false,
+          message: 'CNPJ já cadastrado'
+        });
       }
 
       res.status(500).json({
@@ -159,7 +131,6 @@ class ClientController {
       const clientData = req.body;
       const userId = req.user.id;
 
-      // Buscar cliente existente para validar tipo
       const existingClient = await ClientModel.findById(id);
       if (!existingClient) {
         return res.status(404).json({
@@ -168,25 +139,16 @@ class ClientController {
         });
       }
 
-      // Validar campos específicos por tipo
-      if (existingClient.type === 'PF' && (clientData.cpf || clientData.full_name)) {
-        if (!clientData.cpf || !clientData.full_name) {
-          return res.status(400).json({
-            success: false,
-            message: 'CPF e nome completo são obrigatórios para pessoa física'
-          });
-        }
-      } else if (existingClient.type === 'PJ' && (clientData.cnpj || clientData.company_name)) {
-        if (!clientData.cnpj || !clientData.company_name) {
-          return res.status(400).json({
-            success: false,
-            message: 'CNPJ e razão social são obrigatórios para pessoa jurídica'
-          });
-        }
+      // Validar campos obrigatórios PJ
+      if (!clientData.cnpj || !clientData.company_name) {
+        return res.status(400).json({
+          success: false,
+          message: 'CNPJ e razão social são obrigatórios'
+        });
       }
 
       const client = await ClientModel.update(id, clientData, userId);
-      
+
       res.json({
         success: true,
         message: 'Cliente atualizado com sucesso',
@@ -194,22 +156,14 @@ class ClientController {
       });
     } catch (error) {
       console.error('Erro ao atualizar cliente:', error);
-      
-      // Verificar erros de duplicação
+
       if (error.code === '23505') {
-        if (error.constraint === 'clients_pf_cpf_key') {
-          return res.status(400).json({
-            success: false,
-            message: 'CPF já cadastrado'
-          });
-        } else if (error.constraint === 'clients_pj_cnpj_key') {
-          return res.status(400).json({
-            success: false,
-            message: 'CNPJ já cadastrado'
-          });
-        }
+        return res.status(400).json({
+          success: false,
+          message: 'CNPJ já cadastrado'
+        });
       }
-      
+
       res.status(500).json({
         success: false,
         message: 'Erro ao atualizar cliente',
@@ -225,7 +179,7 @@ class ClientController {
   async delete(req, res) {
     try {
       const { id } = req.params;
-      
+
       const client = await ClientModel.findById(id);
       if (!client) {
         return res.status(404).json({
@@ -235,7 +189,7 @@ class ClientController {
       }
 
       await ClientModel.softDelete(id);
-      
+
       res.json({
         success: true,
         message: 'Cliente desativado com sucesso'
@@ -257,8 +211,7 @@ class ClientController {
   async deletePermanent(req, res) {
     try {
       const { id } = req.params;
-      
-      // Verificar se é admin
+
       if (req.user.role_name !== 'admin') {
         return res.status(403).json({
           success: false,
@@ -275,37 +228,35 @@ class ClientController {
       }
 
       await ClientModel.hardDelete(id);
-      
+
       res.json({
         success: true,
         message: 'Cliente excluído permanentemente'
       });
     } catch (error) {
       console.error('Erro ao excluir cliente permanentemente:', error);
-      
-      // Verificar se é um erro de constraint de negócio
+
       if (error.message && error.message.includes('contratos associados')) {
         return res.status(400).json({
           success: false,
           message: error.message
         });
       }
-      
+
       if (error.message && error.message.includes('propostas associadas')) {
         return res.status(400).json({
           success: false,
           message: error.message
         });
       }
-      
-      // Verificar erros de foreign key constraint do banco
+
       if (error.code === '23503') {
         return res.status(400).json({
           success: false,
-          message: 'Não é possível excluir o cliente pois existem registros relacionados. Verifique contratos, propostas e outros dados associados.'
+          message: 'Não é possível excluir o cliente pois existem registros relacionados.'
         });
       }
-      
+
       res.status(500).json({
         success: false,
         message: 'Erro ao excluir cliente permanentemente',
@@ -321,7 +272,7 @@ class ClientController {
   async getStats(req, res) {
     try {
       const stats = await ClientModel.getStats();
-      
+
       res.json({
         success: true,
         stats
@@ -343,7 +294,7 @@ class ClientController {
   async getCities(req, res) {
     try {
       const cities = await ClientModel.getCities();
-      
+
       res.json({
         success: true,
         cities
@@ -365,7 +316,7 @@ class ClientController {
   async getStates(req, res) {
     try {
       const states = await ClientModel.getStates();
-      
+
       res.json({
         success: true,
         states

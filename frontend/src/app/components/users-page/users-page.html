@@ -14,18 +14,6 @@
     </button>
   </div>
 
-  <div class="tabs">
-    <button class="tab" [class.active]="currentFilter === 'active'" (click)="setFilter('active')">
-      Ativos
-    </button>
-    <button class="tab" [class.active]="currentFilter === 'inactive'" (click)="setFilter('inactive')">
-      Inativos
-    </button>
-    <button class="tab" [class.active]="currentFilter === 'all'" (click)="setFilter('all')">
-      Todos
-    </button>
-  </div>
-  
   <!-- Loading state -->
   <div *ngIf="loading" class="loading-container">
     <div class="spinner"></div>

@@ -703,12 +703,8 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
         return this.proposal.client_name || '';
     }
 
-    if (client.type === 'PJ' && client.company) {
+    if (client.company) {
         return client.company.trade_name || client.company.company_name || '';
-    }
-
-    if (client.type === 'PF' && client.person) {
-        return client.person.full_name || '';
     }
 
     return this.proposal.client_name || client.name || '';
@@ -717,13 +713,13 @@ export class ProposalViewPageComponent implements OnInit, OnDestroy {
   getClientEmail(): string {
     if (!this.proposal) return '';
     const client = (this.proposal as any).client;
-    return client?.company?.email || client?.person?.email || this.proposal.client_email || '';
+    return client?.company?.email || this.proposal.client_email || '';
   }
 
   getClientPhone(): string {
     if (!this.proposal) return '';
     const client = (this.proposal as any).client;
-    return client?.company?.phone || client?.person?.phone || this.proposal.client_phone || '';
+    return client?.company?.phone || this.proposal.client_phone || '';
   }
 
   // === PAYMENT INFORMATION METHODS ===

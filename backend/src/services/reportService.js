@@ -858,14 +858,14 @@ class ReportService {
         pdfGenerator.addHeader(doc, `Relatório de Rotinas`, client.name);
 
         // Informações do Cliente em caixa
-        doc.fontSize(14).font('Helvetica-Bold').fillColor('#003b2b').text('Dados do Cliente');
+        doc.fontSize(14).font('Helvetica-Bold').fillColor('#1e6076').text('Dados do Cliente');
         doc.moveDown(0.5);
 
         const infoBoxY = doc.y;
         doc.roundedRect(50, infoBoxY, doc.page.width - 100, 90, 5)
            .lineWidth(1)
-           .strokeColor('#003b2b')
-           .fillAndStroke('#f9f9f9', '#003b2b');
+           .strokeColor('#1e6076')
+           .fillAndStroke('#f9f9f9', '#1e6076');
 
         doc.fillColor('#333333');
         doc.fontSize(10).font('Helvetica');
@@ -888,7 +888,7 @@ class ReportService {
         };
 
         // Detalhamento dos Serviços por Status
-        doc.fontSize(14).font('Helvetica-Bold').fillColor('#003b2b').text('Detalhamento das Rotinas de Serviço');
+        doc.fontSize(14).font('Helvetica-Bold').fillColor('#1e6076').text('Detalhamento das Rotinas de Serviço');
         doc.moveDown(1);
 
         // Agrupar por status para melhor organização
@@ -910,7 +910,7 @@ class ReportService {
         statusOrder.forEach(status => {
             const services = servicesByStatus[status];
             if (services.length > 0) {
-                doc.fontSize(12).font('Helvetica-Bold').fillColor('#003b2b').text(`${statusLabels[status]} (${services.length})`, 50, doc.y, { align: 'left' });
+                doc.fontSize(12).font('Helvetica-Bold').fillColor('#1e6076').text(`${statusLabels[status]} (${services.length})`, 50, doc.y, { align: 'left' });
                 doc.moveDown(0.5);
 
                 pdfGenerator.addTable(doc, {
@@ -1125,7 +1125,6 @@ class ReportService {
                 client:clients(
                     id,
                     email,
-                    clients_pf(full_name, cpf),
                     clients_pj(company_name, trade_name, cnpj)
                 )
             `)
@@ -1218,7 +1217,7 @@ class ReportService {
         // Desenhar cabeçalho
         const headerY = doc.y;
         doc.rect(50, headerY, doc.page.width - 100, headerHeight)
-           .fillAndStroke('#003b2b', '#003b2b');
+           .fillAndStroke('#1e6076', '#1e6076');
 
         doc.font('Helvetica-Bold').fontSize(10).fillColor('#FFFFFF');
         headers.forEach(header => {
@@ -1243,7 +1242,7 @@ class ReportService {
                 // Redesenhar cabeçalho
                 const newHeaderY = doc.y;
                 doc.rect(50, newHeaderY, doc.page.width - 100, headerHeight)
-                   .fillAndStroke('#003b2b', '#003b2b');
+                   .fillAndStroke('#1e6076', '#1e6076');
 
                 doc.font('Helvetica-Bold').fontSize(10).fillColor('#FFFFFF');
                 headers.forEach(header => {
@@ -1375,7 +1374,6 @@ class ReportService {
                 client:clients(
                     id,
                     email,
-                    clients_pf(full_name, cpf),
                     clients_pj(company_name, trade_name, cnpj)
                 )
             `)
@@ -1556,12 +1554,7 @@ class ReportService {
         if (!proposal.client) return 'Cliente não identificado';
 
         const client = proposal.client;
-        if (client.clients_pf && client.clients_pf.full_name) {
-            return client.clients_pf.full_name;
-        } else if (client.clients_pj) {
-            return client.clients_pj.trade_name || client.clients_pj.company_name || 'Empresa não identificada';
-        }
-        return 'Cliente não identificado';
+        return client.clients_pj?.trade_name || client.clients_pj?.company_name || 'Cliente';
     }
 
     translateProposalStatus(status) {
@@ -1615,11 +1608,9 @@ class ReportService {
                     phone,
                     city,
                     state,
-                    clients_pf (full_name, cpf),
                     clients_pj (company_name, trade_name, cnpj)
                 )
             `)
-            .eq('is_active', true)
             .eq('status', 'active')
             .order('client_id');
 
@@ -1635,12 +1626,8 @@ class ReportService {
                 let clientDocument = '';
                 let clientType = '';
 
-                if (client.clients_pf && client.clients_pf.full_name) {
-                    clientName = client.clients_pf.full_name;
-                    clientDocument = client.clients_pf.cpf || '';
-                    clientType = 'PF';
-                } else if (client.clients_pj) {
-                    clientName = client.clients_pj.trade_name || client.clients_pj.company_name || '';
+                if (client.clients_pj) {
+                    clientName = client.clients_pj.trade_name || client.clients_pj.company_name || 'Cliente';
                     clientDocument = client.clients_pj.cnpj || '';
                     clientType = 'PJ';
                 }
@@ -1752,11 +1739,9 @@ class ReportService {
                     phone,
                     city,
                     state,
-                    clients_pf (full_name, cpf),
                     clients_pj (company_name, trade_name, cnpj)
                 )
             `)
-            .eq('is_active', true)
             .eq('status', 'active')
             .order('client_id');
 
@@ -1772,12 +1757,8 @@ class ReportService {
                 let clientDocument = '';
                 let clientType = '';
 
-                if (client.clients_pf && client.clients_pf.full_name) {
-                    clientName = client.clients_pf.full_name;
-                    clientDocument = client.clients_pf.cpf || '';
-                    clientType = 'PF';
-                } else if (client.clients_pj) {
-                    clientName = client.clients_pj.trade_name || client.clients_pj.company_name || '';
+                if (client.clients_pj) {
+                    clientName = client.clients_pj.trade_name || client.clients_pj.company_name || 'Cliente';
                     clientDocument = client.clients_pj.cnpj || '';
                     clientType = 'PJ';
                 }
@@ -1843,7 +1824,7 @@ class ReportService {
             cell.fill = {
                 type: 'pattern',
                 pattern: 'solid',
-                fgColor: { argb: 'FF065F46' }
+                fgColor: { argb: 'FF1e6076' }
             };
             cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -1898,7 +1879,7 @@ class ReportService {
             cell.fill = {
                 type: 'pattern',
                 pattern: 'solid',
-                fgColor: { argb: 'FF065F46' }
+                fgColor: { argb: 'FF1e6076' }
             };
             cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
             cell.alignment = { vertical: 'middle', horizontal: 'center' };

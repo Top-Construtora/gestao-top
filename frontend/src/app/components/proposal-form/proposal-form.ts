@@ -95,11 +95,6 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       this.loadProposal();
     }
 
-    // Observar mudanças no tipo de cliente para ajustar validações
-    this.newClientForm.get('client_type')?.valueChanges.subscribe(value => {
-      this.updateDocumentValidation(value);
-    });
-
     // Adicionar listeners para conversão entre valor e porcentagem
     // IMPORTANTE: Adicionar delay apenas se estiver em modo de edição
     if (this.isEditMode) {
@@ -176,12 +171,11 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     });
 
     this.newClientForm = this.fb.group({
-      client_type: ['', Validators.required],
+      client_type: ['pj'],
       name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      cpf: [''],
-      cnpj: [''],
-      trade_name: [''] // Apenas para PJ, opcional
+      cnpj: ['', Validators.required],
+      trade_name: ['']
     });
 
     // Não adiciona serviço vazio - agora é via modal
@@ -564,47 +558,25 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     const clientType = formValue.client_type;
     
     
-    // Build comprehensive client data with ALL potentially required fields
+    // Build client data (apenas PJ)
     const clientData: CreateClientRequest = {
-      type: clientType === 'pf' ? 'PF' : 'PJ',
-      // Endereço - campos obrigatórios conforme schema
-      street: 'Rua temporária',
+      street: 'Rua temporaria',
       number: '123',
-      complement: '', // pode ser null conforme schema
+      complement: '',
       neighborhood: 'Centro',
       city: 'São Paulo',
       state: 'SP',
       zipcode: '01310100',
-      phone: '' // pode ser null conforme schema
+      phone: '',
+      emails: [formValue.email || ''],
+      cnpj: formValue.cnpj?.replace(/\D/g, '') || '00000000000000',
+      company_name: formValue.name || '',
+      trade_name: formValue.trade_name || '',
+      employee_count: 1,
+      business_segment: 'A definir'
     };
 
-    // Configurar email e campos específicos por tipo
-    if (clientType === 'pf') {
-      // Pessoa Física - usa email único
-      clientData.email = formValue.email || '';
-      clientData.cpf = formValue.cpf?.replace(/\D/g, '') || '00000000000'; // Remove formatação do CPF
-      clientData.full_name = formValue.name || '';
-    } else {
-      // Pessoa Jurídica - pode usar array de emails
-      clientData.email = formValue.email || ''; // Tentar email único também
-      clientData.emails = [formValue.email || '']; // E array de emails
-      clientData.cnpj = formValue.cnpj?.replace(/\D/g, '') || '00000000000000'; // Remove formatação do CNPJ
-      clientData.company_name = formValue.name || '';
-      clientData.trade_name = formValue.trade_name || '';
-      
-      // Campos específicos PJ que podem ser obrigatórios
-      clientData.legal_representative = 'A definir';
-      clientData.employee_count = 1;
-      clientData.business_segment = 'A definir';
-    }
-    
-    console.log('🆕 Client data being sent:', JSON.stringify(clientData, null, 2));
-    console.log('📧 Email configuration:', {
-      clientType,
-      email: clientData.email,
-      emails: clientData.emails,
-      formEmail: formValue.email
-    });
+    console.log('Client data being sent:', JSON.stringify(clientData, null, 2));
     
     this.clientService.createClient(clientData)
       .pipe(takeUntil(this.destroy$))
@@ -651,34 +623,22 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
   }
 
   private tryAlternativeClientCreation(formValue: any, clientType: string): void {
-    console.log('🎯 Trying alternative strategies for 400 error...');
-    
-    // Strategy 1: Try with minimal required fields only
+    console.log('Trying alternative strategy...');
+
     const minimalData: CreateClientRequest = {
-      type: clientType === 'pf' ? 'PF' : 'PJ',
       street: 'A definir',
       number: '0',
       neighborhood: 'A definir',
       city: 'A definir',
       state: 'SP',
-      zipcode: '00000000'
+      zipcode: '00000000',
+      emails: [formValue.email || ''],
+      cnpj: formValue.cnpj?.replace(/\D/g, '') || '00000000000000',
+      company_name: formValue.name || '',
+      trade_name: formValue.trade_name || '',
+      employee_count: 1,
+      business_segment: 'A definir'
     };
-
-    if (clientType === 'pf') {
-      minimalData.email = formValue.email || '';
-      minimalData.cpf = formValue.cpf?.replace(/\D/g, '') || '00000000000';
-      minimalData.full_name = formValue.name || '';
-    } else {
-      // Try only with email field (not emails array) for PJ
-      minimalData.email = formValue.email || '';
-      minimalData.cnpj = formValue.cnpj?.replace(/\D/g, '') || '00000000000000';
-      minimalData.company_name = formValue.name || '';
-      minimalData.trade_name = formValue.trade_name || '';
-      minimalData.legal_representative = 'A definir';
-      minimalData.employee_count = 1;
-      minimalData.business_segment = 'A definir';
-    }
-
 
     this.clientService.createClient(minimalData)
       .pipe(takeUntil(this.destroy$))
@@ -689,105 +649,37 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
           this.showNewClientForm = false;
           this.newClientForm.reset();
           this.isCreatingClient = false;
-          this.toastr.success('Cliente criado com sucesso! Complete as informações obrigatórias depois editando o cliente.');
+          this.toastr.success('Cliente criado com sucesso! Complete as Informações depois editando o cliente.');
         },
         error: (error) => {
-          console.error('❌ Alternative strategy 1 failed:', error);
-          console.log('🔄 Trying alternative strategy 2 - emails array for PJ...');
-          this.tryEmailsArrayStrategy(formValue, clientType);
-        }
-      });
-  }
-
-  private tryEmailsArrayStrategy(formValue: any, clientType: string): void {
-    if (clientType !== 'pj') {
-      // If not PJ, fallback to simplified creation
-      this.trySimplifiedClientCreation(formValue, clientType);
-      return;
-    }
-
-    // Strategy 2: For PJ, try with emails array instead of email field
-    const emailsArrayData: CreateClientRequest = {
-      type: 'PJ',
-      street: 'A definir',
-      number: '0', 
-      neighborhood: 'A definir',
-      city: 'A definir',
-      state: 'SP',
-      zipcode: '00000000',
-      // Use emails array, NOT email field for PJ
-      emails: [formValue.email || ''],
-      cnpj: formValue.cnpj?.replace(/\D/g, '') || '00000000000000',
-      company_name: formValue.name || '',
-      trade_name: formValue.trade_name || '',
-      legal_representative: 'A definir',
-      employee_count: 1,
-      business_segment: 'A definir'
-    };
-
-    // Explicitly remove email field
-    delete (emailsArrayData as any).email;
-
-
-    this.clientService.createClient(emailsArrayData)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          this.clients.push(response.client);
-          this.proposalForm.get('client_id')?.setValue(response.client.id);
-          this.showNewClientForm = false;
-          this.newClientForm.reset();
-          this.isCreatingClient = false;
-          this.toastr.success('Cliente criado com sucesso! Complete as informações obrigatórias depois editando o cliente.');
-        },
-        error: (error) => {
-          console.error('❌ Alternative strategy 2 also failed:', error);
-          console.log('🔄 Falling back to simplified strategy...');
+          console.error('Alternative strategy failed:', error);
           this.trySimplifiedClientCreation(formValue, clientType);
         }
       });
   }
 
+  private tryEmailsArrayStrategy(formValue: any, clientType: string): void {
+    this.trySimplifiedClientCreation(formValue, clientType);
+  }
+
   private trySimplifiedClientCreation(formValue: any, clientType: string): void {
-    // Payload mais simples sem dados temporários complexos
     const simplifiedData: CreateClientRequest = {
-      type: clientType === 'pf' ? 'PF' : 'PJ',
       phone: '',
-      street: 'Não informado',
+      street: 'Nao informado',
       number: '0',
-      neighborhood: 'Não informado',
-      city: 'Não informado',
+      neighborhood: 'Nao informado',
+      city: 'Nao informado',
       state: 'SP',
-      zipcode: '00000000'
+      zipcode: '00000000',
+      emails: [formValue.email || ''],
+      cnpj: formValue.cnpj?.replace(/\D/g, '') || '00000000000000',
+      company_name: formValue.name || '',
+      trade_name: formValue.trade_name || '',
+      employee_count: 1,
+      business_segment: 'Outros'
     };
 
-    // Configurar email de acordo com o tipo (mesma lógica)
-    if (clientType === 'pj') {
-      simplifiedData.emails = [formValue.email || ''];
-    } else {
-      simplifiedData.email = formValue.email || '';
-    }
-
-    if (clientType === 'pf') {
-      simplifiedData.cpf = formValue.cpf?.replace(/\D/g, '') || '00000000000'; // CPF com zeros para editar depois
-      simplifiedData.full_name = formValue.name || '';
-    } else {
-      simplifiedData.cnpj = formValue.cnpj?.replace(/\D/g, '') || '00000000000000'; // CNPJ com zeros para editar depois
-      simplifiedData.company_name = formValue.name || '';
-      simplifiedData.trade_name = formValue.trade_name || '';
-      // Campos adicionais mínimos para PJ
-      simplifiedData.legal_representative = 'A definir';
-      simplifiedData.employee_count = 1;
-      simplifiedData.business_segment = 'Outros';
-    }
-
-    console.log('🔄 Trying simplified payload:', simplifiedData);
-    console.log('📧 Simplified email setup:', {
-      clientType,
-      email: simplifiedData.email,
-      emails: simplifiedData.emails,
-      formEmail: formValue.email
-    });
+    console.log('Trying simplified payload:', simplifiedData);
 
     this.clientService.createClient(simplifiedData)
       .pipe(takeUntil(this.destroy$))
@@ -798,10 +690,10 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
           this.showNewClientForm = false;
           this.newClientForm.reset();
           this.isCreatingClient = false;
-          this.toastr.success('Cliente criado com sucesso! Complete as informações obrigatórias depois editando o cliente.');
+          this.toastr.success('Cliente criado com sucesso! Complete as Informações depois editando o cliente.');
         },
         error: (error) => {
-          console.error('❌ Simplified creation also failed:', error);
+          console.error('Simplified creation also failed:', error);
           this.isCreatingClient = false;
           this.handleClientCreationError(error);
         }
@@ -902,14 +794,11 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Determinar tipo do cliente baseado no documento
-    const clientType = selectedClient.cpf ? 'pf' : 'pj';
-
     const formData: CreateProposalData = {
       client_id: clientId,
       type: this.proposalForm.value.type || 'Full',
-      client_name: selectedClient.full_name || selectedClient.company_name || '',
-      client_document: selectedClient.cpf || selectedClient.cnpj || '',
+      client_name: selectedClient.trade_name || selectedClient.company_name || '',
+      client_document: selectedClient.cnpj || '',
       client_email: selectedClient.email || '',
       client_phone: selectedClient.phone || undefined,
       client_street: selectedClient.street || '',
@@ -1027,29 +916,17 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
 
 
   getNewClientNamePlaceholder(): string {
-    const clientType = this.newClientForm.get('client_type')?.value;
-    if (clientType === 'pf') {
-      return 'Ex: João da Silva Santos';
-    } else if (clientType === 'pj') {
-      return 'Ex: Empresa LTDA';
-    }
-    return 'Nome completo ou razão social';
+    return 'Ex: Empresa LTDA';
   }
 
   getNewClientNameLabel(): string {
-    const clientType = this.newClientForm.get('client_type')?.value;
-    if (clientType === 'pf') {
-      return 'Nome completo';
-    } else if (clientType === 'pj') {
-      return 'Razão social';
-    }
-    return 'Nome';
+    return 'Razão social';
   }
 
   cancelNewClient(): void {
     this.showNewClientForm = false;
     this.newClientForm.reset();
-    this.isCreatingClient = false; // Reset do flag de criação
+    this.isCreatingClient = false;
   }
 
   isNewClientFieldInvalid(fieldName: string): boolean {
@@ -1057,40 +934,18 @@ export class ProposalFormComponent implements OnInit, OnDestroy {
     return !!(field && field.invalid && (field.dirty || field.touched));
   }
 
-  private detectClientType(document: string): 'pf' | 'pj' | '' {
+  private detectClientType(document: string): 'pj' | '' {
     if (!document) return '';
-    
-    // Remove all non-numeric characters
     const cleanDocument = document.replace(/\D/g, '');
-    
-    // CPF has 11 digits, CNPJ has 14 digits
-    if (cleanDocument.length === 11) {
-      return 'pf';
-    } else if (cleanDocument.length === 14) {
+    if (cleanDocument.length === 14) {
       return 'pj';
     }
-    
     return '';
   }
 
   private updateDocumentValidation(clientType: string): void {
-    const cpfControl = this.newClientForm.get('cpf');
     const cnpjControl = this.newClientForm.get('cnpj');
-
-    // Reset validators
-    cpfControl?.clearValidators();
-    cnpjControl?.clearValidators();
-
-    if (clientType === 'pf') {
-      // CPF é obrigatório para PF
-      cpfControl?.setValidators([Validators.required]);
-    } else if (clientType === 'pj') {
-      // CNPJ é obrigatório para PJ
-      cnpjControl?.setValidators([Validators.required]);
-    }
-
-    // Update validity
-    cpfControl?.updateValueAndValidity();
+    cnpjControl?.setValidators([Validators.required]);
     cnpjControl?.updateValueAndValidity();
   }
 

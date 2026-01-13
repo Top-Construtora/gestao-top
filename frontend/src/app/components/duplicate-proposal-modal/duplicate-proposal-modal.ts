@@ -110,12 +110,8 @@ export class DuplicateProposalModalComponent implements OnInit {
   getClientDisplayName(client: any): string {
     if (!client) return '';
 
-    if (client.type === 'PJ' && client.company) {
+    if (client.company) {
       return client.company.trade_name || client.company.company_name || '';
-    }
-
-    if (client.type === 'PF' && client.person) {
-      return client.person.full_name || '';
     }
 
     return client.name || '';
@@ -213,10 +209,8 @@ export class DuplicateProposalModalComponent implements OnInit {
     let clientName = 'Cliente não identificado';
 
     if (client) {
-      if (client.type === 'PJ' && client.company) {
+      if (client.company) {
         clientName = client.company.trade_name || client.company.company_name || '';
-      } else if (client.type === 'PF' && client.person) {
-        clientName = (client.person as any).full_name || client.person.name || '';
       }
     }
 

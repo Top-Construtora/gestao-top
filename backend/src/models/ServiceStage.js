@@ -20,9 +20,7 @@ class ServiceStageModel {
           category: category || null,
           sort_order: sort_order || 1,
           status: 'pending',
-          is_active: true,
-          created_by: userId,
-          updated_by: userId
+          is_active: true
         }])
         .select('*')
         .single();
@@ -41,7 +39,7 @@ class ServiceStageModel {
         .from('service_stages')
         .select(`
           id, service_id, name, description, category, sort_order, status, is_active,
-          is_not_applicable, created_at, updated_at, created_by, updated_by
+          is_not_applicable, created_at, updated_at
         `)
         .eq('service_id', serviceId)
         .eq('is_active', true)
@@ -87,9 +85,7 @@ class ServiceStageModel {
         is_not_applicable
       } = stageData;
 
-      const updateObject = {
-        updated_by: userId
-      };
+      const updateObject = {};
 
       if (name !== undefined) updateObject.name = name;
       if (description !== undefined) updateObject.description = description;

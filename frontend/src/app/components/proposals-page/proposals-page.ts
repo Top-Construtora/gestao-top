@@ -358,13 +358,11 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
     const client = apiProposal.client;
 
     if (client) {
-        clientType = client.type || '';
-        if (client.type === 'PJ' && client.company) {
+        clientType = client.type || 'PJ';
+        if (client.company) {
             tradeName = client.company.trade_name || '';
             companyName = client.company.company_name || '';
             clientName = tradeName || companyName || apiProposal.client_name || '';
-        } else if (client.type === 'PF' && client.person) {
-            clientName = client.person.full_name || apiProposal.client_name || '';
         } else {
             clientName = apiProposal.client_name || client.name || '';
         }
@@ -1072,21 +1070,17 @@ export class ProposalsPageComponent implements OnInit, OnDestroy {
         return client.company.trade_name || client.company.company_name || proposal.client_name || '';
     }
 
-    if (client.type === 'PF' && client.person) {
-        return client.person.full_name || proposal.client_name || '';
-    }
-
-    return proposal.client_name || client.name || 'Cliente não informado';
+    return proposal.client_name || client.name || 'Cliente nao informado';
   }
 
   private getClientEmail(proposal: any): string {
     if (!proposal) return '';
-    return proposal.client?.company?.email || proposal.client?.person?.email || proposal.client_email || '';
+    return proposal.client?.company?.email || proposal.client_email || '';
   }
 
   private getClientPhone(proposal: any): string {
     if (!proposal) return '';
-    return proposal.client?.company?.phone || proposal.client?.person?.phone || proposal.client_phone || '';
+    return proposal.client?.company?.phone || proposal.client_phone || '';
   }
 
   private addSectionHeader(doc: any, title: string, y: number, margin: number, pageWidth: number): void {

@@ -4,11 +4,9 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface CreateClientRequest {
-  type: 'PF' | 'PJ';
-  email?: string; // Para compatibilidade com PF
-  emails?: string[]; // Para múltiplos emails em PJ
+  emails?: string[];
   phone?: string;
-  phones?: string[]; // Para múltiplos telefones
+  phones?: string[];
   street: string;
   number: string;
   complement?: string;
@@ -18,19 +16,15 @@ export interface CreateClientRequest {
   zipcode: string;
   employee_count?: number;
   business_segment?: string;
-  cpf?: string;
-  full_name?: string;
-  cnpj?: string;
-  company_name?: string;
+  cnpj: string;
+  company_name: string;
   trade_name?: string;
-  legal_representative?: string;
 }
 
 export interface UpdateClientRequest {
-  email?: string; // Para compatibilidade com PF
-  emails?: string[]; // Para múltiplos emails em PJ
+  emails?: string[];
   phone?: string;
-  phones?: string[]; // Para múltiplos telefones
+  phones?: string[];
   street?: string;
   number?: string;
   complement?: string;
@@ -40,12 +34,9 @@ export interface UpdateClientRequest {
   zipcode?: string;
   employee_count?: number;
   business_segment?: string;
-  cpf?: string;
-  full_name?: string;
   cnpj?: string;
   company_name?: string;
   trade_name?: string;
-  legal_representative?: string;
 }
 
 export interface ClientEmail {
@@ -62,14 +53,14 @@ export interface ClientPhone {
 
 export interface ApiClient {
   id: number;
-  type: 'PF' | 'PJ';
+  type: 'PJ';
   name: string;
-  email: string; // Email primário para compatibilidade
-  emails?: ClientEmail[]; // Lista de emails para PJ
-  primary_email?: string; // Email primário extraído
+  email: string;
+  emails?: ClientEmail[];
+  primary_email?: string;
   phone: string | null;
-  phones?: ClientPhone[]; // Lista de telefones
-  primary_phone?: string; // Telefone primário extraído
+  phones?: ClientPhone[];
+  primary_phone?: string;
   street: string;
   number: string;
   complement: string | null;
@@ -83,12 +74,9 @@ export interface ApiClient {
   updated_by?: number;
   created_by_user?: { name: string };
   updated_by_user?: { name: string };
-  cpf?: string;
-  full_name?: string;
   cnpj?: string;
   company_name?: string;
   trade_name?: string;
-  legal_representative?: string;
   employee_count?: number | null;
   business_segment?: string | null;
   logo_path?: string | null;
@@ -96,9 +84,6 @@ export interface ApiClient {
   logo_mime_type?: string | null;
   logo_size?: number | null;
   logo_uploaded_at?: string | null;
-  founded_date?: string | null;
-  headquarters?: string | null;
-  market_sector?: string | null;
 }
 
 export interface ClientsResponse {
@@ -118,14 +103,11 @@ export interface CreateClientResponse {
 
 export interface ClientStats {
   total: number;
-  totalPF: number;
-  totalPJ: number;
   byCity: { [key: string]: number };
   byState: { [key: string]: number };
 }
 
 export interface ClientFilters {
-  type?: 'PF' | 'PJ';
   city?: string;
   state?: string;
   search?: string;
@@ -153,11 +135,8 @@ export class ClientService {
    */
   getClients(filters?: ClientFilters): Observable<ClientsResponse> {
     let params: any = {};
-    
+
     if (filters) {
-      if (filters.type) {
-        params.type = filters.type;
-      }
       if (filters.city) {
         params.city = filters.city;
       }
@@ -172,9 +151,9 @@ export class ClientService {
       }
     }
 
-    return this.http.get<ClientsResponse>(this.API_URL, { 
+    return this.http.get<ClientsResponse>(this.API_URL, {
       params,
-      headers: this.getAuthHeaders() 
+      headers: this.getAuthHeaders()
     });
   }
 
@@ -233,14 +212,6 @@ export class ClientService {
   }
 
   /**
-   * Formatar CPF
-   */
-  formatCPF(cpf: string): string {
-    if (!cpf) return '';
-    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-  }
-
-  /**
    * Formatar CNPJ
    */
   formatCNPJ(cnpj: string): string {
@@ -283,12 +254,10 @@ export class ClientService {
   }
 
   /**
-   * Obter documento formatado (CPF ou CNPJ)
+   * Obter documento formatado (CNPJ)
    */
   getFormattedDocument(client: ApiClient): string {
-    if (client.type === 'PF' && client.cpf) {
-      return this.formatCPF(client.cpf);
-    } else if (client.type === 'PJ' && client.cnpj) {
+    if (client.cnpj) {
       return this.formatCNPJ(client.cnpj);
     }
     return '';
@@ -399,7 +368,7 @@ export class ClientService {
   }
 
   /**
-   * Substituir todos os emails de um cliente PJ
+   * Substituir todos os emails de um cliente
    */
   replaceAllEmails(clientId: number, emails: string[]): Observable<{ success: boolean; emails: ClientEmail[]; message: string }> {
     return this.http.put<{ success: boolean; emails: ClientEmail[]; message: string }>(
@@ -416,12 +385,12 @@ export class ClientService {
     if (client.primary_email) {
       return client.primary_email;
     }
-    
+
     if (client.emails && client.emails.length > 0) {
       const primaryEmail = client.emails.find(e => e.is_primary);
       return primaryEmail?.email || client.emails[0].email;
     }
-    
+
     return client.email || '';
   }
 
@@ -432,7 +401,7 @@ export class ClientService {
     if (client.emails && client.emails.length > 0) {
       return client.emails.map(e => e.email);
     }
-    
+
     return client.email ? [client.email] : [];
   }
 
@@ -513,12 +482,12 @@ export class ClientService {
     if (client.primary_phone) {
       return client.primary_phone;
     }
-    
+
     if (client.phones && client.phones.length > 0) {
       const primaryPhone = client.phones.find(p => p.is_primary);
       return primaryPhone?.phone || client.phones[0].phone;
     }
-    
+
     return client.phone || '';
   }
 
@@ -529,7 +498,7 @@ export class ClientService {
     if (client.phones && client.phones.length > 0) {
       return client.phones.map(p => p.phone);
     }
-    
+
     return client.phone ? [client.phone] : [];
   }
 }

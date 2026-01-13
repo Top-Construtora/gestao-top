@@ -16,133 +16,72 @@
         <div class="main-column">
           <div class="form-card">
             <div class="card-header">
-              <i class="fas fa-user-tag"></i>
-              <h2>Tipo de Cliente</h2>
+              <i class="fas fa-building"></i>
+              <h2>Dados da Empresa</h2>
             </div>
             <div class="card-body">
-              <div class="form-group">
-                <label class="form-label">Tipo de Cliente <span class="required">*</span></label>
-                <select name="type" class="form-control" [(ngModel)]="formData.type" required [disabled]="isLoading">
-                  <option value="PF">
-                    <i class="fas fa-user"></i>
-                    Pessoa Física
-                  </option>
-                  <option value="PJ">
-                    <i class="fas fa-building"></i>
-                    Pessoa Jurídica
-                  </option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-card" *ngIf="formData.type">
-            <div class="card-header">
-              <i class="fas fa-info-circle"></i>
-              <h2>{{ formData.type === 'PF' ? 'Dados Pessoais' : 'Dados da Empresa' }}</h2>
-            </div>
-            <div class="card-body">
-              <div *ngIf="formData.type === 'PF'" class="form-grid">
-                <div class="form-group">
-                  <label class="form-label">Nome Completo <span class="required">*</span></label>
-                  <input 
-                    type="text" 
-                    name="full_name"
-                    class="form-control"
-                    [(ngModel)]="formData.full_name" 
-                    required
-                    [disabled]="isLoading"
-                    placeholder="Digite o nome completo">
-                </div>
-                
-                <div class="form-group">
-                  <label class="form-label">CPF <span class="required">*</span></label>
-                  <input 
-                    type="text" 
-                    name="cpf"
-                    class="form-control"
-                    [(ngModel)]="formData.cpf" 
-                    required
-                    [disabled]="isLoading"
-                    placeholder="000.000.000-00"
-                    appDocumentMask="cpf">
-                </div>
-              </div>
-
-              <div *ngIf="formData.type === 'PJ'" class="form-grid">
+              <div class="form-grid">
                 <div class="form-group">
                   <label class="form-label">Razão Social <span class="required">*</span></label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="company_name"
                     class="form-control"
-                    [(ngModel)]="formData.company_name" 
+                    [(ngModel)]="formData.company_name"
                     required
                     [disabled]="isLoading"
                     placeholder="Digite a razão social">
                 </div>
-                
+
                 <div class="form-group">
                   <label class="form-label">Nome Fantasia</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="trade_name"
                     class="form-control"
-                    [(ngModel)]="formData.trade_name" 
+                    [(ngModel)]="formData.trade_name"
                     [disabled]="isLoading"
                     placeholder="Digite o nome fantasia">
                 </div>
-                
+
                 <div class="form-group">
                   <label class="form-label">CNPJ <span class="required">*</span></label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="cnpj"
                     class="form-control"
-                    [(ngModel)]="formData.cnpj" 
+                    [(ngModel)]="formData.cnpj"
                     required
                     [disabled]="isLoading"
                     placeholder="00.000.000/0000-00"
                     appDocumentMask="cnpj">
                 </div>
-                
+
                 <div class="form-group">
-                  <label class="form-label">Quantidade de Funcionários</label>
-                  <input 
-                    type="number" 
+                  <label class="form-label">Quantidade de Funcionarios</label>
+                  <input
+                    type="number"
                     name="employee_count"
                     class="form-control"
-                    [(ngModel)]="formData.employee_count" 
+                    [(ngModel)]="formData.employee_count"
                     [disabled]="isLoading"
                     placeholder="Ex: 10"
                     min="0">
                 </div>
-                
+
                 <div class="form-group">
-                  <label class="form-label">Segmento de Atuação</label>
-                  <input 
-                    type="text" 
+                  <label class="form-label">Segmento de Atuacao</label>
+                  <input
+                    type="text"
                     name="business_segment"
                     class="form-control"
-                    [(ngModel)]="formData.business_segment" 
+                    [(ngModel)]="formData.business_segment"
                     [disabled]="isLoading"
                     placeholder="">
-                </div>
-                
-                <div class="form-group">
-                  <label class="form-label">Representante Legal</label>
-                  <input 
-                    type="text" 
-                    name="legal_representative"
-                    class="form-control"
-                    [(ngModel)]="formData.legal_representative" 
-                    [disabled]="isLoading"
-                    placeholder="Nome do representante legal da empresa">
                 </div>
               </div>
             </div>
           </div>
-
 
           <div class="form-card">
             <div class="card-header">
@@ -150,129 +89,99 @@
               <h2>Dados de Contato</h2>
             </div>
             <div class="card-body">
-              <!-- Emails para PF (apenas um campo) -->
-              <div class="form-grid" *ngIf="formData.type === 'PF'">
-                <div class="form-group">
-                  <label class="form-label">E-mail <span class="required">*</span></label>
-                  <input 
-                    type="email" 
-                    name="email"
-                    class="form-control"
-                    [(ngModel)]="formData.email" 
-                    required
+              <!-- Emails (múltiplos emails) -->
+              <div class="emails-section">
+                <div class="section-header">
+                  <label class="form-label">E-mails da Empresa <span class="required">*</span></label>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-primary add-email-btn"
+                    (click)="addEmailField()"
                     [disabled]="isLoading"
-                    placeholder="exemplo@email.com">
+                    title="Adicionar novo e-mail">
+                    <i class="fas fa-plus"></i>
+                    Adicionar E-mail
+                  </button>
                 </div>
-                
-                <div class="form-group">
-                  <label class="form-label">Telefone</label>
-                  <input 
-                    type="text" 
-                    name="phone"
-                    class="form-control"
-                    [(ngModel)]="formData.phone" 
-                    [disabled]="isLoading"
-                    placeholder="(00) 00000-0000"
-                    appDocumentMask="phone">
-                </div>
-              </div>
 
-              <!-- Emails para PJ (múltiplos emails) -->
-              <div *ngIf="formData.type === 'PJ'">
-                <div class="emails-section">
-                  <div class="section-header">
-                    <label class="form-label">E-mails da Empresa <span class="required">*</span></label>
-                    <button 
-                      type="button" 
-                      class="btn btn-sm btn-outline-primary add-email-btn"
-                      (click)="addEmailField()"
-                      [disabled]="isLoading"
-                      title="Adicionar novo e-mail">
-                      <i class="fas fa-plus"></i>
-                      Adicionar E-mail
-                    </button>
-                  </div>
-                  
-                  <div class="emails-list">
-                    <div 
-                      *ngFor="let email of emailFields; let i = index; trackBy: trackByEmailIndex"
-                      class="email-field-group">
-                      <div class="email-input-container">
-                        <input 
-                          type="email" 
-                          [name]="'email_' + i"
-                          class="form-control"
-                          [(ngModel)]="emailFields[i]" 
-                          [required]="i === 0"
-                          [disabled]="isLoading"
-                          [placeholder]="i === 0 ? 'E-mail principal da empresa' : 'E-mail adicional'"
-                          (blur)="validateEmail(i)">
-                        
-                        <button 
-                          *ngIf="i > 0"
-                          type="button" 
-                          class="btn btn-sm btn-outline-danger remove-email-btn"
-                          (click)="removeEmailField(i)"
-                          [disabled]="isLoading"
-                          title="Remover este e-mail">
-                          <i class="fas fa-trash"></i>
-                        </button>
-                      </div>
-                      
-                      <div *ngIf="i === 0" class="email-note">
-                        <i class="fas fa-info-circle"></i>
-                        Este será o e-mail principal da empresa
-                      </div>
+                <div class="emails-list">
+                  <div
+                    *ngFor="let email of emailFields; let i = index; trackBy: trackByEmailIndex"
+                    class="email-field-group">
+                    <div class="email-input-container">
+                      <input
+                        type="email"
+                        [name]="'email_' + i"
+                        class="form-control"
+                        [(ngModel)]="emailFields[i]"
+                        [required]="i === 0"
+                        [disabled]="isLoading"
+                        [placeholder]="i === 0 ? 'E-mail principal da empresa' : 'E-mail adicional'"
+                        (blur)="validateEmail(i)">
+
+                      <button
+                        *ngIf="i > 0"
+                        type="button"
+                        class="btn btn-sm btn-outline-danger remove-email-btn"
+                        (click)="removeEmailField(i)"
+                        [disabled]="isLoading"
+                        title="Remover este e-mail">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+
+                    <div *ngIf="i === 0" class="email-note">
+                      <i class="fas fa-info-circle"></i>
+                      Este será o e-mail principal da empresa
                     </div>
                   </div>
                 </div>
-                
-                <!-- Telefones (múltiplos telefones para todos os clientes) -->
-                <div class="phones-section">
-                  <div class="section-header">
-                    <label class="form-label">Telefones <span class="required">*</span></label>
-                    <button 
-                      type="button" 
-                      class="btn btn-sm btn-outline-primary add-phone-btn"
-                      (click)="addPhoneField()"
-                      [disabled]="isLoading"
-                      title="Adicionar novo telefone">
-                      <i class="fas fa-plus"></i>
-                      Adicionar Telefone
-                    </button>
-                  </div>
-                  
-                  <div class="phones-list">
-                    <div 
-                      *ngFor="let phone of phoneFields; let i = index; trackBy: trackByPhoneIndex"
-                      class="phone-field-group">
-                      <div class="phone-input-container">
-                        <input 
-                          type="text" 
-                          [name]="'phone_' + i"
-                          class="form-control"
-                          [(ngModel)]="phoneFields[i]" 
-                          [required]="i === 0"
-                          [disabled]="isLoading"
-                          [placeholder]="i === 0 ? 'Telefone principal' : 'Telefone adicional'"
-                          appDocumentMask="phone"
-                          (blur)="validatePhone(i)">
-                        
-                        <button 
-                          *ngIf="i > 0"
-                          type="button" 
-                          class="btn btn-sm btn-outline-danger remove-phone-btn"
-                          (click)="removePhoneField(i)"
-                          [disabled]="isLoading"
-                          title="Remover este telefone">
-                          <i class="fas fa-trash"></i>
-                        </button>
-                      </div>
-                      
-                      <div *ngIf="i === 0" class="phone-note">
-                        <i class="fas fa-info-circle"></i>
-                        Este será o telefone principal
-                      </div>
+              </div>
+
+              <!-- Telefones (múltiplos telefones) -->
+              <div class="phones-section">
+                <div class="section-header">
+                  <label class="form-label">Telefones</label>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-primary add-phone-btn"
+                    (click)="addPhoneField()"
+                    [disabled]="isLoading"
+                    title="Adicionar novo telefone">
+                    <i class="fas fa-plus"></i>
+                    Adicionar Telefone
+                  </button>
+                </div>
+
+                <div class="phones-list">
+                  <div
+                    *ngFor="let phone of phoneFields; let i = index; trackBy: trackByPhoneIndex"
+                    class="phone-field-group">
+                    <div class="phone-input-container">
+                      <input
+                        type="text"
+                        [name]="'phone_' + i"
+                        class="form-control"
+                        [(ngModel)]="phoneFields[i]"
+                        [disabled]="isLoading"
+                        [placeholder]="i === 0 ? 'Telefone principal' : 'Telefone adicional'"
+                        appDocumentMask="phone"
+                        (blur)="validatePhone(i)">
+
+                      <button
+                        *ngIf="i > 0"
+                        type="button"
+                        class="btn btn-sm btn-outline-danger remove-phone-btn"
+                        (click)="removePhoneField(i)"
+                        [disabled]="isLoading"
+                        title="Remover este telefone">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+
+                    <div *ngIf="i === 0" class="phone-note">
+                      <i class="fas fa-info-circle"></i>
+                      Este será o telefone principal
                     </div>
                   </div>
                 </div>
@@ -289,107 +198,111 @@
               <div class="form-grid">
                 <div class="form-group">
                   <label class="form-label">CEP <span class="required">*</span></label>
-                  <input 
-                    type="text" 
-                    name="zipcode"
-                    class="form-control"
-                    [(ngModel)]="formData.zipcode" 
-                    required
-                    [disabled]="isLoading"
-                    placeholder="00000-000"
-                    appDocumentMask="cep">
+                  <div class="input-with-loader">
+                    <input
+                      type="text"
+                      name="zipcode"
+                      class="form-control"
+                      [(ngModel)]="formData.zipcode"
+                      required
+                      [disabled]="isLoading"
+                      placeholder="00000-000"
+                      appDocumentMask="cep"
+                      (blur)="onCepBlur()">
+                    <i *ngIf="isLoadingCep" class="fas fa-spinner fa-spin cep-loader"></i>
+                  </div>
                 </div>
-                
+
                 <div class="form-group">
                   <label class="form-label">Logradouro <span class="required">*</span></label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="street"
                     class="form-control"
-                    [(ngModel)]="formData.street" 
+                    [(ngModel)]="formData.street"
                     required
                     [disabled]="isLoading"
                     placeholder="Rua, Avenida, etc.">
                 </div>
-                
+
                 <div class="form-group">
                   <label class="form-label">Número <span class="required">*</span></label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="number"
                     class="form-control"
-                    [(ngModel)]="formData.number" 
+                    [(ngModel)]="formData.number"
                     required
                     [disabled]="isLoading"
                     placeholder="123">
                 </div>
-                
+
                 <div class="form-group">
                   <label class="form-label">Complemento</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="complement"
                     class="form-control"
-                    [(ngModel)]="formData.complement" 
+                    [(ngModel)]="formData.complement"
                     [disabled]="isLoading"
                     placeholder="Apt, Bloco, etc.">
                 </div>
-                
+
                 <div class="form-group">
                   <label class="form-label">Setor <span class="required">*</span></label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="neighborhood"
                     class="form-control"
-                    [(ngModel)]="formData.neighborhood" 
+                    [(ngModel)]="formData.neighborhood"
                     required
                     [disabled]="isLoading"
                     placeholder="Centro, Vila, etc.">
                 </div>
-                
+
                 <div class="form-group">
                   <label class="form-label">Cidade <span class="required">*</span></label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="city"
                     class="form-control"
-                    [(ngModel)]="formData.city" 
+                    [(ngModel)]="formData.city"
                     required
                     [disabled]="isLoading"
                     placeholder="São Paulo">
                 </div>
-                
+
                 <div class="form-group">
                   <label class="form-label">Estado <span class="required">*</span></label>
-                  <select 
+                  <select
                     name="state"
                     class="form-control"
-                    [(ngModel)]="formData.state" 
+                    [(ngModel)]="formData.state"
                     required
                     [disabled]="isLoading">
                     <option value="">Selecione...</option>
                     <option value="AC">Acre</option>
                     <option value="AL">Alagoas</option>
-                    <option value="AP">Amapá</option>
+                    <option value="AP">Amapa</option>
                     <option value="AM">Amazonas</option>
                     <option value="BA">Bahia</option>
-                    <option value="CE">Ceará</option>
+                    <option value="CE">Ceara</option>
                     <option value="DF">Distrito Federal</option>
-                    <option value="ES">Espírito Santo</option>
-                    <option value="GO">Goiás</option>
-                    <option value="MA">Maranhão</option>
+                    <option value="ES">Espirito Santo</option>
+                    <option value="GO">Goias</option>
+                    <option value="MA">Maranhao</option>
                     <option value="MT">Mato Grosso</option>
                     <option value="MS">Mato Grosso do Sul</option>
                     <option value="MG">Minas Gerais</option>
-                    <option value="PA">Pará</option>
-                    <option value="PB">Paraíba</option>
-                    <option value="PR">Paraná</option>
+                    <option value="PA">Para</option>
+                    <option value="PB">Paraiba</option>
+                    <option value="PR">Parana</option>
                     <option value="PE">Pernambuco</option>
-                    <option value="PI">Piauí</option>
+                    <option value="PI">Piaui</option>
                     <option value="RJ">Rio de Janeiro</option>
                     <option value="RN">Rio Grande do Norte</option>
                     <option value="RS">Rio Grande do Sul</option>
-                    <option value="RO">Rondônia</option>
+                    <option value="RO">Rondonia</option>
                     <option value="RR">Roraima</option>
                     <option value="SC">Santa Catarina</option>
                     <option value="SP">São Paulo</option>
@@ -404,10 +317,10 @@
 
         <!-- Coluna Lateral -->
         <div class="side-column">
-          <div class="form-card" *ngIf="formData.type">
+          <div class="form-card">
             <div class="card-header">
               <i class="fas fa-image"></i>
-              <h2>Logo {{ formData.type === 'PF' ? 'do Cliente' : 'da Empresa' }}</h2>
+              <h2>Logo da Empresa</h2>
             </div>
             <div class="card-body logo-upload-body">
               <app-image-upload
@@ -424,25 +337,25 @@
           <div class="form-card info-card">
             <div class="card-header">
               <i class="fas fa-info-circle"></i>
-              <h2>Informações</h2>
+              <h2>Informacoes</h2>
             </div>
             <div class="card-body">
               <ul class="info-list">
                 <li>
                   <i class="fas fa-check-circle"></i>
-                  Todos os campos obrigatórios devem ser preenchidos
+                  Todos os campos obrigatorios devem ser preenchidos
                 </li>
                 <li>
                   <i class="fas fa-check-circle"></i>
-                  Para PJ, é possível cadastrar múltiplos emails e telefones
+                  E possivel cadastrar múltiplos emails e telefones
                 </li>
                 <li>
                   <i class="fas fa-check-circle"></i>
-                  A logo é opcional e pode ser adicionada posteriormente
+                  A logo  opcional e pode ser adicionada posteriormente
                 </li>
                 <li>
                   <i class="fas fa-check-circle"></i>
-                  Cliente ficará disponível imediatamente após cadastro
+                  Cliente ficara disponivel imediatamente apos cadastro
                 </li>
               </ul>
             </div>

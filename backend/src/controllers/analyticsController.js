@@ -81,7 +81,6 @@ class AnalyticsController {
       const { data: allContracts, error: contractsError } = await supabase
         .from('contracts')
         .select('id, status, total_value, created_at')
-        .eq('is_active', true)
         .gte('created_at', dateFilter.startDate)
         .lte('created_at', dateFilter.endDate);
 
@@ -150,7 +149,6 @@ class AnalyticsController {
       const { data: contracts } = await supabase
         .from('contracts')
         .select('status, type, created_at, total_value')
-        .eq('is_active', true)
         .gte('created_at', dateFilter.startDate)
         .lte('created_at', dateFilter.endDate);
 
@@ -308,20 +306,15 @@ class AnalyticsController {
       const { data: clientsWithContracts } = await supabase
         .from('contracts')
         .select('client_id')
-        .eq('is_active', true)
         .not('client_id', 'is', null);
 
       const uniqueClientsWithContracts = new Set(
         clientsWithContracts?.map(c => c.client_id) || []
       ).size;
 
-      // Contar clientes por tipo
-      const { data: clientsPf } = await supabase
-        .from('clients_pf')
-        .select('client_id');
-
+      // Contar clientes PJ
       const { data: clientsPj } = await supabase
-        .from('clients_pj')  
+        .from('clients_pj')
         .select('client_id');
 
       return {
@@ -330,7 +323,6 @@ class AnalyticsController {
         activeClients: uniqueClientsWithContracts,
         retentionRate: 85, // Valor estimado - pode ser calculado com mais precisão
         byType: {
-          pf: clientsPf?.length || 0,
           pj: clientsPj?.length || 0
         }
       };
@@ -384,7 +376,6 @@ class AnalyticsController {
       const { data: contracts } = await supabase
         .from('contracts')
         .select('total_value, payment_status, created_at, end_date, status')
-        .eq('is_active', true)
         .gte('created_at', dateFilter.startDate)
         .lte('created_at', dateFilter.endDate);
 
@@ -440,7 +431,6 @@ class AnalyticsController {
       const { data: contracts } = await supabase
         .from('contracts')
         .select('start_date, end_date')
-        .eq('is_active', true)
         .not('end_date', 'is', null);
 
       if (!contracts || contracts.length === 0) return 0;
@@ -506,7 +496,6 @@ class AnalyticsController {
       const { data: currentPeriod } = await supabase
         .from('contracts')
         .select('id')
-        .eq('is_active', true)
         .gte('created_at', dateFilter.startDate)
         .lte('created_at', dateFilter.endDate);
 
@@ -518,7 +507,6 @@ class AnalyticsController {
       const { data: previousPeriod } = await supabase
         .from('contracts')
         .select('id')
-        .eq('is_active', true)
         .gte('created_at', previousStart.toISOString().split('T')[0])
         .lte('created_at', previousEnd.toISOString().split('T')[0]);
 
@@ -541,7 +529,6 @@ class AnalyticsController {
       const { data: contracts } = await supabase
         .from('contracts')
         .select('created_at')
-        .eq('is_active', true)
         .gte('created_at', new Date(Date.now() - 6 * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
 
       const monthlyData = new Map();
@@ -578,7 +565,6 @@ class AnalyticsController {
       const { data: contracts } = await supabase
         .from('contracts')
         .select('created_at, total_value')
-        .eq('is_active', true)
         .gte('created_at', new Date(Date.now() - 6 * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
 
       const monthlyData = new Map();
@@ -672,8 +658,7 @@ class AnalyticsController {
               )
             )
           `)
-          .eq('user_id', user.id)
-          .eq('is_active', true);
+          .eq('user_id', user.id);
 
         // Filtrar contratos por data após a query
         const filteredAssignments = assignments?.filter(a => {
@@ -786,7 +771,6 @@ class AnalyticsController {
             )
           )
         `)
-        .eq('is_active', true)
         .gte('created_at', dateFilter.startDate)
         .lte('created_at', dateFilter.endDate);
 
@@ -843,7 +827,6 @@ class AnalyticsController {
         .from('clients')
         .select(`
           id,
-          clients_pf (full_name),
           clients_pj (company_name, trade_name)
         `);
 
@@ -860,35 +843,14 @@ class AnalyticsController {
       // Processar cada cliente individualmente
       for (const client of allClients) {
         try {
-          // Determinar o nome do cliente (PF ou PJ)
-          let clientName = `Cliente #${client.id}`;
-          
-          // Verificar se os dados vêm como objeto direto (estrutura real)
-          if (client.clients_pf && client.clients_pf.full_name) {
-            clientName = client.clients_pf.full_name;
-          }
-          else if (client.clients_pj && (client.clients_pj.trade_name || client.clients_pj.company_name)) {
-            clientName = client.clients_pj.trade_name || client.clients_pj.company_name;
-          }
-          // Fallback para array (caso a estrutura mude)
-          else if (client.clients_pf && Array.isArray(client.clients_pf) && client.clients_pf.length > 0 && client.clients_pf[0].full_name) {
-            clientName = client.clients_pf[0].full_name;
-          } 
-          else if (client.clients_pj && Array.isArray(client.clients_pj) && client.clients_pj.length > 0) {
-            const pjData = client.clients_pj[0];
-            if (pjData.trade_name) {
-              clientName = pjData.trade_name;
-            } else if (pjData.company_name) {
-              clientName = pjData.company_name;
-            }
-          }
+          // Determinar o nome do cliente (apenas PJ)
+          const clientName = client.clients_pj?.trade_name || client.clients_pj?.company_name || 'Cliente';
 
           // Buscar contratos ATIVOS do cliente
           const { data: contracts, error: contractsError } = await supabase
             .from('contracts')
             .select('id, status')
             .eq('client_id', client.id)
-            .eq('is_active', true)
             .eq('status', 'active'); // Apenas contratos com status ativo
 
           if (contractsError) {
@@ -1054,11 +1016,9 @@ class AnalyticsController {
           start_date,
           clients:client_id (
             id,
-            clients_pf (full_name),
             clients_pj (company_name, trade_name)
           )
         `)
-        .eq('is_active', true)
         .eq('status', 'active');
 
       if (contractsError) {
@@ -1075,17 +1035,8 @@ class AnalyticsController {
       // Processar cada contrato individualmente
       for (const contract of allContracts) {
         try {
-          // Determinar o nome do cliente (PF ou PJ)
-          let clientName = `Cliente #${contract.client_id}`;
-          
-          if (contract.clients) {
-            if (contract.clients.clients_pf && contract.clients.clients_pf.full_name) {
-              clientName = contract.clients.clients_pf.full_name;
-            }
-            else if (contract.clients.clients_pj && (contract.clients.clients_pj.trade_name || contract.clients.clients_pj.company_name)) {
-              clientName = contract.clients.clients_pj.trade_name || contract.clients.clients_pj.company_name;
-            }
-          }
+          // Determinar o nome do cliente (apenas PJ)
+          const clientName = contract.clients?.clients_pj?.trade_name || contract.clients?.clients_pj?.company_name || 'Cliente';
 
           // Buscar serviços do contrato
           const { data: contractServices, error: servicesError } = await supabase

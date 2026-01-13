@@ -18,8 +18,7 @@ class ClientEmailModel {
         .insert([{
           client_id,
           email: email.toLowerCase().trim(),
-          is_primary,
-          is_active: true
+          is_primary
         }])
         .select('*')
         .single();
@@ -45,7 +44,6 @@ class ClientEmailModel {
         .from('client_emails')
         .select('*')
         .eq('client_id', clientId)
-        .eq('is_active', true)
         .order('is_primary', { ascending: false })
         .order('created_at', { ascending: true });
 
@@ -71,7 +69,6 @@ class ClientEmailModel {
         .select('*')
         .eq('client_id', clientId)
         .eq('is_primary', true)
-        .eq('is_active', true)
         .single();
 
       if (error && error.code !== 'PGRST116') {
@@ -108,7 +105,6 @@ class ClientEmailModel {
       if (is_primary !== undefined) {
         updateData.is_primary = is_primary;
       }
-      updateData.updated_at = new Date().toISOString();
 
       const { data, error } = await supabase
         .from('client_emails')
@@ -168,10 +164,7 @@ class ClientEmailModel {
       // Definir este email como primary
       const { data, error } = await supabase
         .from('client_emails')
-        .update({ 
-          is_primary: true,
-          updated_at: new Date().toISOString()
-        })
+        .update({ is_primary: true })
         .eq('id', id)
         .select('*')
         .single();
@@ -195,10 +188,7 @@ class ClientEmailModel {
     try {
       let query = supabase
         .from('client_emails')
-        .update({ 
-          is_primary: false,
-          updated_at: new Date().toISOString()
-        })
+        .update({ is_primary: false })
         .eq('client_id', clientId)
         .eq('is_primary', true);
 
@@ -221,58 +211,10 @@ class ClientEmailModel {
   }
 
   /**
-   * Desativar email (soft delete)
+   * Desativar email (soft delete) - redireciona para hard delete
    */
   async softDelete(id) {
-    try {
-      const email = await this.findById(id);
-      if (!email) {
-        throw new Error('Email não encontrado');
-      }
-
-      // Verificar se é um cliente PJ e se tem outros emails ativos
-      const { data: clientType } = await supabase
-        .from('clients_pj')
-        .select('client_id')
-        .eq('client_id', email.client_id)
-        .single();
-
-      if (clientType) {
-        // É um cliente PJ, verificar se tem outros emails ativos
-        const activeEmails = await this.findByClientId(email.client_id);
-        if (activeEmails.length <= 1) {
-          throw new Error('Clientes PJ devem ter pelo menos um email ativo');
-        }
-
-        // Se for o email primário, definir outro como primário
-        if (email.is_primary) {
-          const otherEmails = activeEmails.filter(e => e.id !== id);
-          if (otherEmails.length > 0) {
-            await this.setPrimary(otherEmails[0].id);
-          }
-        }
-      }
-
-      const { data, error } = await supabase
-        .from('client_emails')
-        .update({ 
-          is_active: false,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .select('*')
-        .single();
-
-      if (error) {
-        console.error('❌ Erro ao desativar email:', error);
-        throw error;
-      }
-
-      return data;
-    } catch (error) {
-      console.error('❌ Erro no softDelete:', error);
-      throw error;
-    }
+    return this.hardDelete(id);
   }
 
   /**
@@ -324,8 +266,7 @@ class ClientEmailModel {
       const emailsData = emails.map((email, index) => ({
         client_id: clientId,
         email: email.toLowerCase().trim(),
-        is_primary: index === 0, // Primeiro email é primário
-        is_active: true
+        is_primary: index === 0 // Primeiro email é primário
       }));
 
       // Se há emails sendo adicionados e o primeiro é primário, limpar outros primários
@@ -355,13 +296,10 @@ class ClientEmailModel {
    */
   async replaceAllEmails(clientId, emails) {
     try {
-      // Primeiro, desativar todos os emails existentes
+      // Primeiro, deletar todos os emails existentes
       await supabase
         .from('client_emails')
-        .update({ 
-          is_active: false,
-          updated_at: new Date().toISOString()
-        })
+        .delete()
         .eq('client_id', clientId);
 
       // Depois, adicionar os novos emails

@@ -41,7 +41,6 @@ export class UsersPageComponent implements OnInit, OnDestroy {
   users: User[] = [];
   loading = false;
   error = '';
-  currentFilter: 'active' | 'inactive' | 'all' = 'active';
   openDropdownId: number | null = null;
   canManageUsers = false; // Admin Gerencial não pode editar/deletar usuários
 
@@ -84,22 +83,12 @@ export class UsersPageComponent implements OnInit, OnDestroy {
     this.loadUsers();
   }
 
-  setFilter(filter: 'active' | 'inactive' | 'all') {
-    this.currentFilter = filter;
-    this.loadUsers();
-  }
-
   async loadUsers() {
     this.loading = true;
     this.error = '';
 
-    const params: { is_active?: boolean } = {};
-    if (this.currentFilter !== 'all') {
-      params.is_active = this.currentFilter === 'active';
-    }
-
     try {
-      const response = await firstValueFrom(this.userService.getUsers(params));
+      const response = await firstValueFrom(this.userService.getUsers({}));
       
       if (response && response.users) {
         this.users = response.users.map(user => this.mapApiUserToTableUser(user));
@@ -311,29 +300,11 @@ export class UsersPageComponent implements OnInit, OnDestroy {
   }
 
   getEmptyStateTitle(): string {
-    switch (this.currentFilter) {
-      case 'active':
-        return 'Nenhum usuário ativo encontrado';
-      case 'inactive':
-        return 'Nenhum usuário inativo encontrado';
-      case 'all':
-        return 'Nenhum usuário cadastrado';
-      default:
-        return 'Nenhum usuário encontrado';
-    }
+    return 'Nenhum usuário cadastrado';
   }
 
   getEmptyStateMessage(): string {
-    switch (this.currentFilter) {
-      case 'active':
-        return 'Não há usuários ativos no momento.';
-      case 'inactive':
-        return 'Não há usuários inativos no momento.';
-      case 'all':
-        return 'Adicione o primeiro usuário clicando no botão acima';
-      default:
-        return 'Não há usuários para exibir.';
-    }
+    return 'Adicione o primeiro usuário clicando no botão acima.';
   }
 
   deleteUser(userId: number, userName: string) {

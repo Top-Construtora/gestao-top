@@ -6,7 +6,7 @@ export interface ContractTemplate {
   id: string;
   name: string;
   description: string;
-  type: 'PJ' | 'PF';
+  type: 'PJ';
   service: string;
 }
 
@@ -28,23 +28,23 @@ export class ContractExportModalComponent {
     {
       id: 'consultoria-pj',
       name: 'Contrato 1',
-      description: 'Contrato para consultoria corporativa destinado a pessoas jurídicas. Inclui diagnóstico organizacional, análises e devolutivas.',
+      description: 'Contrato para consultoria corporativa. Inclui diagnostico organizacional, analises e devolutivas.',
       type: 'PJ',
       service: 'Consultoria Corporativa'
     },
     {
-      id: 'consultoria-pf',
+      id: 'consultoria-individual',
       name: 'Contrato 2',
-      description: 'Contrato para mentoria e consultoria individual destinado a pessoas físicas. Inclui avaliações e testes específicos.',
-      type: 'PF',
+      description: 'Contrato para mentoria e consultoria individual. Inclui avaliacoes e testes especificos.',
+      type: 'PJ',
       service: 'Mentoria/Consultoria Individual'
     },
     {
       id: 'recrutamento',
       name: 'Contrato 3',
-      description: 'Contrato especializado em serviços de R&S. Inclui processo completo desde levantamento até seleção final.',
+      description: 'Contrato especializado em servicos de R&S. Inclui processo completo desde levantamento ate selecao final.',
       type: 'PJ',
-      service: 'Recrutamento e Seleção'
+      service: 'Recrutamento e Selecao'
     }
   ];
 

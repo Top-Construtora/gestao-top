@@ -587,3 +587,21 @@ textarea.form-control {
   margin-top: 0.125rem;
   flex-shrink: 0;
 }
+
+/* Input com loader (CEP) */
+.input-with-loader {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-loader .form-control {
+  padding-right: 36px;
+}
+
+.cep-loader {
+  position: absolute;
+  right: 12px;
+  color: var(--top-primary, #1e6076);
+  font-size: 14px;
+}

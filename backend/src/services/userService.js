@@ -53,21 +53,15 @@ class UserService {
       cargo
     });
 
-    // Enviar email de boas-vindas (não bloquear criação em caso de erro)
-    try {
-      await emailService.sendWelcomeEmailWithCredentials(email, name, temporaryPassword);
-    } catch (emailError) {
-      console.error('❌ Erro ao enviar email de boas-vindas:', emailError.message);
-      // Continua mesmo se o email falhar
-    }
+    // Enviar email de boas-vindas de forma assíncrona (não bloqueia a resposta)
+    emailService.sendWelcomeEmailWithCredentials(email, name, temporaryPassword)
+      .then(() => console.log('✅ Email de boas-vindas enviado para:', email))
+      .catch(emailError => console.error('❌ Erro ao enviar email de boas-vindas:', emailError.message));
 
-    // Notificar administradores sobre novo usuário criado (não bloquear em caso de erro)
+    // Notificar administradores sobre novo usuário criado de forma assíncrona
     if (creatorId) {
-      try {
-        await NotificationService.notifyAdminsNewUser(user.id, creatorId);
-      } catch (notifyError) {
-        console.error('❌ Erro ao notificar admins:', notifyError.message);
-      }
+      NotificationService.notifyAdminsNewUser(user.id, creatorId)
+        .catch(notifyError => console.error('❌ Erro ao notificar admins:', notifyError.message));
     }
 
     return {
@@ -167,7 +161,10 @@ class UserService {
       last_password_change: null
     });
 
-    await emailService.sendAdminPasswordResetEmail(user.email, user.name, temporaryPassword);
+    // Enviar email de forma assíncrona (não bloqueia a resposta)
+    emailService.sendAdminPasswordResetEmail(user.email, user.name, temporaryPassword)
+      .then(() => console.log('✅ Email de reset de senha enviado para:', user.email))
+      .catch(err => console.error('❌ Erro ao enviar email de reset:', err.message));
 
     return { success: true };
   }

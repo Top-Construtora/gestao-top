@@ -67,15 +67,11 @@ export interface PublicProposal {
     city: string;
     state: string;
     zipcode: string;
-    type?: 'PJ' | 'PF';
+    type?: 'PJ';
     company?: {
       company_name: string;
       trade_name?: string;
       cnpj: string;
-    };
-    person?: {
-      full_name: string;
-      cpf: string;
     };
   };
   services: PublicProposalService[];

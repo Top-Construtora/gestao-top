@@ -182,23 +182,14 @@ export class ContractViewPageComponent implements OnInit, OnDestroy {
     if (client.name) {
       return client.name;
     }
-    
-    // Fallback: try to get name from the client data structure directly
-    // For PF (Pessoa Física)
-    if (client.clients_pf && client.clients_pf.length > 0) {
-      const pfName = client.clients_pf[0].full_name || 'Nome não informado';
-      return pfName;
-    }
-    
-    // For PJ (Pessoa Jurídica)  
+
+    // Para PJ (Pessoa Juridica)
     if (client.clients_pj && client.clients_pj.length > 0) {
-      const pjName = client.clients_pj[0].company_name || client.clients_pj[0].trade_name || 'Empresa não informada';
+      const pjName = client.clients_pj[0].company_name || client.clients_pj[0].trade_name || 'Empresa nao informada';
       return pjName;
     }
-    
-    // Final fallback
-    console.log('❌ Client not identified');
-    return 'Cliente não identificado';
+
+    return 'Cliente nao identificado';
   }
 
   getClientEmail(): string {

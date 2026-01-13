@@ -16,7 +16,6 @@ interface ClientDisplay {
   id: number;
   name: string;
   initials: string;
-  type: 'PF' | 'PJ';
   location: string;
   document: string;
   contracts: number;
@@ -220,7 +219,6 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
       id: apiClient.id,
       name: apiClient.name,
       initials: initials,
-      type: apiClient.type,
       location: `${apiClient.city}/${apiClient.state}`,
       document: this.clientService.getFormattedDocument(apiClient),
       contracts: aggregates?.totalCount || 0,
@@ -341,14 +339,13 @@ export class ClientsTableComponent implements OnInit, OnDestroy {
     const termDigitsOnly = this.searchTerm.replace(/\D/g, ''); // Remove tudo que não é dígito
 
     this.filteredClients = this.clients.filter((client) => {
-      // Busca por nome, localização ou tipo
+      // Busca por nome ou localização
       if (client.name.toLowerCase().includes(term) ||
-          client.location.toLowerCase().includes(term) ||
-          client.type.toLowerCase().includes(term)) {
+          client.location.toLowerCase().includes(term)) {
         return true;
       }
 
-      // Busca por documento (CPF/CNPJ) - compara apenas números
+      // Busca por documento (CNPJ) - compara apenas números
       if (termDigitsOnly && client.document) {
         const documentDigitsOnly = client.document.replace(/\D/g, '');
         if (documentDigitsOnly.includes(termDigitsOnly)) {

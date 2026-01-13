@@ -52,14 +52,9 @@ class ContractInstallmentModel {
    */
   async updateInstallmentStatus(installmentId, statusData) {
     try {
-      const updateData = {
-        ...statusData,
-        updated_at: new Date().toISOString()
-      };
-
       const { data, error } = await supabase
         .from('contract_installments')
-        .update(updateData)
+        .update(statusData)
         .eq('id', installmentId)
         .select()
         .single();
@@ -80,8 +75,7 @@ class ContractInstallmentModel {
       const updateData = {
         payment_status: 'pago',
         paid_amount: paidAmount,
-        paid_date: paidDate || new Date().toISOString().split('T')[0],
-        updated_at: new Date().toISOString()
+        paid_date: paidDate || new Date().toISOString().split('T')[0]
       };
 
       const { data, error } = await supabase
@@ -113,7 +107,6 @@ class ContractInstallmentModel {
           contract:contracts(
             contract_number,
             client:clients(
-              clients_pf(full_name),
               clients_pj(company_name, trade_name)
             )
           )
@@ -142,7 +135,6 @@ class ContractInstallmentModel {
           contract:contracts(
             contract_number,
             client:clients(
-              clients_pf(full_name),
               clients_pj(company_name, trade_name)
             )
           )
@@ -224,10 +216,7 @@ class ContractInstallmentModel {
 
       const { data, error } = await supabase
         .from('contract_installments')
-        .update({ 
-          payment_status: 'atrasado',
-          updated_at: new Date().toISOString()
-        })
+        .update({ payment_status: 'atrasado' })
         .eq('payment_status', 'pendente')
         .lt('due_date', today)
         .select();

@@ -8,8 +8,8 @@
   <div class="error-icon">
     <i class="fas fa-exclamation-triangle"></i>
   </div>
-  <h3>Cliente não encontrado</h3>
-  <p>Não foi possível carregar os dados do cliente.</p>
+  <h3>Cliente nao encontrado</h3>
+  <p>Nao foi possivel carregar os dados do cliente.</p>
   <button class="btn btn-primary" routerLink="/home/clientes">
     <i class="fas fa-arrow-left"></i> Voltar para Clientes
   </button>
@@ -17,7 +17,7 @@
 
 <!-- Main Content -->
 <div class="content" *ngIf="!isLoading && client">
-  
+
   <!-- Unified Client Details Section -->
   <div class="client-details-unified">
     <!-- Client Overview Header -->
@@ -27,7 +27,7 @@
         <i class="fas fa-edit"></i>
         Editar
       </button>
-      
+
       <!-- Primary Info -->
       <div class="primary-info">
         <div class="client-header">
@@ -42,25 +42,17 @@
           <div class="client-info">
             <h2 class="client-name">{{ getClientName() }}</h2>
             <div class="client-badges">
-              <span class="type-badge" [ngClass]="client.type === 'PF' ? 'badge-info' : 'badge-primary'">
-                {{ client.type === 'PF' ? 'Pessoa Física' : 'Pessoa Jurídica' }}
-              </span>
+              <span class="type-badge badge-primary">Pessoa Juridica</span>
               <span class="document-badge">{{ getClientDocument() }}</span>
             </div>
           </div>
         </div>
       </div>
-      
+
       <!-- Contact Information -->
       <div class="contact-info">
-        <!-- E-mails para PF (apenas um) -->
-        <div class="info-group" *ngIf="client.type === 'PF'">
-          <span class="info-label">E-mail</span>
-          <span class="info-value">{{ client.email || 'Não informado' }}</span>
-        </div>
-        
-        <!-- E-mails para PJ (múltiplos) -->
-        <div class="info-group emails-group" *ngIf="client.type === 'PJ'">
+        <!-- E-mails (múltiplos) -->
+        <div class="info-group emails-group">
           <span class="info-label">E-mails da Empresa</span>
           <div class="emails-container" *ngIf="clientEmails.length > 0; else noEmails">
             <div class="email-item" *ngFor="let email of clientEmails; trackBy: trackByEmailId">
@@ -71,17 +63,13 @@
             <span class="info-value">Nenhum e-mail cadastrado</span>
           </ng-template>
         </div>
-        
+
         <div class="info-group" *ngIf="client.phone">
           <span class="info-label">Telefone</span>
           <span class="info-value">{{ client.phone }}</span>
         </div>
-        <div class="info-group" *ngIf="client.type === 'PJ' && client.legal_representative">
-          <span class="info-label">Representante Legal</span>
-          <span class="info-value">{{ client.legal_representative }}</span>
-        </div>
-        <div class="info-group" *ngIf="client.type === 'PJ' && client.employee_count">
-          <span class="info-label">Nº de Funcionários</span>
+        <div class="info-group" *ngIf="client.employee_count">
+          <span class="info-label">N de Funcionarios</span>
           <span class="info-value">{{ client.employee_count }}</span>
         </div>
         <div class="info-group">
@@ -96,14 +84,14 @@
 
     <!-- Tab Navigation -->
     <div class="tab-navigation">
-      <button class="tab-button" 
+      <button class="tab-button"
               [class.active]="isTabActive('contracts')"
               (click)="setActiveTab('contracts')">
         <i class="fas fa-file-contract"></i>
         <span>Contratos</span>
         <span class="tab-count">{{ contracts.length }}</span>
       </button>
-      <button class="tab-button" 
+      <button class="tab-button"
               [class.active]="isTabActive('attachments')"
               (click)="setActiveTab('attachments')">
         <i class="fas fa-paperclip"></i>
@@ -114,20 +102,20 @@
 
     <!-- Tab Content -->
     <div class="tab-content">
-      
+
       <!-- Contracts Tab -->
       <div class="tab-panel" [class.active]="isTabActive('contracts')" *ngIf="isTabActive('contracts')">
         <div class="contracts-section-content">
-          
+
           <!-- Empty State -->
           <div *ngIf="contracts.length === 0" class="empty-state">
             <div class="empty-icon">
               <i class="fas fa-file-contract"></i>
             </div>
             <h4>Nenhum contrato encontrado</h4>
-            <p>Este cliente ainda não possui contratos cadastrados no sistema.</p>
+            <p>Este cliente ainda nao possui contratos cadastrados no sistema.</p>
           </div>
-          
+
           <!-- Contracts Grid -->
           <div class="contracts-grid" *ngIf="contracts.length > 0">
             <div *ngFor="let contract of contracts" class="contract-card" (click)="viewContract(contract.id)">
@@ -137,34 +125,34 @@
                   {{ getStatusText(contract.status) }}
                 </div>
               </div>
-              
+
               <div class="contract-card-body">
                 <div class="contract-detail">
                   <span class="detail-label">Tipo:</span>
                   <span class="detail-value">{{ getTypeText(contract.type) }}</span>
                 </div>
-                
+
                 <div class="contract-detail">
                   <span class="detail-label">Valor:</span>
                   <span class="detail-value">{{ formatValue(contract.total_value) }}</span>
                 </div>
-                
+
                 <div class="contract-detail">
-                  <span class="detail-label">Início:</span>
+                  <span class="detail-label">Inicio:</span>
                   <span class="detail-value">{{ formatDate(contract.start_date) }}</span>
                 </div>
-                
+
                 <div class="contract-detail" *ngIf="contract.end_date">
                   <span class="detail-label">Fim:</span>
                   <span class="detail-value">{{ formatDate(contract.end_date) }}</span>
                 </div>
-                
+
                 <div class="contract-detail">
-                  <span class="detail-label">Serviços:</span>
+                  <span class="detail-label">Servicos:</span>
                   <span class="detail-value">{{ contract.contract_services.length || 0 }} item(s)</span>
                 </div>
               </div>
-              
+
               <div class="contract-card-footer">
                 <button class="btn btn-sm btn-primary">
                   <i class="fas fa-eye"></i>
@@ -183,7 +171,7 @@
 
     </div>
   </div>
-  
+
 </div>
 
   <!-- Loading State -->
@@ -198,5 +186,5 @@
       <i class="fas fa-user-times"></i>
     </div>
     <h3>{{ error }}</h3>
-    <p>Verifique se o ID do cliente está correto ou tente novamente.</p>
+    <p>Verifique se o ID do cliente esta correto ou tente novamente.</p>
   </div>

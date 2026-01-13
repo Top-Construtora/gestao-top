@@ -61,11 +61,10 @@
         <thead>
           <tr>
             <th>Cliente</th>
-            <th>Tipo</th>
             <th>Cidade/UF</th>
-            <th>Documento</th>
+            <th>CNPJ</th>
             <th>Contratos</th>
-            <th>Ações</th>
+            <th>Acoes</th>
           </tr>
         </thead>
         <tbody>
@@ -80,16 +79,11 @@
                 </div>
                 <div class="client-name-container">
                   <span class="client-name">{{ client.name }}</span>
-                  <span class="client-trade-name" *ngIf="client.type === 'PJ' && client.company_name && client.trade_name && client.trade_name !== client.company_name">
+                  <span class="client-trade-name" *ngIf="client.company_name && client.trade_name && client.trade_name !== client.company_name">
                     {{ client.company_name }}
                   </span>
                 </div>
               </div>
-            </td>
-            <td>
-              <span class="badge" [ngClass]="client.type === 'PF' ? 'badge-info' : 'badge-primary'">
-                {{ client.type }}
-              </span>
             </td>
             <td class="client-location">{{ client.location }}</td>
             <td>{{ client.document }}</td>

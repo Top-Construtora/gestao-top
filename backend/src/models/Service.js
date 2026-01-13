@@ -19,9 +19,7 @@ class ServiceModel {
           duration_unit,
           category: category || 'Geral',
           description: description,
-          is_active: true,
-          created_by: userId,
-          updated_by: userId
+          is_active: true
         }])
         .select('*')
         .single();
@@ -96,8 +94,7 @@ class ServiceModel {
         duration_unit,
         category,
         description,
-        is_active,
-        updated_by: userId
+        is_active
       };
 
       Object.keys(updateObject).forEach(key => updateObject[key] === undefined && delete updateObject[key]);
@@ -273,9 +270,7 @@ class ServiceModel {
           sort_order: stage.sort_order,
           status: 'pending',
           category: stage.category,
-          is_active: true,
-          created_by: userId,
-          updated_by: userId
+          is_active: true
         }));
 
         const { error: insertStagesError } = await supabase
