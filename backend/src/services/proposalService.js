@@ -625,8 +625,7 @@ class ProposalService {
         const { data, error } = await supabase
           .from('proposals')
           .update({
-            status: 'sent',
-            updated_by: userId
+            status: 'sent'
           })
           .eq('id', proposalId)
           .select('*')
@@ -642,11 +641,24 @@ class ProposalService {
         console.log('ℹ️ Status não precisa ser atualizado:', proposal.status);
       }
 
-      // Usar o unique_link da proposta
-      const unique_link = updatedProposal.unique_link || proposal.unique_link;
-      
+      // Usar o unique_link da proposta ou gerar um novo se não existir
+      let unique_link = updatedProposal.unique_link || proposal.unique_link;
+
       if (!unique_link) {
-        throw new Error('Erro: proposta não possui link único');
+        console.log('🔑 Gerando novo unique_link para proposta sem link');
+        unique_link = generateProposalToken();
+
+        const { error: linkError } = await supabase
+          .from('proposals')
+          .update({ unique_link })
+          .eq('id', proposalId);
+
+        if (linkError) {
+          console.error('❌ Erro ao salvar unique_link:', linkError);
+          throw linkError;
+        }
+
+        updatedProposal.unique_link = unique_link;
       }
 
       const result = {

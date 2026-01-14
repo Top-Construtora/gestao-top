@@ -158,21 +158,21 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
         title: 'Total de Propostas',
         value: totalProposals,
         icon: 'fas fa-file-alt',
-        color: '#003b2b',
+        color: '#baa673',
         subtitle: this.useFilteredData ? 'Propostas filtradas' : undefined
       },
       {
         title: 'Propostas Enviadas',
         value: sentProposals,
         icon: 'fas fa-paper-plane',
-        color: '#003b2b',
+        color: '#baa673',
         subtitle: totalProposals > 0 ? `${Math.round((sentProposals / totalProposals) * 100)}% do total` : '0% do total'
       },
       {
         title: 'Propostas Fechadas',
         value: signedProposals + convertedProposals,
         icon: 'fas fa-check-circle',
-        color: '#003b2b',
+        color: '#baa673',
         subtitle: totalProposals > 0 ? `${Math.round(((signedProposals + convertedProposals) / totalProposals) * 100)}% do total` : '0% do total'
       }
     ];
@@ -183,7 +183,7 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
         title: pendingTitle,
         value: this.formatCurrency(pendingValue),
         icon: 'fas fa-dollar-sign',
-        color: '#003b2b',
+        color: '#baa673',
         subtitle: pendingSubtitle
       } as StatCard);
     }
@@ -207,19 +207,19 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
         title: 'Total de Propostas',
         value: totalProposals,
         icon: 'fas fa-file-alt',
-        color: '#003b2b',
+        color: '#baa673',
       },
       {
         title: 'Propostas Enviadas',
         value: sentProposals,
         icon: 'fas fa-paper-plane',
-        color: '#003b2b',
+        color: '#baa673',
       },
       {
         title: 'Propostas Fechadas',
         value: signedProposals + acceptedProposals,
         icon: 'fas fa-check-circle',
-        color: '#003b2b',
+        color: '#baa673',
       }
     ];
 
@@ -229,7 +229,7 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
         title: 'Valor em Aberto',
         value: this.formatCurrency(pendingValue),
         icon: 'fas fa-dollar-sign',
-        color: '#003b2b',
+        color: '#baa673',
         subtitle: `${sentProposals} proposta${sentProposals !== 1 ? 's' : ''} enviada${sentProposals !== 1 ? 's' : ''}`
       } as StatCard);
     }
@@ -244,19 +244,19 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
         title: 'Total de Propostas',
         value: 0,
         icon: 'fas fa-file-alt',
-        color: '#003b2b',
+        color: '#baa673',
       },
       {
         title: 'Propostas Enviadas',
         value: 0,
         icon: 'fas fa-paper-plane',
-        color: '#003b2b',
+        color: '#baa673',
       },
       {
         title: 'Propostas Fechadas',
         value: 0,
         icon: 'fas fa-check-circle',
-        color: '#003b2b',
+        color: '#baa673',
       }
     ];
 
@@ -266,7 +266,7 @@ export class ProposalStatsCardsComponent implements OnInit, OnDestroy, OnChanges
         title: 'Valor em Aberto',
         value: 'R$ 0,00',
         icon: 'fas fa-dollar-sign',
-        color: '#003b2b',
+        color: '#baa673',
       } as StatCard);
     }
 
